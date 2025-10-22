@@ -19,7 +19,8 @@ class MEGABONKLIKE_API IMBLSpawnObjectInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	// 플레이어가 오버랩됐을때 호출
+	// 오버랩 함수
+	UFUNCTION()
 	virtual void OnPlayerOverlapBegin(
 		UPrimitiveComponent* OverlappedComp,
 		AActor* OtherActor,
@@ -28,15 +29,18 @@ public:
 		bool bFromSweep,
 		const FHitResult& SweepResult
 	) = 0;
-	// 오버랩이 끝났을때 호출
+	// 오버랩 종료 함수
+	UFUNCTION()
 	virtual void OnPlayerOverlapEnd(
 		UPrimitiveComponent* OverlappedComp,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex
 	) = 0;
-	// 해당 아이템이 활성화 됐을때 호출
-	virtual void OnObjectActivated() = 0;
-	// 아이템 타입 Getter
+	// 오브젝트 사용 함수
+	virtual void OnObjectActivated(AActor* Activator) = 0;
+	// 오브젝트 타입 Getter
 	virtual FName GetObejctType() const = 0;
+	// 오브젝트 제거 함수
+	virtual void DestroyObject() = 0;
 };
