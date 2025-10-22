@@ -3,11 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/GameInstance.h"
-#include "MBLGameInstance.generated.h"
+#include "GameFramework/GameState.h"
+#include "MBLGameState.generated.h"
 
+/**
+ * 
+ */
 UCLASS()
-class MEGABONKLIKE_API UMBLGameInstance : public UGameInstance
+class MEGABONKLIKE_API AMBLGameState : public AGameState
 {
 	GENERATED_BODY()
 	

@@ -6,6 +6,9 @@
 #include "GameFramework/GameMode.h"
 #include "MBLGameMode.generated.h"
 
+/**
+ * 
+ */
 UCLASS()
 class MEGABONKLIKE_API AMBLGameMode : public AGameMode
 {
