@@ -86,10 +86,18 @@ void AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AActor> EnemyClass)
 	// 예외 처리
 	if (!EnemyClass) return;
 
+	FVector SpawnLocation = GetRandomPointInVolume();
+
+	if (SpawnLocation.IsNearlyZero())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Player not found in spawn box"));
+		return;
+	}
+
 	// 스폰
 	GetWorld()->SpawnActor<AActor>(
 		EnemyClass,
-		GetRandomPointInVolume(),
+		SpawnLocation,
 		FRotator::ZeroRotator
 	);
 }
