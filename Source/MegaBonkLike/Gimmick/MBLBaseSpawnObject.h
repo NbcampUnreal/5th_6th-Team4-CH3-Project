@@ -8,7 +8,6 @@
 #include "MBLBaseSpawnObject.generated.h"
 
 class USceneComponent;
-//class UCapsuleComponent;
 class USphereComponent;
 class UStaticMeshComponent;
 
@@ -38,17 +37,6 @@ public:
 	virtual void OnObjectActivated(AActor* Activator) override;
 	virtual FName GetObejctType() const override;
 	virtual void DestroyObject() override;
-
-	// 임시 함수 지울거임
-	UFUNCTION()
-	void TemporaryOnPlayerOverlapBegin(
-		UPrimitiveComponent* OverlappedComp,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult
-	);
 
 protected:
 	// Called when the game starts or when spawned

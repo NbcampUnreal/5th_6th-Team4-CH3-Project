@@ -12,4 +12,5 @@ AMBLMoneyObject::AMBLMoneyObject()
 void AMBLMoneyObject::OnObjectActivated(AActor* Activator)
 {
 	Super::OnObjectActivated(Activator);
+	Super::DestroyObject();
 }

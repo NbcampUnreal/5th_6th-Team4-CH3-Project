@@ -3,7 +3,6 @@
 
 #include "Gimmick/MBLBaseSpawnObject.h"
 #include "Components/SceneComponent.h"
-//#include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 
@@ -24,17 +23,12 @@ AMBLBaseSpawnObject::AMBLBaseSpawnObject()
 	StaticMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	StaticMeshComp->SetupAttachment(CollisionComp);
 
-	//CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	//CollisionComp->SetCollisionResponseToAllChannels(ECR_Ignore);
-	//CollisionComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
-	//CollisionComp->SetGenerateOverlapEvents(true);
-
 	DetectionComp = CreateDefaultSubobject<USphereComponent>(TEXT("DetectionComponent"));
 	DetectionComp->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 	DetectionComp->SetSphereRadius(300.f);
 	DetectionComp->SetupAttachment(SceneComp);
 
-	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AMBLBaseSpawnObject::TemporaryOnPlayerOverlapBegin);
+	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapBegin);
 	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapEnd);
 	
 	DetectionComp->OnComponentBeginOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapBegin);
@@ -52,9 +46,17 @@ void AMBLBaseSpawnObject::OnPlayerOverlapBegin(
 {
 	if (OtherActor && OtherActor->ActorHasTag("Player"))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Player detected"));
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Player detected")));
-		//OnObjectActivated(OtherActor);
+		if (OverlappedComp == DetectionComp)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Player detected"));
+			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Player detected")));
+		}
+		else if (OverlappedComp == CollisionComp)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Gained"));
+			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Gained")));
+			OnObjectActivated(OtherActor);
+		}
 	}
 }
 
@@ -79,17 +81,6 @@ FName AMBLBaseSpawnObject::GetObejctType() const
 void AMBLBaseSpawnObject::DestroyObject()
 {
 	Destroy();
-}
-
-// 임시 함수 지울거임
-void AMBLBaseSpawnObject::TemporaryOnPlayerOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (OtherActor && OtherActor->ActorHasTag("Player"))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Gained"));
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Gained")));
-		OnObjectActivated(OtherActor);
-	}
 }
 
 // Called when the game starts or when spawned
