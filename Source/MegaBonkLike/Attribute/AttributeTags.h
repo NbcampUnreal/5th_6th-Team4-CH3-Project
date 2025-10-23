@@ -1,0 +1,9 @@
+﻿#pragma once
+#include "NativeGameplayTags.h"
+
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Attribute_Damage);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Attribute_Size);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Attribute_MoveSpeed);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Attribute_AttackSpeed);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Attribute_ProjectileSpeed);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Attribute_AttackProjectiles);
