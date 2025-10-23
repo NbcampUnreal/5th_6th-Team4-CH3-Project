@@ -8,10 +8,13 @@ public class MegaBonkLike : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { 
+		PublicDependencyModuleNames.AddRange(new string[]
+		{ 
 			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput",
-			"GameplayTags",
-			"Niagara"});
+            "GameplayTags",
+			"Niagara",
+            "AIModule", "NavigationSystem", "GameplayTasks"
+		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
