@@ -37,25 +37,22 @@ const FAttributeModifier* FAttribute::GetModifier(int32 InId) const
 	return Modifiers.Find(InId);
 }
 
-float FAttribute::GetValue(const TArray<FAttributeModifier>& InAdditiveModifiers) const
+float FAttribute::GetValue() const
 {
 	float AdditiveVal = 0.0f;
 	float MultiplyVal = 1.0f;
 	float FinalAdditiveVal = 0.0f;
 
-	auto Calculate = [&](const FAttributeModifier& Modifier)
+	for (const auto& [MId, Modifier] : Modifiers)
+	{
+		switch (Modifier.Type)
 		{
-			switch (Modifier.Type)
-			{
-				case EAttributeModifierType::Additive:			AdditiveVal += Modifier.Value; break;
-				case EAttributeModifierType::Multiply:			MultiplyVal *= (1.0f + Modifier.Value); break;
-				case EAttributeModifierType::FinalAdditive:		FinalAdditiveVal += Modifier.Value;	break;
-				default: break;
-			}
-		};
-
-	for (const auto& [MId, Modifier] : Modifiers) Calculate(Modifier);
-	for (const auto& Modifier : InAdditiveModifiers) Calculate(Modifier);
+			case EAttributeModifierType::Additive:			AdditiveVal += Modifier.Value; break;
+			case EAttributeModifierType::Multiply:			MultiplyVal *= (1.0f + Modifier.Value); break;
+			case EAttributeModifierType::FinalAdditive:		FinalAdditiveVal += Modifier.Value;	break;
+			default: break;
+		}
+	}
 
 	float Result = (BaseValue + AdditiveVal) * MultiplyVal + FinalAdditiveVal;
 	return Result;

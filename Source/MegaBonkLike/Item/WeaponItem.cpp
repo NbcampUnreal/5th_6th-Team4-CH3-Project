@@ -1,0 +1,35 @@
+﻿#include "Item/WeaponItem.h"
+#include "Item/ItemDataRow.h"
+#include "Entity/AttributeComponent.h"
+
+void UWeaponItem::AddAttributeModifiers(UAttributeComponent*, EItemRarity InRarity)
+{
+	const FWeaponItemDataRow* WeaponData = (FWeaponItemDataRow*)Data;
+	if (WeaponData == nullptr)
+		return;
+
+	for (const auto& Entry : WeaponData->WeaponAttributeEntry)
+	{
+		if (Level == 1)
+		{
+			WeaponAttributeSet.AddAttribute(Entry.AttributeTag, Entry.BaseValue);
+		}
+		else
+		{
+			FAttributeModifier NewModifier;
+			NewModifier.Type = Entry.UpgradeModifier.Type;
+			NewModifier.Value = Entry.UpgradeModifier.Value * GetRarityMultiplier(InRarity);
+			WeaponAttributeSet.AddModifier(Entry.AttributeTag, NewModifier);
+		}
+	}
+}
+
+void UWeaponItem::SetSkillId(int32 InSkillId)
+{
+    SkillId = InSkillId;
+}
+
+float UWeaponItem::GetAttributeValue(const FGameplayTag& AttributeTag) const
+{
+	return WeaponAttributeSet.GetAttributeValue(AttributeTag);
+}

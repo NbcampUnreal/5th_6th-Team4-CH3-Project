@@ -90,7 +90,7 @@ void USA_AttachToPlayer::UpdateTransform()
 // 이거 delegate에 연결하기
 void USA_AttachToPlayer::SetSize()
 {
-    float SkillSize = GetSkillValue(BaseSize, TAG_Attribute_Size);
+    float SkillSize = GetWeaponValue(TAG_Attribute_Size);
     float AttributeSize = GetAttributeValue(TAG_Attribute_Size);
     float Size = SkillSize * AttributeSize;
     AttachedActor->SetActorScale3D(Size * FVector::OneVector);
@@ -101,7 +101,7 @@ void USA_AttachToPlayer::ApplyDamage(AActor* TargetActor)
     if (Instigator.IsValid() == false)
         return;
 
-    float SkillDamage = GetSkillValue(BaseDamage, TAG_Attribute_Damage);
+    float SkillDamage = GetWeaponValue(TAG_Attribute_Damage);
     float AttributeDamage = GetAttributeValue(TAG_Attribute_Damage);
     float Damage = SkillDamage * AttributeDamage;
     UGameplayStatics::ApplyDamage(TargetActor, Damage, Instigator->GetInstigatorController(), Instigator.Get(), nullptr);

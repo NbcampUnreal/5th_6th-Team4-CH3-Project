@@ -9,6 +9,21 @@
 class USkill;
 
 USTRUCT(BlueprintType)
+struct FWeaponAttributeEntry
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	FGameplayTag AttributeTag;
+
+	UPROPERTY(EditAnywhere)
+	float BaseValue;
+
+	UPROPERTY(EditAnywhere)
+	FAttributeModifier UpgradeModifier;
+};
+
+USTRUCT(BlueprintType)
 struct MEGABONKLIKE_API FItemDataRow : public FTableRowBase
 {
 	GENERATED_BODY()
@@ -21,8 +36,6 @@ struct MEGABONKLIKE_API FItemDataRow : public FTableRowBase
 	FText ItemName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText ItemDesc;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<FGameplayTag, FAttributeModifier> AttributeModifiers;
 };
 
 USTRUCT(BlueprintType)
@@ -32,6 +45,8 @@ struct MEGABONKLIKE_API FWeaponItemDataRow : public FItemDataRow
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<USkill> SkillClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FWeaponAttributeEntry> WeaponAttributeEntry;
 
 	FWeaponItemDataRow() { ItemType = EItemType::Weapon; }
 };
@@ -40,6 +55,9 @@ USTRUCT(BlueprintType)
 struct MEGABONKLIKE_API FTomesItemDataRow : public FItemDataRow
 {
 	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<FGameplayTag, FAttributeModifier> AttributeModifiers;
 
 	FTomesItemDataRow() { ItemType = EItemType::Tomes; }
 };
@@ -51,6 +69,8 @@ struct MEGABONKLIKE_API FMiscItemDataRow : public FItemDataRow
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EMiscItemRarity ItemRarity;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<FGameplayTag, FAttributeModifier> AttributeModifiers;
 
 	FMiscItemDataRow() { ItemType = EItemType::Misc; }
 };

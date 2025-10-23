@@ -23,12 +23,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<AProjectile> ProjectileClass;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float BaseDamage;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float BaseProjectileSpeed;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float BaseProjectileCount;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName TargetTag;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float AutoDetectRadius;

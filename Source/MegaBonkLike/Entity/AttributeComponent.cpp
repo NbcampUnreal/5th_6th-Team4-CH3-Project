@@ -4,6 +4,11 @@
 UAttributeComponent::UAttributeComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+
+	for (EAttributeSourceType Type : TEnumRange<EAttributeSourceType>())
+	{
+		AttributeSets.Add(Type, FAttributeSet());
+	}
 }
 
 void UAttributeComponent::BeginPlay()
@@ -11,32 +16,73 @@ void UAttributeComponent::BeginPlay()
 	Super::BeginPlay();	
 }
 
-void UAttributeComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UAttributeComponent::AddAttribute(EAttributeSourceType SourceType, const FGameplayTag& Tag, float InBaseValue)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+	if (FAttributeSet* Set = AttributeSets.Find(SourceType))
+	{
+		Set->AddAttribute(Tag, InBaseValue);
+	}
 }
 
-void UAttributeComponent::AddAttribute(const FGameplayTag& InTag, float NewBaseValue)
+void UAttributeComponent::AddAttribute(EAttributeSourceType SourceType, const FAttribute& NewAttribute)
 {
-	FAttribute NewAttribute;
-	NewAttribute.AttributeTag = InTag;
-	NewAttribute.BaseValue = NewBaseValue;
-	AddAttribute(NewAttribute);
+	if (FAttributeSet* Set = AttributeSets.Find(SourceType))
+	{
+		Set->AddAttribute(NewAttribute);
+	}
 }
 
-void UAttributeComponent::AddAttribute(const FAttribute& NewAttribute)
+void UAttributeComponent::AddAttributeChangedCallback(EAttributeSourceType SourceType, const FGameplayTag& Tag, TFunction<void(const FAttribute&)> NewCallBack)
 {
-	Attributes.Add(NewAttribute.AttributeTag, NewAttribute);
+	if (FAttributeSet* Set = AttributeSets.Find(SourceType))
+	{
+		Set->AddChangedCallback(Tag, NewCallBack);
+	}
 }
 
-FAttribute* UAttributeComponent::GetAttribute(const FGameplayTag& InTag)
+int32 UAttributeComponent::AddModifer(EAttributeSourceType SourceType, const FGameplayTag& Tag, const FAttributeModifier& Modifier)
 {
-	return Attributes.Find(InTag);
+	if (FAttributeSet* Set = AttributeSets.Find(SourceType))
+	{
+		return Set->AddModifier(Tag, Modifier);
+	}
+	return -1;
 }
 
-float UAttributeComponent::GetValue(const FGameplayTag& InTag)
+void UAttributeComponent::ChangeModifier(EAttributeSourceType SourceType, const FGameplayTag& Tag, int32 ModifierId, const FAttributeModifier& Modifier)
 {
-	FAttribute* Attribute = GetAttribute(InTag);
-	return Attribute == nullptr ? 0.0f : Attribute->GetValue();
+	if (FAttributeSet* Set = AttributeSets.Find(SourceType))
+	{
+		Set->ChangeModifier(Tag, ModifierId, Modifier);
+	}
+}
+
+void UAttributeComponent::RemoveModifier(EAttributeSourceType SourceType, const FGameplayTag& Tag, int32 ModifierId)
+{
+	if (FAttributeSet* Set = AttributeSets.Find(SourceType))
+	{
+		Set->RemoveModifier(Tag, ModifierId);
+	}
+}
+
+float UAttributeComponent::GetAttributeValue(EAttributeSourceType SourceType, const FGameplayTag& Tag) const
+{
+	if (const FAttributeSet* Set = AttributeSets.Find(SourceType))
+	{
+		return Set->GetAttributeValue(Tag);
+	}
+	return 1.0f;
+}
+
+float UAttributeComponent::GetFinalValue(const FGameplayTag& Tag) const
+{
+	float FinalValue = 1.0f;
+	for (EAttributeSourceType Type : TEnumRange<EAttributeSourceType>())
+	{
+		if (AttributeSets.Contains(Type))
+		{
+			FinalValue *= AttributeSets[Type].GetAttributeValue(Tag);
+		}
+	}
+	return FinalValue;
 }

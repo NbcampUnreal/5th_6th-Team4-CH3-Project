@@ -17,7 +17,7 @@ void USA_AreaAttack::CheckHit()
         return;
 
     FVector Origin = Instigator->GetActorLocation();
-    float SkillRadius = GetSkillValue(BaseRadius, TAG_Attribute_Size);
+    float SkillRadius = GetWeaponValue(TAG_Attribute_Size);
     float AttributeRadius = GetAttributeValue(TAG_Attribute_Size);
     float Radius = SkillRadius * AttributeRadius;
     TArray<FOverlapResult> Overlaps;
@@ -42,7 +42,7 @@ void USA_AreaAttack::CheckHit()
             if (TargetTag.IsNone() == false && HitActor->ActorHasTag(TargetTag) == false)
                 continue;
 
-            float SkillDamage = GetSkillValue(BaseDamage, TAG_Attribute_Damage);
+            float SkillDamage = GetWeaponValue(TAG_Attribute_Damage);
             float AttributeDamage = GetAttributeValue(TAG_Attribute_Damage);
             float Damage = SkillDamage * AttributeDamage;
             UGameplayStatics::ApplyDamage(HitActor, Damage, Instigator->GetInstigatorController(), Instigator.Get(), nullptr);

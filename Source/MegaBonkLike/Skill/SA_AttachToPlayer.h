@@ -35,9 +35,5 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bUseCollisionHit;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float BaseDamage;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float BaseSize;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName TargetTag;
 };

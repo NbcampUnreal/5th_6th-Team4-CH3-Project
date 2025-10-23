@@ -17,9 +17,5 @@ private:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float BaseDamage;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float BaseRadius;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName TargetTag;
 };

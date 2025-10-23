@@ -44,8 +44,8 @@ void USA_RangeAttack::DetectEnemy()
 		}
 	}
 
-	float Interval = BaseTimerInterval / GetSkillValue(1.0f, TAG_Attribute_AttackSpeed) * GetAttributeValue(TAG_Attribute_AttackSpeed);
-	AttackCount = GetSkillValue(BaseProjectileCount, TAG_Attribute_AttackProjectiles) * GetAttributeValue(TAG_Attribute_AttackProjectiles);
+	float Interval = BaseTimerInterval / GetWeaponValue(TAG_Attribute_AttackSpeed) * GetAttributeValue(TAG_Attribute_AttackSpeed);
+	AttackCount = GetWeaponValue(TAG_Attribute_AttackProjectiles) * GetAttributeValue(TAG_Attribute_AttackProjectiles);
 	AttackInterval = AttackCount > 1 ? Interval * 0.5f / (AttackCount - 1) : 0.0f;
 	ShootRandomTarget();
 }
@@ -91,12 +91,12 @@ void USA_RangeAttack::Shoot(const FVector& TargetPos)
 	AProjectile* Projectile = Instigator->GetWorld()->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, Params);
 	if (IsValid(Projectile) == true)
 	{
-		float SkillProjectileSpeed = GetSkillValue(BaseProjectileSpeed, TAG_Attribute_ProjectileSpeed);
+		float WeaponProjectileSpeed = GetWeaponValue(TAG_Attribute_ProjectileSpeed);
 		float AttributeProjectileSpeed = GetAttributeValue(TAG_Attribute_ProjectileSpeed);
-		float ProjectileSpeed = SkillProjectileSpeed * AttributeProjectileSpeed;
+		float ProjectileSpeed = WeaponProjectileSpeed * AttributeProjectileSpeed;
 		Projectile->SetDirectionAndSpeed(Dir, ProjectileSpeed);
 		Projectile->SetTargetTag(TargetTag);
-		float SkillDamage = GetSkillValue(BaseDamage, TAG_Attribute_Damage);
+		float SkillDamage = GetWeaponValue(TAG_Attribute_Damage);
 		float AttributeDamage = GetAttributeValue(TAG_Attribute_Damage);
 		float Damage = SkillDamage * AttributeDamage;
 		Projectile->SetDamage(Damage);

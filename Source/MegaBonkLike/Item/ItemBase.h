@@ -10,22 +10,17 @@
 class UAttributeComponent;
 struct FItemDataRow;
 
-UCLASS()
+UCLASS(Abstract)
 class MEGABONKLIKE_API UItemBase : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	virtual void InitializeItem(const FItemDataRow* InData);
+	void SetData(const FItemDataRow* InData);
 	void Upgrade();
 
-	void AddAttributeModifiers(UAttributeComponent* AttributeComponent, EItemRarity InRarity = EItemRarity::Common);
-	void RemoveAttributeModifiers(UAttributeComponent* AttributeComponent);
-
-	int32 GetSkillId() const { return SkillId; }
-	void SetSkillId(int32 InSkillId);
-
-	const FAttributeModifier* GetModifier(const FGameplayTag& AttributeTag) const;
+	virtual void AddAttributeModifiers(UAttributeComponent* AttributeComponent, EItemRarity InRarity = EItemRarity::Common) {}
+	virtual void RemoveAttributeModifiers(UAttributeComponent* AttributeComponent) {}
 
 	const FItemDataRow* GetData() const { return Data; }
 
@@ -35,12 +30,6 @@ protected:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 Level = 1;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	int32 SkillId;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	TMap<FGameplayTag, int32> ModifierIds;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	TMap<FGameplayTag, FAttributeModifier> Modifiers;
 
 	const FItemDataRow* Data = nullptr;
 };

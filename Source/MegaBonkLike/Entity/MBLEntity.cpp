@@ -2,11 +2,6 @@
 #include "Entity/AttributeComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 
-AMBLEntity::AMBLEntity()
-{
-	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComponent"));
-}
-
 void AMBLEntity::BeginPlay()
 {
 	Super::BeginPlay();
@@ -18,13 +13,8 @@ float AMBLEntity::TakeDamage(float Damage, FDamageEvent const& DamageEvent, ACon
 {
 	float NewDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 	CurrHP -= NewDamage;
-	UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("%f"), CurrHP));
+	// UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("%f"), CurrHP));
 	return NewDamage;
-}
-
-float AMBLEntity::GetAttributeValue(const FGameplayTag& AttributeTag) const
-{
-	return AttributeComponent == nullptr ? 0.0f : AttributeComponent->GetValue(AttributeTag);
 }
 
 void AMBLEntity::SetCameraCollisionIgnore()

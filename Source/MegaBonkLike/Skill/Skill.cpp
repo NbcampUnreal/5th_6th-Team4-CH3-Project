@@ -1,6 +1,6 @@
 ﻿#include "Skill/Skill.h"
 #include "Skill/SkillActionBase.h"
-#include "Item/ItemBase.h"
+#include "Item/WeaponItem.h"
 #include "Attribute/AttributeModifier.h"
 
 void USkill::Activate(AActor* InInstigator)
@@ -31,16 +31,11 @@ void USkill::Deactivate()
 	}
 }
 
-void USkill::SetOwnerWeapon(UItemBase* InOwnerWeapon)
+void USkill::SetOwnerWeapon(UWeaponItem* InOwnerWeapon)
 {
 	OwnerWeapon = InOwnerWeapon;
-
 	for (auto& SkillAction : SkillActions)
 	{
-		SkillAction->GetModifierFunc =
-			[&](const FGameplayTag& InAttributeTag) -> const FAttributeModifier*
-			{
-				return OwnerWeapon == nullptr ? nullptr : OwnerWeapon->GetModifier(InAttributeTag);
-			};
+		SkillAction->SetOwnerWeapon(OwnerWeapon);
 	}
 }

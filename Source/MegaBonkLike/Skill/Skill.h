@@ -5,7 +5,7 @@
 #include "Skill.generated.h"
 
 class USkillActionBase;
-class UItemBase;
+class UWeaponItem;
 
 UCLASS(BlueprintType, Blueprintable, Abstract)
 class MEGABONKLIKE_API USkill : public UObject
@@ -17,7 +17,7 @@ public:
 	void Tick(float DeltaTime);
 	void Deactivate();
 
-	void SetOwnerWeapon(UItemBase* InOwnerWeapon);
+	void SetOwnerWeapon(UWeaponItem* InOwnerWeapon);
 
 protected:
 	UPROPERTY(EditAnywhere, Instanced, BlueprintReadOnly)
@@ -25,5 +25,5 @@ protected:
 	UPROPERTY()
 	TWeakObjectPtr<AActor> Instigator;
 	UPROPERTY()
-	TWeakObjectPtr<UItemBase> OwnerWeapon;
+	TWeakObjectPtr<UWeaponItem> OwnerWeapon;
 };

@@ -38,12 +38,13 @@ AMBLCharacter::AMBLCharacter()
 	Inventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
 	SkillComponent = CreateDefaultSubobject<USkillComponent>(TEXT("SkillComponent"));
 
-	AttributeComponent->AddAttribute(TAG_Attribute_MoveSpeed, 1.0f);
-	AttributeComponent->AddAttribute(TAG_Attribute_Damage, 1.0f);
-	AttributeComponent->AddAttribute(TAG_Attribute_Size, 1.0f);
-	AttributeComponent->AddAttribute(TAG_Attribute_AttackSpeed, 1.0f);
-	AttributeComponent->AddAttribute(TAG_Attribute_ProjectileSpeed, 1.0f);
-	AttributeComponent->AddAttribute(TAG_Attribute_AttackProjectiles, 1.0f);
+	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComponent"));
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_MoveSpeed, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_Damage, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_Size, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_AttackSpeed, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_ProjectileSpeed, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_AttackProjectiles, 1.0f);
 
 	NormalSpeed = 600.0f;	
 }
@@ -52,8 +53,10 @@ void AMBLCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AttributeComponent->GetAttribute(TAG_Attribute_MoveSpeed)->AddChangedCallback(
-		[WeakThis = TWeakObjectPtr<ThisClass>(this)]()
+	AttributeComponent->AddAttributeChangedCallback(
+		EAttributeSourceType::Player,
+		TAG_Attribute_MoveSpeed,
+		[WeakThis = TWeakObjectPtr<ThisClass>(this)](const FAttribute& Attribute)
 		{
 			if (WeakThis.IsValid())
 				WeakThis->RecalculateSpeed();
@@ -73,6 +76,11 @@ void AMBLCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		EnhancedInputComponent->BindAction(InputConfig->IA_Jump, ETriggerEvent::Completed, this, &ThisClass::StopJumping);
 		EnhancedInputComponent->BindAction(InputConfig->IA_TempTest, ETriggerEvent::Started, this, &ThisClass::InputTempAcquireItem);
 	}
+}
+
+float AMBLCharacter::GetAttributeValue(const FGameplayTag& AttributeTag) const
+{
+	return AttributeComponent == nullptr ? 0.0f : AttributeComponent->GetFinalValue(AttributeTag);
 }
 
 void AMBLCharacter::Input_Move(const FInputActionValue& InputValue)
@@ -106,6 +114,6 @@ void AMBLCharacter::InputTempAcquireItem()
 
 void AMBLCharacter::RecalculateSpeed()
 {
-	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed * AttributeComponent->GetValue(TAG_Attribute_MoveSpeed);
-	UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("%f"), AttributeComponent->GetValue(TAG_Attribute_MoveSpeed)));
+	// 다른 요소까지 다 합쳐서 계산한 걸로 바꿔야 함
+	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed * AttributeComponent->GetFinalValue(TAG_Attribute_MoveSpeed);
 }

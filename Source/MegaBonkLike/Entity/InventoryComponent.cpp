@@ -3,7 +3,9 @@
 #include "Entity/SkillComponent.h"
 #include "Entity/AttributeComponent.h"
 #include "Skill/Skill.h"
-#include "Item/ItemBase.h"
+#include "Item/WeaponItem.h"
+#include "Item/TomesItem.h"
+#include "Item/MiscItem.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 UInventoryComponent::UInventoryComponent()
@@ -44,8 +46,19 @@ void UInventoryComponent::AddItem(int32 InItemId)
 	if (Item != nullptr)
 		return;
 
-	Item = NewObject<UItemBase>();
-	Item->InitializeItem(Data);
+	switch (Data->ItemType)
+	{
+		case EItemType::Weapon: Item = NewObject<UWeaponItem>(); break;
+		case EItemType::Tomes: Item = NewObject<UTomesItem>(); break;
+		case EItemType::Misc: Item = NewObject<UMiscItem>(); break;
+		default: return;
+	}
+	Item->SetData(Data);
+	if (UAttributeComponent* AttributeComponent = GetOwner()->FindComponentByClass<UAttributeComponent>())
+	{
+		Item->AddAttributeModifiers(AttributeComponent);
+	}
+
 	if (Data->ItemType == EItemType::Weapon)
 		AddWeaponSkill(Item);
 	Items.Add(Item);
@@ -125,6 +138,10 @@ const FItemDataRow* UInventoryComponent::GetItemData(int32 InItemId) const
 
 void UInventoryComponent::AddWeaponSkill(UItemBase* Item)
 {
+	auto* Weapon = (UWeaponItem*)Item;
+	if (IsValid(Weapon) == false)
+		return;
+
 	auto* Data = (FWeaponItemDataRow*)Item->GetData();
 	if (Data == nullptr)
 		return;
@@ -133,19 +150,20 @@ void UInventoryComponent::AddWeaponSkill(UItemBase* Item)
 	{
 		USkill* CDO = Data->SkillClass->GetDefaultObject<USkill>();
 		USkill* NewSkill = DuplicateObject<USkill>(CDO, SkillComponent);
+		NewSkill->SetOwnerWeapon(Weapon);
 		int32 SkillId = SkillComponent->AddSkill(NewSkill);
-		Item->SetSkillId(SkillId);
-		NewSkill->SetOwnerWeapon(Item);
+		Weapon->SetSkillId(SkillId);
 	}
 }
 
 void UInventoryComponent::RemoveWeaponSkill(UItemBase* Item)
 {
-	if (IsValid(Item) == false)
+	auto* Weapon = (UWeaponItem*)Item;
+	if (IsValid(Weapon) == false)
 		return;
 
 	if (USkillComponent* SkillComponent = GetOwner()->FindComponentByClass<USkillComponent>())
 	{
-		SkillComponent->RemoveSkill(Item->GetSkillId());
+		SkillComponent->RemoveSkill(Weapon->GetSkillId());
 	}
 }

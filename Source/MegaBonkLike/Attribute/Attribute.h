@@ -26,7 +26,7 @@ struct MEGABONKLIKE_API FAttribute
 	bool ChangeModifier(int32 InModifierId, const FAttributeModifier& NewModifier);
 	void RemoveModifier(int32 InId);
 	const FAttributeModifier* GetModifier(int32 InId) const;
-	float GetValue(const TArray<FAttributeModifier>& InAdditiveModifiers = TArray<FAttributeModifier>()) const;
+	float GetValue() const;
 
 	void AddChangedCallback(TFunction<void(const FAttribute&)> NewCallback);
 	void AddChangedCallback(TFunction<void()> NewCallBack);

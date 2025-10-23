@@ -9,6 +9,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UInventoryComponent;
 class USkillComponent;
+class UAttributeComponent;
 
 struct FInputActionValue;
 
@@ -24,6 +25,10 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+public:
+	float GetAttributeValue(const FGameplayTag& AttributeTag) const;
+
+protected:
 	void Input_Move(const FInputActionValue& InputValue);
 	void Input_Look(const FInputActionValue& InputValue);
 	void InputTempAcquireItem();
@@ -35,6 +40,8 @@ protected:
 	TObjectPtr<USpringArmComponent> SpringArm;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> Camera;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAttributeComponent> AttributeComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UInventoryComponent> Inventory;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
