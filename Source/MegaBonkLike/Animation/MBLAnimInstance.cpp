@@ -1,5 +1,5 @@
 ﻿#include "Animation/MBLAnimInstance.h"
-#include "Entity/MBLCharacter.h"
+#include "Character/MBLPlayerCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 void UMBLAnimInstance::NativeInitializeAnimation()
@@ -7,7 +7,7 @@ void UMBLAnimInstance::NativeInitializeAnimation()
 	APawn* OwnerPawn = TryGetPawnOwner();
 	if (IsValid(OwnerPawn) == true)
 	{
-		OwnerCharacter = Cast<AMBLCharacter>(OwnerPawn);
+		OwnerCharacter = Cast<AMBLPlayerCharacter>(OwnerPawn);
 		OwnerCharacterMovement = OwnerCharacter->GetCharacterMovement();
 	}
 }

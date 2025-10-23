@@ -1,51 +1,56 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Character/MBLCharacterBase.h"
-#include "InputActionValue.h"
+#include "GameplayTagContainer.h"
 #include "MBLPlayerCharacter.generated.h"
 
+class UMBLPlayerInputConfig;
 class USpringArmComponent;
 class UCameraComponent;
-class UMBLInputConfig;
-class UInputMappingContext;
+class UInventoryComponent;
+class USkillComponent;
+class UAttributeComponent;
+
+struct FInputActionValue;
 
 UCLASS()
 class MEGABONKLIKE_API AMBLPlayerCharacter : public AMBLCharacterBase
 {
 	GENERATED_BODY()
 	
-#pragma region Override ACharacter
-
 public:
 	AMBLPlayerCharacter();
 
+protected:
 	virtual void BeginPlay() override;
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+public:
+	float GetAttributeValue(const FGameplayTag& AttributeTag) const;
 
 protected:
-	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+	void Input_Move(const FInputActionValue& InputValue);
+	void Input_Look(const FInputActionValue& InputValue);
+	void InputTempAcquireItem();
+
+	void RecalculateSpeed();
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
-	TObjectPtr<USpringArmComponent> SpringArmComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<USpringArmComponent> SpringArm;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UCameraComponent> Camera;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAttributeComponent> AttributeComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UInventoryComponent> Inventory;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<USkillComponent> SkillComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
-	TObjectPtr<UCameraComponent> CameraComponent;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UMBLPlayerInputConfig> InputConfig;
 
-#pragma endregion
-
-#pragma region Input
-
-private:
-	void InputMove(const FInputActionValue& InValue);
-	void InputLook(const FInputActionValue& InValue);
-
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
-	TObjectPtr<UMBLInputConfig> PlayerCharacterInputConfig;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
-	TObjectPtr<UInputMappingContext> PlayerCharacterInputMappingContext;
-
-#pragma endregion	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float NormalSpeed;
 };

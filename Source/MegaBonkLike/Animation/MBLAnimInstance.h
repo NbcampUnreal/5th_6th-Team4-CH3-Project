@@ -4,7 +4,7 @@
 #include "Animation/AnimInstance.h"
 #include "MBLAnimInstance.generated.h"
 
-class AMBLCharacter;
+class AMBLPlayerCharacter;
 class UCharacterMovementComponent;
 
 UCLASS()
@@ -18,7 +18,7 @@ public:
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<AMBLCharacter> OwnerCharacter;
+	TObjectPtr<AMBLPlayerCharacter> OwnerCharacter;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UCharacterMovementComponent> OwnerCharacterMovement;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

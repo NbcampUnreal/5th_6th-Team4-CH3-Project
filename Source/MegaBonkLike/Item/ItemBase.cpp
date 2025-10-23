@@ -1,6 +1,6 @@
 ﻿#include "Item/ItemBase.h"
 #include "Item/ItemDataRow.h"
-#include "Entity/AttributeComponent.h"
+#include "Character/AttributeComponent.h"
 
 void UItemBase::SetData(const FItemDataRow* InData)
 {

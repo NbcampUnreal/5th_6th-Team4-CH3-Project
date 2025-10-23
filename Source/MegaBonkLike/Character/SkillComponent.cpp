@@ -1,4 +1,4 @@
-﻿#include "Entity/SkillComponent.h"
+﻿#include "Character/SkillComponent.h"
 #include "Skill/Skill.h"
 
 USkillComponent::USkillComponent()

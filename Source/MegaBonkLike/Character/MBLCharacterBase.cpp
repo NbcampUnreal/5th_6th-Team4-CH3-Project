@@ -1,24 +1,34 @@
-#include "Character/MBLCharacterBase.h"
+﻿#include "Character/MBLCharacterBase.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 AMBLCharacterBase::AMBLCharacterBase()
 {
-	PrimaryActorTick.bCanEverTick = true;
-
-	float CharacterHalfHeight = 90.f;
-	float CharacterRadius = 40.f;
-
-	GetCapsuleComponent()->InitCapsuleSize(CharacterRadius, CharacterHalfHeight);
-
-	FVector PivotPosition(0.f, 0.f, -CharacterHalfHeight);
-	FRotator PivotRotation(0.f, -90.f, 0.f);
-	GetMesh()->SetRelativeLocationAndRotation(PivotPosition, PivotRotation);
-
-	GetCharacterMovement()->MaxWalkSpeed = 600.f;
-	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
-	GetCharacterMovement()->JumpZVelocity = 700.f;
-	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
+	PrimaryActorTick.bCanEverTick = false;
 }
 
+void AMBLCharacterBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	SetCameraCollisionIgnore();
+}
+
+float AMBLCharacterBase::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float NewDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+	CurrHP -= NewDamage;
+	// UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("%f"), CurrHP));
+	return NewDamage;
+}
+
+void AMBLCharacterBase::SetCameraCollisionIgnore()
+{
+	TArray<UPrimitiveComponent*> PrimitiveComponents;
+	GetComponents<UPrimitiveComponent>(PrimitiveComponents);
+	for (UPrimitiveComponent* PrimComp : PrimitiveComponents)
+	{
+		PrimComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	}
+}

@@ -1,6 +1,6 @@
 ﻿#include "Skill/SkillActionBase.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Entity/MBLCharacter.h"
+#include "Character/MBLPlayerCharacter.h"
 #include "Item/WeaponItem.h"
 
 void USkillActionBase::Activate(TWeakObjectPtr<AActor> InInstigator)
@@ -38,7 +38,7 @@ void USkillActionBase::SetIntervalTimer()
 
 float USkillActionBase::GetAttributeValue(const FGameplayTag& AttributeTag)
 {
-    auto* Entity = Cast<AMBLCharacter>(Instigator);
+    auto* Entity = Cast<AMBLPlayerCharacter>(Instigator);
     return Entity == nullptr ? 0.0f : Entity->GetAttributeValue(AttributeTag);
 }
 

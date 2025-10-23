@@ -1,6 +1,6 @@
 ﻿#include "Item/WeaponItem.h"
 #include "Item/ItemDataRow.h"
-#include "Entity/AttributeComponent.h"
+#include "Character/AttributeComponent.h"
 
 void UWeaponItem::AddAttributeModifiers(UAttributeComponent*, EItemRarity InRarity)
 {

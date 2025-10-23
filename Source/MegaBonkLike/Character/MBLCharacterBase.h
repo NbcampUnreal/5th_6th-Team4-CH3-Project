@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
@@ -12,4 +12,14 @@ class MEGABONKLIKE_API AMBLCharacterBase : public ACharacter
 public:
 	AMBLCharacterBase();
 
+protected:
+	virtual void BeginPlay() override;
+	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+private:
+	void SetCameraCollisionIgnore();
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float CurrHP = 500.0f;
 };

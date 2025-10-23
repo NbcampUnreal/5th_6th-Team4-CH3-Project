@@ -1,4 +1,4 @@
-﻿#include "Entity/AttributeComponent.h"
+﻿#include "Character/AttributeComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 UAttributeComponent::UAttributeComponent()

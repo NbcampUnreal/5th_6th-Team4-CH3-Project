@@ -1,6 +1,6 @@
 ﻿#include "Item/MiscItem.h"
 #include "Item/ItemDataRow.h"
-#include "Entity/AttributeComponent.h"
+#include "Character/AttributeComponent.h"
 
 void UMiscItem::AddAttributeModifiers(UAttributeComponent* AttributeComponent, EItemRarity)
 {
