@@ -8,4 +8,8 @@ void AMBLPlayerController::BeginPlay()
 	{
 		InputSystem->AddMappingContext(IMC_Base, 0);
 	}
+
+	SetInputMode(FInputModeGameOnly());
+	bShowMouseCursor = false;
 }
+
