@@ -17,7 +17,11 @@ public:
 private:
 	void DetectEnemy();
 	void ShootRandomTarget();
-	void Shoot(const FVector& TargetPos);
+	void ShootSequence(const FVector& TargetPos);
+	void ShootSpread(const FVector& TargetPos);
+
+	// 단일
+	void ShootSingle(const FVector& TargetPos);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -28,10 +32,12 @@ protected:
 	float AutoDetectRadius;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bAutoDetect;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool bShootSpread;
 
 	FTimerHandle AttackIntervalHandle;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	int32 AttackCount = 0;
+	int32 ProjectileCount = 0;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float AttackInterval;
 

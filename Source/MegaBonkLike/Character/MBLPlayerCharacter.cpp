@@ -109,12 +109,12 @@ void AMBLPlayerCharacter::InputTempAcquireItem()
 {
 	Inventory->AddOrUpgradeItem(100);
 	Inventory->AddOrUpgradeItem(101);
+	Inventory->AddOrUpgradeItem(102);
 	Inventory->AddOrUpgradeItem(200);
 	Inventory->AddOrUpgradeItem(300);
 }
 
 void AMBLPlayerCharacter::RecalculateSpeed()
 {
-	// 다른 요소까지 다 합쳐서 계산한 걸로 바꿔야 함
 	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed * AttributeComponent->GetFinalValue(TAG_Attribute_MoveSpeed);
 }

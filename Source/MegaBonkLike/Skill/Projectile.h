@@ -36,7 +36,7 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     TObjectPtr<UStaticMeshComponent> StaticMesh;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-    UNiagaraComponent* Trail;
+    TObjectPtr<UNiagaraComponent> Trail;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     TObjectPtr<UProjectileMovementComponent> ProjectileMovement;
 
