@@ -108,6 +108,7 @@ void AMBLPlayerCharacter::Input_Look(const FInputActionValue& InputValue)
 void AMBLPlayerCharacter::InputTempAcquireItem()
 {
 	Inventory->AddOrUpgradeItem(100);
+	Inventory->AddOrUpgradeItem(101);
 	Inventory->AddOrUpgradeItem(200);
 	Inventory->AddOrUpgradeItem(300);
 }
