@@ -18,9 +18,9 @@ public:
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	TObjectPtr<AMBLCharacterBase> NPC1;
+	TObjectPtr<AMBLCharacterBase> OwnerCharacter;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	TObjectPtr<UCharacterMovementComponent> NPC1Movement;
+	TObjectPtr<UCharacterMovementComponent> OwnerCharacterMovement;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FVector Velocity;

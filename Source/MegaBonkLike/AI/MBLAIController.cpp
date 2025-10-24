@@ -38,6 +38,14 @@ void AMBLAIController::BeginPlay()
 	}
 }
 
+void AMBLAIController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	BeginAI(InPawn);
+}
+
+
 void AMBLAIController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	EndAI();
