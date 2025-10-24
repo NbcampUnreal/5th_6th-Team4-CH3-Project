@@ -80,9 +80,33 @@ void AMBLBaseSpawnObject::DestroyObject()
 void AMBLBaseSpawnObject::BeginPlay()
 {
 	Super::BeginPlay();
-	UE_LOG(LogTemp, Warning, TEXT("CollisionComp settings: %s"), *CollisionComp->GetCollisionProfileName().ToString());
-	UE_LOG(LogTemp, Warning, TEXT("DetectionComp settings: %s"), *DetectionComp->GetCollisionProfileName().ToString());
+	// 스폰시 이미 캐릭터와 겹쳐있을 경우를 위한 오버랩 함수 수동 호출
+	DetectionComp->UpdateOverlaps();
+	CollisionComp->UpdateOverlaps();
 
+	TArray<AActor*> OverlappingActors;
+	DetectionComp->GetOverlappingActors(OverlappingActors);
+	
+	for (AActor* Actor : OverlappingActors)
+	{
+		if (Actor && Actor->ActorHasTag("Player"))
+		{
+			FHitResult DummyHit;
+			OnPlayerOverlapBegin(DetectionComp, Actor, nullptr, 0, false, DummyHit);
+		}
+	}
+
+	OverlappingActors.Empty();
+	CollisionComp->GetOverlappingActors(OverlappingActors);
+	
+	for (AActor* Actor : OverlappingActors)
+	{
+		if (Actor && Actor->ActorHasTag("Player"))
+		{
+			FHitResult DummyHit;
+			OnPlayerOverlapBegin(CollisionComp, Actor, nullptr, 0, false, DummyHit);
+		}
+	}
 }
 
 void AMBLBaseSpawnObject::Tick(float DeltaTime)
