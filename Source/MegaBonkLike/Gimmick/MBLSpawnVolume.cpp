@@ -1,14 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Gimmick/MBLSpawnVolume.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 
-// Sets default values
 AMBLSpawnVolume::AMBLSpawnVolume()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
 	Scene = CreateDefaultSubobject<USceneComponent>(TEXT("Scene"));
@@ -83,7 +78,6 @@ FVector AMBLSpawnVolume::GetRandomPointInVolume() const
 
 void AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AActor> EnemyClass)
 {
-	// 예외 처리
 	if (!EnemyClass) return;
 
 	FVector SpawnLocation = GetRandomPointInVolume();
@@ -94,7 +88,6 @@ void AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AActor> EnemyClass)
 		return;
 	}
 
-	// 스폰
 	GetWorld()->SpawnActor<AActor>(
 		EnemyClass,
 		SpawnLocation,
@@ -102,14 +95,12 @@ void AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AActor> EnemyClass)
 	);
 }
 
-// Called when the game starts or when spawned
 void AMBLSpawnVolume::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
-// Called every frame
 void AMBLSpawnVolume::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);

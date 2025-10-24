@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -15,7 +13,6 @@ class MEGABONKLIKE_API AMBLSpawnVolume : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	AMBLSpawnVolume();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawn")
@@ -29,11 +26,9 @@ public:
 	void SpawnEnemy(TSubclassOf<AActor> EnemyClass);
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 };

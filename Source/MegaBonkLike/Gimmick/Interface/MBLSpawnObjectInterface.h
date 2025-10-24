@@ -1,12 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "MBLSpawnObjectInterface.generated.h"
 
-// This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UMBLSpawnObjectInterface : public UInterface
 {
@@ -17,7 +14,6 @@ class MEGABONKLIKE_API IMBLSpawnObjectInterface
 {
 	GENERATED_BODY()
 
-	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	// ¿À¹ö·¦ ÇÔ¼ö
 	UFUNCTION()

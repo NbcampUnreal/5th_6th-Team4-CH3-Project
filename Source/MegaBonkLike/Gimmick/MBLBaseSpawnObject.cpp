@@ -1,15 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Gimmick/MBLBaseSpawnObject.h"
 #include "Components/SceneComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 
-// Sets default values
 AMBLBaseSpawnObject::AMBLBaseSpawnObject()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
 	SceneComp = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComponent"));
@@ -54,7 +49,6 @@ void AMBLBaseSpawnObject::OnPlayerOverlapBegin(
 		else if (OverlappedComp == CollisionComp)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Gained"));
-			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Gained")));
 			OnObjectActivated(OtherActor);
 		}
 	}
@@ -83,7 +77,6 @@ void AMBLBaseSpawnObject::DestroyObject()
 	Destroy();
 }
 
-// Called when the game starts or when spawned
 void AMBLBaseSpawnObject::BeginPlay()
 {
 	Super::BeginPlay();
@@ -92,7 +85,6 @@ void AMBLBaseSpawnObject::BeginPlay()
 
 }
 
-// Called every frame
 void AMBLBaseSpawnObject::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
