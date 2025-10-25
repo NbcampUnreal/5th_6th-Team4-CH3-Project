@@ -7,16 +7,39 @@
 void USA_RangeAttack::Activate(TWeakObjectPtr<AActor> InInstigator)
 {
 	Super::Activate(InInstigator);
-	TimerDelegate.BindUObject(this, &ThisClass::DetectEnemy);
+	TimerDelegate.BindUObject(this, &ThisClass::StartShoot);
 
 	SetIntervalTimer();
 }
 
-void USA_RangeAttack::DetectEnemy()
+void USA_RangeAttack::StartShoot()
 {
-	if (bAutoDetect == false || Instigator.IsValid() == false)
+	ProjectileCount = GetWeaponValue(TAG_Attribute_AttackProjectiles) * GetAttributeValue(TAG_Attribute_AttackProjectiles);
+	float Interval = BaseTimerInterval / GetWeaponValue(TAG_Attribute_AttackSpeed) * GetAttributeValue(TAG_Attribute_AttackSpeed);
+	AttackInterval = ProjectileCount > 1 ? Interval * 0.5f / (ProjectileCount - 1) : 0.0f;
+	ExecuteShoot();
+}
+
+void USA_RangeAttack::ExecuteShoot()
+{
+	if (ProjectileCount <= 0)
 		return;
 
+	if (Instigator.IsValid() == false || IsValid(ProjectileClass) == false)
+		return;
+
+	if (bAutoDetect == false)
+	{
+		Shoot(Instigator->GetActorForwardVector());
+	}
+	else
+	{
+		ShootRandomTarget();
+	}
+}
+
+void USA_RangeAttack::DetectEnemy()
+{
 	AttackTargets.Empty();
 
 	FVector Origin = Instigator->GetActorLocation();
@@ -41,29 +64,50 @@ void USA_RangeAttack::DetectEnemy()
 			if (TargetTag.IsNone() == false && HitActor->ActorHasTag(TargetTag) == false)
 				continue;
 
+			// 적의 생존 여부 확인 후 유효한 적 추가
+
 			AttackTargets.Add(HitActor);
 		}
 	}
-
-	float Interval = BaseTimerInterval / GetWeaponValue(TAG_Attribute_AttackSpeed) * GetAttributeValue(TAG_Attribute_AttackSpeed);
-	ProjectileCount = GetWeaponValue(TAG_Attribute_AttackProjectiles) * GetAttributeValue(TAG_Attribute_AttackProjectiles);
-	AttackInterval = ProjectileCount > 1 ? Interval * 0.5f / (ProjectileCount - 1) : 0.0f;
-	ShootRandomTarget();
 }
 
 void USA_RangeAttack::ShootRandomTarget()
 {
-	if (ProjectileCount <= 0)
+	DetectEnemy();
+	if (AttackTargets.IsEmpty())
 		return;
 
-	if (Instigator.IsValid() == false || IsValid(ProjectileClass) == false || AttackTargets.IsEmpty())
-		return;
+	// 가까운 적일 수록 높은 가중치를 주고, 그 값을 바탕으로 랜덤 적 공격
+	TArray<float> DistanceWeights;
+	float TotalWeight = 0.0f;
+	for (const auto& Target : AttackTargets)
+	{
+		float Weight = 1.0f - FVector::Distance(Instigator->GetActorLocation(), Target->GetActorLocation()) / AutoDetectRadius;
+		Weight = FMath::Sqrt(Weight);				// 가중치 완화
+		DistanceWeights.Add(Weight);
+		TotalWeight += Weight;
+	}
 
-	int RandomIdx = FMath::RandRange(0, AttackTargets.Num() - 1);
+	float RandomValue = FMath::RandRange(0.0f, TotalWeight);
+	int RandomIdx = AttackTargets.Num() - 1;
+	for (int i = 0; i < DistanceWeights.Num(); ++i)
+	{
+		RandomValue -= DistanceWeights[i];
+		if (RandomValue <= 0)
+		{
+			RandomIdx = i;
+			break;
+		}
+	}
 	if (AttackTargets[RandomIdx].IsValid() == false)
 		return;
 
 	FVector TargetDir = (AttackTargets[RandomIdx]->GetActorLocation() - Instigator->GetActorLocation()).GetSafeNormal();
+	Shoot(TargetDir);
+}
+
+void USA_RangeAttack::Shoot(const FVector& TargetDir)
+{
 	if (bShootSpread)
 	{
 		ShootSpread(TargetDir);
@@ -81,7 +125,7 @@ void USA_RangeAttack::ShootRandomTarget()
 		World->GetTimerManager().SetTimer(
 			AttackIntervalHandle,
 			this,
-			&ThisClass::ShootRandomTarget,
+			&ThisClass::ExecuteShoot,
 			AttackInterval,
 			false);
 	}

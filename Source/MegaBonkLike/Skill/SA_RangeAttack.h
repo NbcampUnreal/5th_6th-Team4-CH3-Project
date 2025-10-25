@@ -15,13 +15,17 @@ public:
 	virtual void Activate(TWeakObjectPtr<AActor> InInstigator) override;
 
 private:
+	void StartShoot();
+	void ExecuteShoot();
+
 	void DetectEnemy();
 	void ShootRandomTarget();
-	void ShootSequence(const FVector& TargetPos);
-	void ShootSpread(const FVector& TargetPos);
 
+	void Shoot(const FVector& TargetDir);
+	// 분산
+	void ShootSpread(const FVector& TargetDir);
 	// 단일
-	void ShootSingle(const FVector& TargetPos);
+	void ShootSingle(const FVector& TargetDir);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
