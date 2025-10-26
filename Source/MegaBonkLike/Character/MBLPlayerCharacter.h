@@ -27,7 +27,11 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:
+	void AddAttributeChangedCallback(const FGameplayTag& Tag, TWeakObjectPtr<UObject> InInstigator, TFunction<void(const TWeakObjectPtr<class UAttribute>)> NewCallBack);
+	void RemoveAttributeChangedCallback(const FGameplayTag& Tag, TWeakObjectPtr<UObject> InInstigator);
 	float GetAttributeValue(const FGameplayTag& AttributeTag) const;
+
+	FVector GetFootLocation() const;
 
 protected:
 	void Input_Move(const FInputActionValue& InputValue);

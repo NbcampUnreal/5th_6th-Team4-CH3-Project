@@ -7,8 +7,8 @@
 void USA_RangeAttack::Activate(TWeakObjectPtr<AActor> InInstigator)
 {
 	Super::Activate(InInstigator);
-	TimerDelegate.BindUObject(this, &ThisClass::StartShoot);
 
+	TimerDelegate.BindUObject(this, &ThisClass::StartShoot);
 	SetIntervalTimer();
 }
 
@@ -162,14 +162,12 @@ void USA_RangeAttack::ShootSingle(const FVector& TargetDir)
 	AProjectile* Projectile = Instigator->GetWorld()->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, Params);
 	if (IsValid(Projectile) == true)
 	{
-		float WeaponProjectileSpeed = GetWeaponValue(TAG_Attribute_ProjectileSpeed);
-		float AttributeProjectileSpeed = GetAttributeValue(TAG_Attribute_ProjectileSpeed);
-		float ProjectileSpeed = WeaponProjectileSpeed * AttributeProjectileSpeed;
+		float ProjectileSpeed = GetWeaponValue(TAG_Attribute_ProjectileSpeed) * GetAttributeValue(TAG_Attribute_ProjectileSpeed);
 		Projectile->SetDirectionAndSpeed(TargetDir, ProjectileSpeed);
 		Projectile->SetTargetTag(TargetTag);
-		float SkillDamage = GetWeaponValue(TAG_Attribute_Damage);
-		float AttributeDamage = GetAttributeValue(TAG_Attribute_Damage);
-		float Damage = SkillDamage * AttributeDamage;
+		float Size = GetWeaponValue(TAG_Attribute_Size) * GetAttributeValue(TAG_Attribute_Size);
+		Projectile->SetSize(Size);
+		float Damage = GetWeaponValue(TAG_Attribute_Damage) * GetAttributeValue(TAG_Attribute_Damage);
 		Projectile->SetDamage(Damage);
 	}
 }

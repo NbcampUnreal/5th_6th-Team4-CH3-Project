@@ -45,6 +45,7 @@ AMBLPlayerCharacter::AMBLPlayerCharacter()
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_AttackSpeed, 1.0f);
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_ProjectileSpeed, 1.0f);
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_AttackProjectiles, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_Duration, 1.0f);
 
 	NormalSpeed = 600.0f;	
 }
@@ -56,7 +57,8 @@ void AMBLPlayerCharacter::BeginPlay()
 	AttributeComponent->AddAttributeChangedCallback(
 		EAttributeSourceType::Player,
 		TAG_Attribute_MoveSpeed,
-		[WeakThis = TWeakObjectPtr<ThisClass>(this)](const FAttribute& Attribute)
+		this,
+		[WeakThis = TWeakObjectPtr<ThisClass>(this)](const TWeakObjectPtr<UAttribute> Attribute)
 		{
 			if (WeakThis.IsValid())
 				WeakThis->RecalculateSpeed();
@@ -78,9 +80,30 @@ void AMBLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	}
 }
 
+void AMBLPlayerCharacter::AddAttributeChangedCallback(const FGameplayTag& Tag, TWeakObjectPtr<UObject> InInstigator, TFunction<void(const TWeakObjectPtr<UAttribute>)> NewCallBack)
+{
+	if (IsValid(AttributeComponent) == true)
+	{
+		AttributeComponent->AddAttributeChangedCallback(Tag, InInstigator, NewCallBack);
+	}
+}
+
+void AMBLPlayerCharacter::RemoveAttributeChangedCallback(const FGameplayTag& Tag, TWeakObjectPtr<UObject> InInstigator)
+{
+	if (IsValid(AttributeComponent) == true)
+	{
+		AttributeComponent->RemoveAttributeChangedCallback(Tag, InInstigator);
+	}
+}
+
 float AMBLPlayerCharacter::GetAttributeValue(const FGameplayTag& AttributeTag) const
 {
 	return AttributeComponent == nullptr ? 0.0f : AttributeComponent->GetFinalValue(AttributeTag);
+}
+
+FVector AMBLPlayerCharacter::GetFootLocation() const
+{
+	return GetCharacterMovement()->GetActorFeetLocation();
 }
 
 void AMBLPlayerCharacter::Input_Move(const FInputActionValue& InputValue)
@@ -110,6 +133,7 @@ void AMBLPlayerCharacter::InputTempAcquireItem()
 	Inventory->AddOrUpgradeItem(100);
 	Inventory->AddOrUpgradeItem(101);
 	Inventory->AddOrUpgradeItem(102);
+	Inventory->AddOrUpgradeItem(103);
 	Inventory->AddOrUpgradeItem(200);
 	Inventory->AddOrUpgradeItem(300);
 }

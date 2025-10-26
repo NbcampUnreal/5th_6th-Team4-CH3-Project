@@ -28,9 +28,11 @@ public:
 	virtual void BeginPlay() override;
 
 	void AddAttribute(EAttributeSourceType SourceType, const FGameplayTag& Tag, float InBaseValue);
-	void AddAttribute(EAttributeSourceType SourceType, const FAttribute& NewAttribute);
 
-	void AddAttributeChangedCallback(EAttributeSourceType SourceType, const FGameplayTag& Tag, TFunction<void(const FAttribute&)> NewCallBack);
+	void AddAttributeChangedCallback(EAttributeSourceType SourceType, const FGameplayTag& Tag, TWeakObjectPtr<UObject> Instigator, TFunction<void(const TWeakObjectPtr<UAttribute>)> NewCallBack);
+	void RemoveAttributeChangedCallback(EAttributeSourceType SourceType, const FGameplayTag& Tag, TWeakObjectPtr<UObject> Instigator);
+	void AddAttributeChangedCallback(const FGameplayTag& Tag, TWeakObjectPtr<UObject> Instigator, TFunction<void(const TWeakObjectPtr<UAttribute>)> NewCallBack);
+	void RemoveAttributeChangedCallback(const FGameplayTag& Tag, TWeakObjectPtr<UObject> Instigator);
 
 	int32 AddModifer(EAttributeSourceType SourceType, const FGameplayTag& Tag, const FAttributeModifier& Modifier);
 	void ChangeModifier(EAttributeSourceType SourceType, const FGameplayTag& Tag, int32 ModifierId, const FAttributeModifier& Modifier);
