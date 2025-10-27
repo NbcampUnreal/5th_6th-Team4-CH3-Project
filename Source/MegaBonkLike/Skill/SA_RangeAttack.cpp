@@ -82,8 +82,7 @@ void USA_RangeAttack::ShootRandomTarget()
 	float TotalWeight = 0.0f;
 	for (const auto& Target : AttackTargets)
 	{
-		float Weight = 1.0f - FVector::Distance(Instigator->GetActorLocation(), Target->GetActorLocation()) / AutoDetectRadius;
-		Weight = FMath::Sqrt(Weight);				// 가중치 완화
+		float Weight = 0.5f + (1.0f - FVector::Distance(Instigator->GetActorLocation(), Target->GetActorLocation()) / AutoDetectRadius) * 0.5f;		// 가중치 완화
 		DistanceWeights.Add(Weight);
 		TotalWeight += Weight;
 	}
