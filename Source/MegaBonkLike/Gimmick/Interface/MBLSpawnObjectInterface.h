@@ -33,6 +33,8 @@ public:
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex
 	) = 0;
+	// 오버랩 수동 호출 함수
+	virtual void CallOverlap(UPrimitiveComponent* CollisionComponent) = 0;
 	// 오브젝트 사용 함수
 	virtual void OnObjectActivated(AActor* Activator) = 0;
 	// 오브젝트 타입 Getter

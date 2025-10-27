@@ -8,6 +8,7 @@
 class USceneComponent;
 class USphereComponent;
 class UStaticMeshComponent;
+class UProjectileMovementComponent;
 
 UCLASS()
 class MEGABONKLIKE_API AMBLBaseSpawnObject : public AActor, public IMBLSpawnObjectInterface
@@ -31,6 +32,7 @@ public:
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex
 	) override;
+	virtual void CallOverlap(UPrimitiveComponent* CollisionComponent) override;
 	virtual void OnObjectActivated(AActor* Activator) override;
 	virtual FName GetObejctType() const override;
 	virtual void DestroyObject() override;
@@ -48,8 +50,17 @@ protected:
 	USphereComponent* DetectionComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SpawnObject|Component")
 	UStaticMeshComponent* StaticMeshComp;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SpawnObject|Component")
+	UProjectileMovementComponent* ProjectileComp;
 
-public:	
-	virtual void Tick(float DeltaTime) override;
+	FTimerHandle ChaseTimerHandle;
+	AActor* TargetActor;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SpawnObject|ChaseValue")
+	float BaseSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SpawnObject|ChaseValue")
+	float UpdateInterval;
+
+	void ChaseToPlayer();
+
 
 };

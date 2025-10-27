@@ -56,6 +56,25 @@ void AMBLBaseInteractionObject::OnPlayerOverlapEnd(
 	}
 }
 
+void AMBLBaseInteractionObject::CallOverlap(UPrimitiveComponent* CollisionComponent)
+{
+	if (!CollisionComponent) return;
+
+	CollisionComponent->UpdateOverlaps();
+
+	TArray<AActor*> OverlappingActors;
+	CollisionComponent->GetOverlappingActors(OverlappingActors);
+
+	for (AActor* Actor : OverlappingActors)
+	{
+		if (Actor && Actor->ActorHasTag("Player"))
+		{
+			FHitResult DummyHit;
+			OnPlayerOverlapBegin(CollisionComponent, Actor, nullptr, 0, false, DummyHit);
+		}
+	}
+}
+
 void AMBLBaseInteractionObject::OnObjectActivated(AActor* Activator)
 {
 	// 오브젝트 전용 로직 수행후 DestroyObject();
@@ -76,6 +95,7 @@ void AMBLBaseInteractionObject::BeginPlay()
 {
 	Super::BeginPlay();
 
+	CallOverlap(DetectionComp);
 }
 
 void AMBLBaseInteractionObject::Tick(float DeltaTime)

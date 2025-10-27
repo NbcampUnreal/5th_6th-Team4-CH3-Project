@@ -80,6 +80,9 @@ void AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AActor> EnemyClass)
 {
 	if (!EnemyClass) return;
 
+	UWorld* World = GetWorld();
+	if (!World)return;
+
 	FVector SpawnLocation = GetRandomPointInVolume();
 
 	if (SpawnLocation.IsNearlyZero())
@@ -88,10 +91,24 @@ void AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AActor> EnemyClass)
 		return;
 	}
 
+	TArray<AActor*> PlayerActors;
+	UGameplayStatics::GetAllActorsWithTag(World, TEXT("Player"), PlayerActors);
+
+	if (PlayerActors.Num() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No player actor found"));
+		return;
+	}
+
+	AActor* PlayerActor = PlayerActors[0];
+	FVector PlayerLocation = PlayerActor->GetActorLocation();
+	FVector DirectionToPlayer = PlayerLocation - SpawnLocation;
+	FRotator LookAtRotation = DirectionToPlayer.Rotation();
+
 	GetWorld()->SpawnActor<AActor>(
 		EnemyClass,
 		SpawnLocation,
-		FRotator::ZeroRotator
+		LookAtRotation
 	);
 }
 

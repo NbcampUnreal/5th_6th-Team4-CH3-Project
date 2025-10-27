@@ -31,6 +31,7 @@ public:
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex
 	) override;
+	virtual void CallOverlap(UPrimitiveComponent* CollisionComponent) override;
 	virtual void OnObjectActivated(AActor* Activator) override;
 	virtual FName GetObejctType() const override;
 	virtual void DestroyObject() override;
