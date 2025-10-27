@@ -4,10 +4,11 @@
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "TimerManager.h"
-//#include "Kismet/GameplayStatics.h"
 
 AMBLBaseSpawnObject::AMBLBaseSpawnObject()
-	: TargetActor(nullptr)
+	: RotationSpeed(90.f)
+	, UpdateRotation(0.02f)
+	, TargetActor(nullptr)
 	, BaseSpeed(1000.f)
 	, UpdateInterval(0.05f)
 {
@@ -53,9 +54,8 @@ void AMBLBaseSpawnObject::OnPlayerOverlapBegin(
 	{
 		if (OverlappedComp == DetectionComp)
 		{
-			TargetActor = OtherActor;
 			UE_LOG(LogTemp, Warning, TEXT("Player detected"));
-			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Player detected")));
+			TargetActor = OtherActor;
 		}
 		else if (OverlappedComp == CollisionComp)
 		{
@@ -110,16 +110,34 @@ void AMBLBaseSpawnObject::DestroyObject()
 void AMBLBaseSpawnObject::BeginPlay()
 {
 	Super::BeginPlay();
+
 	// 스폰시 이미 캐릭터와 겹쳐있을 경우를 위한 오버랩 함수 수동 호출
 	CallOverlap(DetectionComp);
 	CallOverlap(CollisionComp);
+
+	GetWorldTimerManager().SetTimer(
+		RotationTimerHandle,
+		this,
+		&AMBLBaseSpawnObject::RotationObject,
+		UpdateRotation,
+		true
+	);
 
 	GetWorldTimerManager().SetTimer(
 		ChaseTimerHandle,
 		this,
 		&AMBLBaseSpawnObject::ChaseToPlayer,
 		UpdateInterval,
-		true);
+		true
+	);
+}
+
+void AMBLBaseSpawnObject::RotationObject()
+{
+	FRotator CurrentRotation = StaticMeshComp->GetRelativeRotation();
+	CurrentRotation.Yaw += RotationSpeed * UpdateRotation;
+
+	StaticMeshComp->SetRelativeRotation(CurrentRotation);
 }
 
 void AMBLBaseSpawnObject::ChaseToPlayer()

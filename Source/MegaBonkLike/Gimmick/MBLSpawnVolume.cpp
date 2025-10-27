@@ -1,6 +1,8 @@
 #include "Gimmick/MBLSpawnVolume.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "NavigationSystem.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AMBLSpawnVolume::AMBLSpawnVolume()
 {
@@ -14,7 +16,7 @@ AMBLSpawnVolume::AMBLSpawnVolume()
 
 }
 
-FVector AMBLSpawnVolume::GetRandomPointInVolume() const
+FVector AMBLSpawnVolume::GetRandomEnemySpawnLocation() const
 {
 	// 抗寇 贸府
 	UWorld* World = GetWorld();
@@ -76,14 +78,50 @@ FVector AMBLSpawnVolume::GetRandomPointInVolume() const
 
 }
 
+FVector AMBLSpawnVolume::GetRandomObjectSpawnLocation() const
+{
+	// 抗寇 贸府
+	UWorld* World = GetWorld();
+	if (!World) return FVector::ZeroVector;
+
+	const FVector BoxOrigin = SpawnBox->Bounds.Origin;
+	const FVector BoxExtent = SpawnBox->Bounds.BoxExtent;
+
+	FVector RandomPoint = UKismetMathLibrary::RandomPointInBoundingBox(BoxOrigin, BoxExtent);
+
+	UNavigationSystemV1* NaviSystem = UNavigationSystemV1::GetCurrent(GetWorld());
+	if (!NaviSystem)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Navigation system not found"))
+		return FVector::ZeroVector;
+	}
+
+	FNavLocation ValidLocation;
+	const float SearchRadius = 100.f;
+
+	bool bFound = NaviSystem->GetRandomPointInNavigableRadius(
+		RandomPoint, 
+		SearchRadius, 
+		ValidLocation
+	);
+
+	if (bFound) return ValidLocation.Location;
+
+	// 抗寇 贸府
+	UE_LOG(LogTemp, Warning, TEXT("Navigation system not found"))
+	return FVector::ZeroVector;
+
+}
+
 void AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AActor> EnemyClass)
 {
+	// 抗寇 贸府
 	if (!EnemyClass) return;
 
 	UWorld* World = GetWorld();
 	if (!World)return;
 
-	FVector SpawnLocation = GetRandomPointInVolume();
+	FVector SpawnLocation = GetRandomEnemySpawnLocation();
 
 	if (SpawnLocation.IsNearlyZero())
 	{
@@ -112,15 +150,34 @@ void AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AActor> EnemyClass)
 	);
 }
 
+void AMBLSpawnVolume::SpawnObject(TSubclassOf<AActor> ObjectClass)
+{
+	// 抗寇 贸府
+	if (!ObjectClass) return;
+
+	UWorld* World = GetWorld();
+	if (!World)return;
+
+	FVector SpawnLocation = GetRandomObjectSpawnLocation();
+	FRotator SpawnRotation = FRotator(0.f, FMath::FRandRange(0.f, 360.f), 0.f);
+
+	if (SpawnLocation.IsNearlyZero())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Spawn failed"));
+		return;
+	}
+
+	GetWorld()->SpawnActor<AActor>(
+		ObjectClass,
+		SpawnLocation,
+		SpawnRotation
+	);
+}
+
 void AMBLSpawnVolume::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
-void AMBLSpawnVolume::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
 

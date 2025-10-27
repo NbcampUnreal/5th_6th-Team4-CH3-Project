@@ -40,6 +40,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	// 컴포넌트
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SpawnObject")
 	FName SpawnObjectType;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SpawnObject|Component")
@@ -53,6 +54,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SpawnObject|Component")
 	UProjectileMovementComponent* ProjectileComp;
 
+	// 오브젝트 Rotation
+	FTimerHandle RotationTimerHandle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SpawnObject|Rotation")
+	float RotationSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SpawnObject|Rotation")
+	float UpdateRotation;
+
+	// 오브젝트 추적
 	FTimerHandle ChaseTimerHandle;
 	AActor* TargetActor;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SpawnObject|ChaseValue")
@@ -60,6 +69,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SpawnObject|ChaseValue")
 	float UpdateInterval;
 
+	void RotationObject();
 	void ChaseToPlayer();
 
 

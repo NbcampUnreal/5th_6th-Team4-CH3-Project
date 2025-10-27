@@ -21,14 +21,15 @@ public:
 	UBoxComponent* SpawnBox;
 
 	UFUNCTION(BlueprintCallable, Category = "Spawn")
-	FVector GetRandomPointInVolume() const;
+	FVector GetRandomEnemySpawnLocation() const;
+	UFUNCTION(BlueprintCallable, Category = "Spawn")
+	FVector GetRandomObjectSpawnLocation() const;
 	UFUNCTION(BlueprintCallable, Category = "Spawn")
 	void SpawnEnemy(TSubclassOf<AActor> EnemyClass);
+	UFUNCTION(BlueprintCallable, Category = "Spawn")
+	void SpawnObject(TSubclassOf<AActor> ObjectClass);
 
 protected:
 	virtual void BeginPlay() override;
-
-public:	
-	virtual void Tick(float DeltaTime) override;
 
 };
