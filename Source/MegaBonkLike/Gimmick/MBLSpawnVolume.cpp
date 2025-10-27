@@ -16,43 +16,15 @@ AMBLSpawnVolume::AMBLSpawnVolume()
 
 }
 
+void AMBLSpawnVolume::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
 FVector AMBLSpawnVolume::GetRandomEnemySpawnLocation() const
 {
-	// 예외 처리
-	UWorld* World = GetWorld();
-	if (!World) return FVector::ZeroVector;
-
-	// 캐릭터 위치 찾기
-	FVector BoxCenter = SpawnBox->GetComponentLocation();
-	FVector BoxExtent = SpawnBox->GetScaledBoxExtent();
-
-	TArray<AActor*> Actors;
-	UGameplayStatics::GetAllActorsWithTag(World, TEXT("Player"), Actors);
-	
-	AActor* PlayerActor = nullptr;
-
-	for (AActor* Actor : Actors)
-	{
-		if (!Actor) continue;
-
-		FVector ActorLocation = Actor->GetActorLocation();
-		FVector Delta = ActorLocation - BoxCenter;
-
-		if (FMath::Abs(Delta.X) <= BoxExtent.X &&
-			FMath::Abs(Delta.Y) <= BoxExtent.Y &&
-			FMath::Abs(Delta.Z) <= BoxExtent.Z)
-		{
-			PlayerActor = Actor;
-			break;
-		}
-	}
-
-	// 예외 처리
-	if (!PlayerActor)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Player tag actor not found in spawn box"));
-		return FVector::ZeroVector;
-	}
+	AActor* PlayerActor = GetPlayerInBox();
+	if (!PlayerActor) return FVector::ZeroVector;
 
 	const FVector PlayerLocation = PlayerActor->GetActorLocation();
 
@@ -65,52 +37,17 @@ FVector AMBLSpawnVolume::GetRandomEnemySpawnLocation() const
 	const FVector Offset(FMath::Cos(Angle) * Radius, FMath::Sin(Angle) * Radius, 0.f);
 	FVector SpawnLocation = PlayerLocation + Offset;
 
-	FHitResult HitResult;
-	FVector Start = SpawnLocation + FVector(0, 0, 1000);
-	FVector End = SpawnLocation + FVector(0, 0, 5000);
-
-	if (World->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility))
-	{
-		SpawnLocation.Z = HitResult.Location.Z;
-	}
-
-	return SpawnLocation;
-
+	return GetValidNavMeshLocation(SpawnLocation, SearchRadius);
 }
 
 FVector AMBLSpawnVolume::GetRandomObjectSpawnLocation() const
 {
-	// 예외 처리
-	UWorld* World = GetWorld();
-	if (!World) return FVector::ZeroVector;
-
-	const FVector BoxOrigin = SpawnBox->Bounds.Origin;
-	const FVector BoxExtent = SpawnBox->Bounds.BoxExtent;
-
-	FVector RandomPoint = UKismetMathLibrary::RandomPointInBoundingBox(BoxOrigin, BoxExtent);
-
-	UNavigationSystemV1* NaviSystem = UNavigationSystemV1::GetCurrent(GetWorld());
-	if (!NaviSystem)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Navigation system not found"))
-		return FVector::ZeroVector;
-	}
-
-	FNavLocation ValidLocation;
-	const float SearchRadius = 100.f;
-
-	bool bFound = NaviSystem->GetRandomPointInNavigableRadius(
-		RandomPoint, 
-		SearchRadius, 
-		ValidLocation
+	FVector RandomPoint = UKismetMathLibrary::RandomPointInBoundingBox(
+		SpawnBox->Bounds.Origin,
+		SpawnBox->Bounds.BoxExtent
 	);
 
-	if (bFound) return ValidLocation.Location;
-
-	// 예외 처리
-	UE_LOG(LogTemp, Warning, TEXT("Navigation system not found"))
-	return FVector::ZeroVector;
-
+	return GetValidNavMeshLocation(RandomPoint, SearchRadius);
 }
 
 void AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AActor> EnemyClass)
@@ -118,36 +55,24 @@ void AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AActor> EnemyClass)
 	// 예외 처리
 	if (!EnemyClass) return;
 
-	UWorld* World = GetWorld();
-	if (!World)return;
-
 	FVector SpawnLocation = GetRandomEnemySpawnLocation();
-
 	if (SpawnLocation.IsNearlyZero())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Player not found in spawn box"));
 		return;
 	}
 
-	TArray<AActor*> PlayerActors;
-	UGameplayStatics::GetAllActorsWithTag(World, TEXT("Player"), PlayerActors);
+	AActor* Player = GetPlayerInBox();
 
-	if (PlayerActors.Num() == 0)
+	if (!Player)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No player actor found"));
 		return;
 	}
 
-	AActor* PlayerActor = PlayerActors[0];
-	FVector PlayerLocation = PlayerActor->GetActorLocation();
-	FVector DirectionToPlayer = PlayerLocation - SpawnLocation;
-	FRotator LookAtRotation = DirectionToPlayer.Rotation();
+	FRotator LookAtRotation = (Player->GetActorLocation() - SpawnLocation).Rotation();
 
-	GetWorld()->SpawnActor<AActor>(
-		EnemyClass,
-		SpawnLocation,
-		LookAtRotation
-	);
+	SpawnActorAtLocation(EnemyClass, SpawnLocation, LookAtRotation);
 }
 
 void AMBLSpawnVolume::SpawnObject(TSubclassOf<AActor> ObjectClass)
@@ -155,11 +80,7 @@ void AMBLSpawnVolume::SpawnObject(TSubclassOf<AActor> ObjectClass)
 	// 예외 처리
 	if (!ObjectClass) return;
 
-	UWorld* World = GetWorld();
-	if (!World)return;
-
 	FVector SpawnLocation = GetRandomObjectSpawnLocation();
-	FRotator SpawnRotation = FRotator(0.f, FMath::FRandRange(0.f, 360.f), 0.f);
 
 	if (SpawnLocation.IsNearlyZero())
 	{
@@ -167,17 +88,75 @@ void AMBLSpawnVolume::SpawnObject(TSubclassOf<AActor> ObjectClass)
 		return;
 	}
 
-	GetWorld()->SpawnActor<AActor>(
-		ObjectClass,
-		SpawnLocation,
-		SpawnRotation
-	);
+	FRotator SpawnRotation = FRotator(0.f, FMath::FRandRange(0.f, 360.f), 0.f);
+
+	SpawnActorAtLocation(ObjectClass, SpawnLocation, SpawnRotation);
 }
 
-void AMBLSpawnVolume::BeginPlay()
+AActor* AMBLSpawnVolume::SpawnActorAtLocation(TSubclassOf<AActor> ActorClass, const FVector& Location, const FRotator& Rotation)
 {
-	Super::BeginPlay();
-	
+	// 예외 처리
+	if (!ActorClass) return nullptr;
+
+	UWorld* World = GetWorld();
+	if (!World) return nullptr;
+
+	return World->SpawnActor<AActor>(ActorClass, Location, Rotation);
 }
 
+AActor* AMBLSpawnVolume::GetPlayerInBox() const
+{
+	UWorld* World = GetWorld();
+	if (!World) return nullptr;
 
+	FVector BoxCenter = SpawnBox->GetComponentLocation();
+	FVector BoxExtent = SpawnBox->GetScaledBoxExtent();
+
+	TArray<AActor*> Players;
+	UGameplayStatics::GetAllActorsWithTag(World, TEXT("Player"), Players);
+
+	AActor* PlayerActor = nullptr;
+
+	for (AActor* Actor : Players)
+	{
+		if (!Actor) continue;
+
+		FVector Delta = Actor->GetActorLocation() - BoxCenter;
+
+		if (FMath::Abs(Delta.X) <= BoxExtent.X &&
+			FMath::Abs(Delta.Y) <= BoxExtent.Y &&
+			FMath::Abs(Delta.Z) <= BoxExtent.Z)
+		{
+			return Actor;
+		}
+	}
+
+	return nullptr;
+}
+
+FVector AMBLSpawnVolume::GetValidNavMeshLocation(const FVector& Location, float Radius) const
+{
+	UWorld* World = GetWorld();
+	if (!World) return FVector::ZeroVector;
+
+	UNavigationSystemV1* NaviSystem = UNavigationSystemV1::GetCurrent(World);
+	if (!NaviSystem)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Navigation system not found"))
+			return FVector::ZeroVector;
+	}
+
+	FNavLocation ValidLocation;
+
+	bool bFound = NaviSystem->GetRandomPointInNavigableRadius(
+		Location,
+		Radius,
+		ValidLocation
+	);
+
+	if (bFound) return ValidLocation.Location;
+
+	// 예외 처리
+	UE_LOG(LogTemp, Warning, TEXT("Navigation system not found"));
+	return FVector::ZeroVector;
+}
