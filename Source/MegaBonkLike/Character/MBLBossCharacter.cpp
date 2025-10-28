@@ -1,9 +1,9 @@
-﻿#include "Character/MBLNonPlayerCharacter.h"
+#include "Character/MBLBossCharacter.h"
 #include "AI/MBLAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 
-AMBLNonPlayerCharacter::AMBLNonPlayerCharacter()
+AMBLBossCharacter::AMBLBossCharacter()
 {
 	AIControllerClass = AMBLAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
@@ -33,16 +33,8 @@ AMBLNonPlayerCharacter::AMBLNonPlayerCharacter()
 	Attack = 50;
 }
 
-void AMBLNonPlayerCharacter::HandleNavLinkJump(const FVector& Destination)
-{
-	FVector JumpDirection = (Destination - GetActorLocation()).GetSafeNormal();
-	JumpDirection.Z = 0.7f;
-	LaunchCharacter(JumpDirection * 600.f, true, true);
 
-	UE_LOG(LogTemp, Warning, TEXT("NPC Jump to SmartLink!"));
-}
-
-void AMBLNonPlayerCharacter::BeginPlay()
+void AMBLBossCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -58,7 +50,7 @@ void AMBLNonPlayerCharacter::BeginPlay()
 	}
 }
 
-float AMBLNonPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+float AMBLBossCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
@@ -72,7 +64,7 @@ float AMBLNonPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const&
 	return ActualDamage;
 }
 
-void AMBLNonPlayerCharacter::SetMovementSpeed(float NewSpeed)
+void AMBLBossCharacter::SetMovementSpeed(float NewSpeed)
 {
 	if (UCharacterMovementComponent* Movement = GetCharacterMovement())
 	{
@@ -81,27 +73,27 @@ void AMBLNonPlayerCharacter::SetMovementSpeed(float NewSpeed)
 	}
 }
 
-int32 AMBLNonPlayerCharacter::GetHealth() const
+int32 AMBLBossCharacter::GetHealth() const
 {
 	return Health;
 }
 
-int32 AMBLNonPlayerCharacter::GetMaxHealth() const
+int32 AMBLBossCharacter::GetMaxHealth() const
 {
 	return MaxHealth;
 }
 
-int32 AMBLNonPlayerCharacter::GetDefense() const
+int32 AMBLBossCharacter::GetDefense() const
 {
 	return Defense;
 }
 
-int32 AMBLNonPlayerCharacter::GetAttack() const
+int32 AMBLBossCharacter::GetAttack() const
 {
 	return Attack;
 }
 
-void AMBLNonPlayerCharacter::OnDeath()
+void AMBLBossCharacter::OnDeath()
 {
 	bIsDead = true;
 
@@ -111,17 +103,4 @@ void AMBLNonPlayerCharacter::OnDeath()
 	SetLifeSpan(0.f);
 
 	UE_LOG(LogTemp, Warning, TEXT("Died."));
-
-	//FVector SpawnLocation = GetActorLocation();
-	
-}
-
-void AMBLNonPlayerCharacter::DropExpCoin()
-{
-
-}
-
-void AMBLNonPlayerCharacter::DropGoldCoin()
-{
-
 }

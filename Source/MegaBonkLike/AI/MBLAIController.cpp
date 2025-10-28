@@ -1,40 +1,29 @@
-﻿#include "AI/MBLAIController.h"
+﻿#include "MBLAIController.h"
 #include "NavigationSystem.h"
-#include "Blueprint/AIBlueprintHelperLibrary.h"
-#include "BehaviorTree/BehaviorTree.h"
-#include "BehaviorTree/BlackboardData.h"
+#include "Navigation/NavLinkProxy.h"
+#include "NavLinkComponent.h"
+#include "EngineUtils.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Character/MBLNonPlayerCharacter.h"
+#include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
-
-const float AMBLAIController::PatrolRadius(500.f);
-int32 AMBLAIController::ShowAIDebug(0);
-const FName AMBLAIController::StartPatrolPositionKey(TEXT("StartPatrolPosition"));
-const FName AMBLAIController::EndPatrolPositionKey(TEXT("EndPatrolPosition"));
-const FName AMBLAIController::TargetCharacterKey(TEXT("TargetCharacter"));
-
-
-FAutoConsoleVariableRef CVarShowAIDebug(
-	TEXT("NXProject.ShowAIDebug"),
-	AMBLAIController::ShowAIDebug,
-	TEXT(""),
-	ECVF_Cheat
-);
 
 AMBLAIController::AMBLAIController()
 {
-	Blackboard = CreateDefaultSubobject<UBlackboardComponent>(TEXT("Blackboard"));
-	BrainComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("BrainComponent"));
-
+	BlackboardComp = CreateDefaultSubobject<UBlackboardComponent>(TEXT("Blackboard"));
 }
 
 void AMBLAIController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	APawn* ControlledPawn = GetPawn();
-	if (IsValid(ControlledPawn) == true)
+	StartBehaviorTree();
+
+	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	if (PlayerPawn && GetBlackboardComp())
 	{
-		BeginAI(ControlledPawn);
+
+		GetBlackboardComp()->SetValueAsObject(TEXT("TargetCharacter"), PlayerPawn);
 	}
 }
 
@@ -42,50 +31,43 @@ void AMBLAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	BeginAI(InPawn);
-}
-
-
-void AMBLAIController::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-	EndAI();
-
-	Super::EndPlay(EndPlayReason);
-}
-
-void AMBLAIController::BeginAI(APawn* InPawn)
-{
-	UBlackboardComponent* BlackboardComponent = Cast<UBlackboardComponent>(Blackboard);
-	if (IsValid(BlackboardComponent) == true)
+	if (InPawn)
 	{
-		if (UseBlackboard(BlackboardDataAsset, BlackboardComponent) == true)
-		{
-			bool bRunSucceeded = RunBehaviorTree(BehaviorTree);
-			checkf(bRunSucceeded == true, TEXT("Fail to run behavior tree."));
-
-			BlackboardComponent->SetValueAsVector(StartPatrolPositionKey, InPawn->GetActorLocation());
-
-			if (ShowAIDebug == 1)
-			{
-				UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("BeginAI()")));
-			}
-		}
+		UE_LOG(LogTemp, Warning, TEXT("AI Controller is Controlling %s."), *InPawn->GetName());
 	}
-
 }
 
-void AMBLAIController::EndAI()
+UBlackboardComponent* AMBLAIController::GetBlackboardComp() const
 {
-	UBehaviorTreeComponent* BehaviorTreeComponent = Cast<UBehaviorTreeComponent>(BrainComponent);
-	if (IsValid(BehaviorTreeComponent) == true)
-	{
-		BehaviorTreeComponent->StopTree();
+	return BlackboardComp;
+}
 
-		if (ShowAIDebug == 1)
+void AMBLAIController::OnSmartLinkJump(AActor* MovingActor, const FVector& DestinationPoint)
+{
+	AMBLNonPlayerCharacter* NPC = Cast<AMBLNonPlayerCharacter>(MovingActor);
+	if (NPC)
+	{
+		StopMovement();
+		NPC->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+		NPC->HandleNavLinkJump(DestinationPoint);
+
+		APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+		if (PlayerPawn)
 		{
-			UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("EndAI()")));
+			MoveToActor(PlayerPawn, 50.f);
 		}
 	}
 }
 
+void AMBLAIController::StartBehaviorTree()
+{
+	if (BehaviorTreeAsset)
+	{
+		RunBehaviorTree(BehaviorTreeAsset);
+	}
+	else
+	{
+
+	}
+}
 

@@ -13,7 +13,7 @@ public class MegaBonkLike : ModuleRules
 			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput",
             "GameplayTags",
 			"Niagara",
-            "AIModule", "NavigationSystem", "GameplayTasks", 
+            "NavigationSystem", "AIModule", "GameplayTasks", 
 			"UMG"
 		});
 

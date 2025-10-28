@@ -1,19 +1,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/MBLCharacterBase.h"
-#include "MBLNonPlayerCharacter.generated.h"
+#include "GameFramework/Character.h"
+#include "MBLBossCharacter.generated.h"
 
 UCLASS()
-class MEGABONKLIKE_API AMBLNonPlayerCharacter : public AMBLCharacterBase
+class MEGABONKLIKE_API AMBLBossCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
-	AMBLNonPlayerCharacter();
-
-	UFUNCTION(BluePrintCallable)
-	void HandleNavLinkJump(const FVector& Destination);
+	AMBLBossCharacter();
 
 protected:
 	virtual void BeginPlay() override;
@@ -35,13 +32,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Stats")
 	float RunSpeed = 600.f;
 
-	//UPROPERTY(EditDefaultsOnly, Category = "Drop")
-	//TSubclassOf<class ADropItemBase> GoldCoinClass;
-	//UPROPERTY(EditDefaultsOnly, Category = "Drop")
-	//TSubclassOf<class ADropItemBase> ExpCoinClass;
-
 private:
-	UPROPERTY(VisibleAnywhere, Category ="Stats")
+	UPROPERTY(VisibleAnywhere, Category = "Stats")
 	int32 Health;
 	UPROPERTY(VisibleAnywhere, Category = "Stats")
 	int32 MaxHealth;
@@ -61,7 +53,5 @@ private:
 private:
 	bool bIsDead;
 	void OnDeath();
-	void DropExpCoin();
-	void DropGoldCoin();
 
 };
