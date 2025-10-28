@@ -1,4 +1,4 @@
-#include "Gimmick/MBLBaseSpawnObject.h"
+#include "MBLBaseSpawnObject.h"
 #include "Components/SceneComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -40,6 +40,31 @@ AMBLBaseSpawnObject::AMBLBaseSpawnObject()
 	ProjectileComp->ProjectileGravityScale = 0.f;
 	ProjectileComp->bShouldBounce = false;
 	ProjectileComp->bRotationFollowsVelocity = true;
+}
+
+void AMBLBaseSpawnObject::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// 스폰시 이미 캐릭터와 겹쳐있을 경우를 위한 오버랩 함수 수동 호출
+	CallOverlap(DetectionComp);
+	CallOverlap(CollisionComp);
+
+	GetWorldTimerManager().SetTimer(
+		RotationTimerHandle,
+		this,
+		&AMBLBaseSpawnObject::RotationObject,
+		UpdateRotation,
+		true
+	);
+
+	GetWorldTimerManager().SetTimer(
+		ChaseTimerHandle,
+		this,
+		&AMBLBaseSpawnObject::ChaseToPlayer,
+		UpdateInterval,
+		true
+	);
 }
 
 void AMBLBaseSpawnObject::OnPlayerOverlapBegin(
@@ -105,31 +130,6 @@ FName AMBLBaseSpawnObject::GetObejctType() const
 void AMBLBaseSpawnObject::DestroyObject()
 {
 	Destroy();
-}
-
-void AMBLBaseSpawnObject::BeginPlay()
-{
-	Super::BeginPlay();
-
-	// 스폰시 이미 캐릭터와 겹쳐있을 경우를 위한 오버랩 함수 수동 호출
-	CallOverlap(DetectionComp);
-	CallOverlap(CollisionComp);
-
-	GetWorldTimerManager().SetTimer(
-		RotationTimerHandle,
-		this,
-		&AMBLBaseSpawnObject::RotationObject,
-		UpdateRotation,
-		true
-	);
-
-	GetWorldTimerManager().SetTimer(
-		ChaseTimerHandle,
-		this,
-		&AMBLBaseSpawnObject::ChaseToPlayer,
-		UpdateInterval,
-		true
-	);
 }
 
 void AMBLBaseSpawnObject::RotationObject()

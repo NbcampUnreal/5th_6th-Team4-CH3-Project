@@ -18,12 +18,13 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawn")
+private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawn", meta = (AllowPrivateAccess = "true"))
 	USceneComponent* Scene;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawn")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawn", meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* SpawnBox;
 
+public:
 	UFUNCTION(BlueprintCallable, Category = "Spawn")
 	FVector GetRandomEnemySpawnLocation() const;
 	UFUNCTION(BlueprintCallable, Category = "Spawn")
@@ -32,12 +33,6 @@ public:
 	void SpawnEnemy(TSubclassOf<AActor> EnemyClass);
 	UFUNCTION(BlueprintCallable, Category = "Spawn")
 	void SpawnObject(TSubclassOf<AActor> ObjectClass);
-	UFUNCTION(BlueprintCallable, Category = "Spawn")
-	AActor* SpawnActorAtLocation(
-		TSubclassOf<AActor> ActorClass,
-		const FVector& Location,
-		const FRotator& Rotation
-	);
 
 private:
 	const float SearchRadius = 100.f;

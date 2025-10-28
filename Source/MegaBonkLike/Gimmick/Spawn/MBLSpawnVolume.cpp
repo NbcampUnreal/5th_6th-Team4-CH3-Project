@@ -1,8 +1,9 @@
-#include "Gimmick/MBLSpawnVolume.h"
+#include "Gimmick/Spawn/MBLSpawnVolume.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "NavigationSystem.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Gimmick/Spawn/MBLSpawnSubsystem.h"
 
 AMBLSpawnVolume::AMBLSpawnVolume()
 {
@@ -52,8 +53,10 @@ FVector AMBLSpawnVolume::GetRandomObjectSpawnLocation() const
 
 void AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AActor> EnemyClass)
 {
-	// 抗寇 贸府
 	if (!EnemyClass) return;
+
+	UWorld* World = GetWorld();
+	if (!World) return;
 
 	FVector SpawnLocation = GetRandomEnemySpawnLocation();
 	if (SpawnLocation.IsNearlyZero())
@@ -70,15 +73,20 @@ void AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AActor> EnemyClass)
 		return;
 	}
 
-	FRotator LookAtRotation = (Player->GetActorLocation() - SpawnLocation).Rotation();
+	FRotator SpawnRotation = (Player->GetActorLocation() - SpawnLocation).Rotation();
 
-	SpawnActorAtLocation(EnemyClass, SpawnLocation, LookAtRotation);
+	if (UMBLSpawnSubsystem* Subsystem = World->GetSubsystem<UMBLSpawnSubsystem>())
+	{
+		Subsystem->SpawnActorAtLocation(EnemyClass, SpawnLocation, SpawnRotation);
+	}
 }
 
 void AMBLSpawnVolume::SpawnObject(TSubclassOf<AActor> ObjectClass)
 {
-	// 抗寇 贸府
 	if (!ObjectClass) return;
+
+	UWorld* World = GetWorld();
+	if (!World) return;
 
 	FVector SpawnLocation = GetRandomObjectSpawnLocation();
 
@@ -90,18 +98,10 @@ void AMBLSpawnVolume::SpawnObject(TSubclassOf<AActor> ObjectClass)
 
 	FRotator SpawnRotation = FRotator(0.f, FMath::FRandRange(0.f, 360.f), 0.f);
 
-	SpawnActorAtLocation(ObjectClass, SpawnLocation, SpawnRotation);
-}
-
-AActor* AMBLSpawnVolume::SpawnActorAtLocation(TSubclassOf<AActor> ActorClass, const FVector& Location, const FRotator& Rotation)
-{
-	// 抗寇 贸府
-	if (!ActorClass) return nullptr;
-
-	UWorld* World = GetWorld();
-	if (!World) return nullptr;
-
-	return World->SpawnActor<AActor>(ActorClass, Location, Rotation);
+	if (UMBLSpawnSubsystem* Subsystem = World->GetSubsystem<UMBLSpawnSubsystem>())
+	{
+		Subsystem->SpawnActorAtLocation(ObjectClass, SpawnLocation, SpawnRotation);
+	}
 }
 
 AActor* AMBLSpawnVolume::GetPlayerInBox() const
@@ -156,7 +156,6 @@ FVector AMBLSpawnVolume::GetValidNavMeshLocation(const FVector& Location, float 
 
 	if (bFound) return ValidLocation.Location;
 
-	// 抗寇 贸府
 	UE_LOG(LogTemp, Warning, TEXT("Navigation system not found"));
 	return FVector::ZeroVector;
 }

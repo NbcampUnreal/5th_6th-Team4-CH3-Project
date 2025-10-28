@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Gimmick/MBLBaseSpawnObject.h"
+#include "Gimmick/Objects/SpawnObjects/MBLBaseSpawnObject.h"
 #include "MBLMoneyObject.generated.h"
 
 UCLASS()
@@ -13,8 +13,8 @@ public:
 	AMBLMoneyObject();
 	virtual void OnObjectActivated(AActor* Activator) override;
 
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MoneyObject")
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MoneyObject", meta = (AllowPrivateAccess="true"))
 	int32 MoneyValue;
 	
 };

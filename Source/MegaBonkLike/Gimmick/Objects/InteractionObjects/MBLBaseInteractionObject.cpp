@@ -1,7 +1,9 @@
-#include "Gimmick/MBLBaseInteractionObject.h"
+#include "MBLBaseInteractionObject.h"
 #include "Components/SceneComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Gimmick/Spawn/MBLSpawnSubsystem.h"
+#include "Gimmick/Objects/SpawnObjects/MBLBaseSpawnObject.h"
 
 AMBLBaseInteractionObject::AMBLBaseInteractionObject()
 {
@@ -20,6 +22,13 @@ AMBLBaseInteractionObject::AMBLBaseInteractionObject()
 
 	DetectionComp->OnComponentBeginOverlap.AddDynamic(this, &AMBLBaseInteractionObject::OnPlayerOverlapBegin);
 	DetectionComp->OnComponentEndOverlap.AddDynamic(this, &AMBLBaseInteractionObject::OnPlayerOverlapEnd);
+}
+
+void AMBLBaseInteractionObject::BeginPlay()
+{
+	Super::BeginPlay();
+
+	CallOverlap(DetectionComp);
 }
 
 void AMBLBaseInteractionObject::OnPlayerOverlapBegin(
@@ -50,6 +59,7 @@ void AMBLBaseInteractionObject::OnPlayerOverlapEnd(
 	{
 		if (OverlappedComp == DetectionComp)
 		{
+			OnObjectActivated(OtherActor);
 			UE_LOG(LogTemp, Warning, TEXT("Player lost"));
 			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Player lost")));
 		}
@@ -77,13 +87,25 @@ void AMBLBaseInteractionObject::CallOverlap(UPrimitiveComponent* CollisionCompon
 
 void AMBLBaseInteractionObject::OnObjectActivated(AActor* Activator)
 {
-	// 오브젝트 전용 로직 수행후 DestroyObject();
-	DestroyObject();
+	if (!DropItem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DropItem is null"));
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (!World) return;
+
+	if (UMBLSpawnSubsystem* Subsystem = World->GetSubsystem<UMBLSpawnSubsystem>())
+	{
+		Subsystem->SpawnActorAtLocation(DropItem, GetActorLocation(), GetActorRotation());
+		DestroyObject();
+	}
 }
 
 FName AMBLBaseInteractionObject::GetObejctType() const
 {
-	return FName();
+	return InteractionObjectType;
 }
 
 void AMBLBaseInteractionObject::DestroyObject()
@@ -91,16 +113,4 @@ void AMBLBaseInteractionObject::DestroyObject()
 	Destroy();
 }
 
-void AMBLBaseInteractionObject::BeginPlay()
-{
-	Super::BeginPlay();
-
-	CallOverlap(DetectionComp);
-}
-
-void AMBLBaseInteractionObject::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
 

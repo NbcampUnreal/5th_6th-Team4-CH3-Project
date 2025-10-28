@@ -1,7 +1,7 @@
-#include "Gimmick/MBLMoneyObject.h"
+#include "MBLMoneyObject.h"
 
 AMBLMoneyObject::AMBLMoneyObject()
-	: MoneyValue(5) // 임시 값
+	: MoneyValue(1) // 임시 값
 {
 	SpawnObjectType = "Money";
 }
