@@ -1,11 +1,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "Character/MBLCharacterBase.h"
 #include "MBLBossCharacter.generated.h"
 
 UCLASS()
-class MEGABONKLIKE_API AMBLBossCharacter : public ACharacter
+class MEGABONKLIKE_API AMBLBossCharacter : public AMBLCharacterBase
 {
 	GENERATED_BODY()
 

@@ -8,8 +8,8 @@ AMBLBossCharacter::AMBLBossCharacter()
 	AIControllerClass = AMBLAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	float CharacterHalfHeight = 90.f;
-	float CharacterRadius = 40.f;
+	float CharacterHalfHeight = 180.f;
+	float CharacterRadius = 80.f;
 
 	GetCapsuleComponent()->InitCapsuleSize(CharacterRadius, CharacterHalfHeight);
 
@@ -73,6 +73,7 @@ void AMBLBossCharacter::SetMovementSpeed(float NewSpeed)
 	}
 }
 
+#pragma region Getter Function
 int32 AMBLBossCharacter::GetHealth() const
 {
 	return Health;
@@ -93,14 +94,17 @@ int32 AMBLBossCharacter::GetAttack() const
 	return Attack;
 }
 
+#pragma endregion
+
 void AMBLBossCharacter::OnDeath()
 {
+	if (bIsDead) return;
+
 	bIsDead = true;
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCharacterMovement()->DisableMovement();
 
-	SetLifeSpan(0.f);
-
+	Destroy();
 	UE_LOG(LogTemp, Warning, TEXT("Died."));
 }

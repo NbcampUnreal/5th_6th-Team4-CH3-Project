@@ -1,5 +1,6 @@
 #include "Test/KIH_NpcAnimInstance.h"
 #include "Character/MBLCharacterBase.h"
+#include "Character/MBLBossCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Character/MBLNonPlayerCharacter.h"
@@ -26,6 +27,11 @@ void UKIH_NpcAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bShouldMove = (KINDA_SMALL_NUMBER < GroundSpeed) && (bIsAccelerationNearlyZero == false);
 		
 		if (AMBLNonPlayerCharacter* OwnerNPC = Cast<AMBLNonPlayerCharacter>(OwnerCharacter))
+		{
+			bShouldMove = KINDA_SMALL_NUMBER < GroundSpeed;
+		}
+
+		if (AMBLBossCharacter* OwnerNPC = Cast<AMBLBossCharacter>(OwnerCharacter))
 		{
 			bShouldMove = KINDA_SMALL_NUMBER < GroundSpeed;
 		}
