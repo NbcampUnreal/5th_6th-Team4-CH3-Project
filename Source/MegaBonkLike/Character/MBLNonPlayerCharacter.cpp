@@ -56,6 +56,8 @@ void AMBLNonPlayerCharacter::BeginPlay()
 
 		GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	}
+
+	//KillSelf();       몬스터죽음 테스트용
 }
 
 float AMBLNonPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -103,25 +105,31 @@ int32 AMBLNonPlayerCharacter::GetAttack() const
 
 void AMBLNonPlayerCharacter::OnDeath()
 {
+	if (bIsDead) return;
+
 	bIsDead = true;
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCharacterMovement()->DisableMovement();
 
-	SetLifeSpan(0.f);
+	FVector SpawnLocation = GetActorLocation() + FVector(0,0,50);
 
-	UE_LOG(LogTemp, Warning, TEXT("Died."));
-
-	//FVector SpawnLocation = GetActorLocation();
+	if (GoldCoin)
+	{
+		GetWorld()->SpawnActor<AMBLMoneyObject>(GoldCoin, SpawnLocation, FRotator::ZeroRotator);
+	}
 	
+	/*if (ExpCoin)
+	{
+		GetWorld()->SpawnActor<AMBLExpObject>(ExpCoin, SpawnLocation, FRotator::ZeroRotator);
+	}*/
+
+	Destroy();
+	UE_LOG(LogTemp, Warning, TEXT("Died."));
 }
 
-void AMBLNonPlayerCharacter::DropExpCoin()
+//테스트용 코드
+void AMBLNonPlayerCharacter::KillSelf()
 {
-
-}
-
-void AMBLNonPlayerCharacter::DropGoldCoin()
-{
-
+	OnDeath();
 }

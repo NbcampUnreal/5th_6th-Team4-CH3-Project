@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/MBLCharacterBase.h"
+#include "Gimmick/MBLMoneyObject.h"
 #include "MBLNonPlayerCharacter.generated.h"
 
 UCLASS()
@@ -35,10 +36,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Stats")
 	float RunSpeed = 600.f;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Drop")
+	TSubclassOf<class AMBLMoneyObject> GoldCoin;
 	//UPROPERTY(EditDefaultsOnly, Category = "Drop")
-	//TSubclassOf<class ADropItemBase> GoldCoinClass;
-	//UPROPERTY(EditDefaultsOnly, Category = "Drop")
-	//TSubclassOf<class ADropItemBase> ExpCoinClass;
+	//TSubclassOf<class AMBLExpObject> ExpCoin;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category ="Stats")
@@ -61,7 +62,7 @@ private:
 private:
 	bool bIsDead;
 	void OnDeath();
-	void DropExpCoin();
-	void DropGoldCoin();
 
+	//테스트용 코드
+	void KillSelf();
 };
