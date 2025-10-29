@@ -27,9 +27,8 @@ AMBLNonPlayerCharacter::AMBLNonPlayerCharacter()
 	GetCharacterMovement()->AvoidanceWeight = 1.f;
 
 	bIsDead = false;
-	MaxHealth = 100;
-	Health = MaxHealth;
-	Defense = 0;
+	MaxHP = 100;
+	CurrHP = MaxHP;
 	Attack = 50;
 }
 
@@ -48,22 +47,11 @@ void AMBLNonPlayerCharacter::BeginPlay()
 		GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	}
 
+	OnDead.AddDynamic(this, &ThisClass::OnDeath);
+
 	//KillSelf();       몬스터죽음 테스트용
 }
 
-float AMBLNonPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
-	Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
-
-	if (Health <= 0.0f)
-	{
-		OnDeath();
-	}
-
-	return ActualDamage;
-}
 
 void AMBLNonPlayerCharacter::SetMovementSpeed(float NewSpeed)
 {
@@ -72,26 +60,6 @@ void AMBLNonPlayerCharacter::SetMovementSpeed(float NewSpeed)
 		Movement->MaxWalkSpeed = NewSpeed;
 		UE_LOG(LogTemp, Warning, TEXT("Speed changed: %.1f"), NewSpeed);
 	}
-}
-
-int32 AMBLNonPlayerCharacter::GetHealth() const
-{
-	return Health;
-}
-
-int32 AMBLNonPlayerCharacter::GetMaxHealth() const
-{
-	return MaxHealth;
-}
-
-int32 AMBLNonPlayerCharacter::GetDefense() const
-{
-	return Defense;
-}
-
-int32 AMBLNonPlayerCharacter::GetAttack() const
-{
-	return Attack;
 }
 
 void AMBLNonPlayerCharacter::OnDeath()
@@ -103,17 +71,17 @@ void AMBLNonPlayerCharacter::OnDeath()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCharacterMovement()->DisableMovement();
 
-	FVector SpawnLocation = GetActorLocation() + FVector(0,0,50);
+	FVector SpawnLocation = GetActorLocation();
 
 	if (GoldCoin)
 	{
 		GetWorld()->SpawnActor<AMBLMoneyObject>(GoldCoin, SpawnLocation, FRotator::ZeroRotator);
 	}
 	
-	/*if (ExpCoin)
+	if (ExpCoin)
 	{
 		GetWorld()->SpawnActor<AMBLExpObject>(ExpCoin, SpawnLocation, FRotator::ZeroRotator);
-	}*/
+	}
 
 	Destroy();
 	UE_LOG(LogTemp, Warning, TEXT("Died."));

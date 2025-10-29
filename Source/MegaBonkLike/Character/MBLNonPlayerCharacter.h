@@ -2,7 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "Character/MBLCharacterBase.h"
-#include "Gimmick/MBLMoneyObject.h"
+#include "Gimmick/Objects/SpawnObjects/MBLMoneyObject.h"
+#include "Gimmick/Objects/SpawnObjects/MBLExpObject.h"
 #include "MBLNonPlayerCharacter.generated.h"
 
 UCLASS()
@@ -16,13 +17,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	virtual float TakeDamage(
-		float DamageAmount,
-		struct FDamageEvent const& DamageEvent,
-		class AController* EventInstigator,
-		AActor* DamageCauser
-	) override;
-
 #pragma region NPC Stat 
 
 public:
@@ -35,29 +29,19 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Drop")
 	TSubclassOf<class AMBLMoneyObject> GoldCoin;
-	//UPROPERTY(EditDefaultsOnly, Category = "Drop")
-	//TSubclassOf<class AMBLExpObject> ExpCoin;
+	UPROPERTY(EditDefaultsOnly, Category = "Drop")
+	TSubclassOf<class AMBLExpObject> ExpCoin;
 
 private:
-	UPROPERTY(VisibleAnywhere, Category ="Stats")
-	int32 Health;
-	UPROPERTY(VisibleAnywhere, Category = "Stats")
-	int32 MaxHealth;
-	UPROPERTY(VisibleAnywhere, Category = "Stats")
-	int32 Defense;
 	UPROPERTY(VisibleAnywhere, Category = "Stats")
 	int32 Attack;
 
-
-	int32 GetHealth() const;
-	int32 GetMaxHealth() const;
-	int32 GetDefense() const;
-	int32 GetAttack() const;
 #pragma endregion 
 
 
 private:
 	bool bIsDead;
+	UFUNCTION()
 	void OnDeath();
 
 	//테스트용 코드

@@ -27,10 +27,10 @@ AMBLBossCharacter::AMBLBossCharacter()
 	GetCharacterMovement()->AvoidanceWeight = 1.f;
 
 	bIsDead = false;
-	MaxHealth = 100;
-	Health = MaxHealth;
-	Defense = 0;
+	MaxHP = 100;
+	CurrHP = MaxHP;
 	Attack = 50;
+
 }
 
 
@@ -48,20 +48,7 @@ void AMBLBossCharacter::BeginPlay()
 
 		GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	}
-}
-
-float AMBLBossCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
-	Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
-
-	if (Health <= 0.0f)
-	{
-		OnDeath();
-	}
-
-	return ActualDamage;
+	OnDead.AddDynamic(this, &ThisClass::OnDeath);
 }
 
 void AMBLBossCharacter::SetMovementSpeed(float NewSpeed)
@@ -72,29 +59,6 @@ void AMBLBossCharacter::SetMovementSpeed(float NewSpeed)
 		UE_LOG(LogTemp, Warning, TEXT("Speed changed: %.1f"), NewSpeed);
 	}
 }
-
-#pragma region Getter Function
-int32 AMBLBossCharacter::GetHealth() const
-{
-	return Health;
-}
-
-int32 AMBLBossCharacter::GetMaxHealth() const
-{
-	return MaxHealth;
-}
-
-int32 AMBLBossCharacter::GetDefense() const
-{
-	return Defense;
-}
-
-int32 AMBLBossCharacter::GetAttack() const
-{
-	return Attack;
-}
-
-#pragma endregion
 
 void AMBLBossCharacter::OnDeath()
 {

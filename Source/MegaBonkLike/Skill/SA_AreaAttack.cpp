@@ -6,8 +6,8 @@
 void USA_AreaAttack::Activate(TWeakObjectPtr<AActor> InInstigator)
 {
 	Super::Activate(InInstigator);
-    TimerDelegate.BindUObject(this, &ThisClass::CheckHit);
 
+    TimerDelegate.BindUObject(this, &ThisClass::CheckHit);
     SetIntervalTimer();
 }
 
@@ -17,9 +17,7 @@ void USA_AreaAttack::CheckHit()
         return;
 
     FVector Origin = Instigator->GetActorLocation();
-    float SkillRadius = GetWeaponValue(TAG_Attribute_Size);
-    float AttributeRadius = GetAttributeValue(TAG_Attribute_Size);
-    float Radius = SkillRadius * AttributeRadius;
+    float Radius = GetWeaponValue(TAG_Attribute_Size) * GetAttributeValue(TAG_Attribute_Size);
     TArray<FOverlapResult> Overlaps;
     FCollisionShape CollisionShape;
     CollisionShape.SetSphere(Radius);
@@ -42,9 +40,7 @@ void USA_AreaAttack::CheckHit()
             if (TargetTag.IsNone() == false && HitActor->ActorHasTag(TargetTag) == false)
                 continue;
 
-            float SkillDamage = GetWeaponValue(TAG_Attribute_Damage);
-            float AttributeDamage = GetAttributeValue(TAG_Attribute_Damage);
-            float Damage = SkillDamage * AttributeDamage;
+            float Damage = GetWeaponValue(TAG_Attribute_Damage) * GetAttributeValue(TAG_Attribute_Damage);
             UGameplayStatics::ApplyDamage(HitActor, Damage, Instigator->GetInstigatorController(), Instigator.Get(), nullptr);
         }
     }
