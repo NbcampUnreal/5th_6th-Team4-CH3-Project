@@ -8,5 +8,12 @@ UCLASS()
 class MEGABONKLIKE_API AMBLExpObject : public AMBLBaseSpawnObject
 {
 	GENERATED_BODY()
-	
+
+public:
+	AMBLExpObject();
+	virtual void OnObjectActivated(AActor* Activator) override;
+
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ExpObject", meta = (AllowPrivateAccess = "true"))
+	int32 Exp;
 };

@@ -4,6 +4,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "Gimmick/Spawn/MBLSpawnSubsystem.h"
 #include "Gimmick/Objects/SpawnObjects/MBLBaseSpawnObject.h"
+#include "Components/WidgetComponent.h"
+#include "Components/TextBlock.h"
 
 AMBLBaseInteractionObject::AMBLBaseInteractionObject()
 {
@@ -20,15 +22,26 @@ AMBLBaseInteractionObject::AMBLBaseInteractionObject()
 	StaticMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	StaticMeshComp->SetupAttachment(DetectionComp);
 
-	DetectionComp->OnComponentBeginOverlap.AddDynamic(this, &AMBLBaseInteractionObject::OnPlayerOverlapBegin);
-	DetectionComp->OnComponentEndOverlap.AddDynamic(this, &AMBLBaseInteractionObject::OnPlayerOverlapEnd);
+	InteractableWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractableWidget"));
+	InteractableWidget->SetupAttachment(StaticMeshComp);
+	InteractableWidget->SetWidgetSpace(EWidgetSpace::Screen);
+	InteractableWidget->SetVisibility(false);
 }
 
 void AMBLBaseInteractionObject::BeginPlay()
 {
 	Super::BeginPlay();
 
+	DetectionComp->OnComponentBeginOverlap.AddDynamic(this, &AMBLBaseInteractionObject::OnPlayerOverlapBegin);
+	DetectionComp->OnComponentEndOverlap.AddDynamic(this, &AMBLBaseInteractionObject::OnPlayerOverlapEnd);
+
 	CallOverlap(DetectionComp);
+	
+	if (InteractableWidget)
+	{
+		InteractableWidget->SetVisibility(false);
+	}
+
 }
 
 void AMBLBaseInteractionObject::OnPlayerOverlapBegin(
@@ -43,6 +56,7 @@ void AMBLBaseInteractionObject::OnPlayerOverlapBegin(
 	{
 		if (OverlappedComp == DetectionComp)
 		{
+			InteractableWidget->SetVisibility(true);
 			UE_LOG(LogTemp, Warning, TEXT("Player can interact this object"));
 			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Player can interact this object")));
 		}
@@ -59,7 +73,7 @@ void AMBLBaseInteractionObject::OnPlayerOverlapEnd(
 	{
 		if (OverlappedComp == DetectionComp)
 		{
-			OnObjectActivated(OtherActor);
+			InteractableWidget->SetVisibility(false);
 			UE_LOG(LogTemp, Warning, TEXT("Player lost"));
 			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Player lost")));
 		}
@@ -87,20 +101,7 @@ void AMBLBaseInteractionObject::CallOverlap(UPrimitiveComponent* CollisionCompon
 
 void AMBLBaseInteractionObject::OnObjectActivated(AActor* Activator)
 {
-	if (!DropItem)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("DropItem is null"));
-		return;
-	}
 
-	UWorld* World = GetWorld();
-	if (!World) return;
-
-	if (UMBLSpawnSubsystem* Subsystem = World->GetSubsystem<UMBLSpawnSubsystem>())
-	{
-		Subsystem->SpawnActorAtLocation(DropItem, GetActorLocation(), GetActorRotation());
-		DestroyObject();
-	}
 }
 
 FName AMBLBaseInteractionObject::GetObejctType() const
@@ -113,4 +114,15 @@ void AMBLBaseInteractionObject::DestroyObject()
 	Destroy();
 }
 
+void AMBLBaseInteractionObject::UpdateWidget()
+{
+	if (!InteractableWidget) return;
 
+	UUserWidget* InteractableWidgetInstance = InteractableWidget->GetUserWidgetObject();
+	if (!InteractableWidgetInstance) return;
+
+	if (UTextBlock* InteractableText = Cast<UTextBlock>(InteractableWidgetInstance->GetWidgetFromName(TEXT("Press"))))
+	{
+		InteractableText->SetText(FText::FromString(FString::Printf(TEXT("Press 'E'"))));
+	}
+}
