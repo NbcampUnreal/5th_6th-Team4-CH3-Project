@@ -14,8 +14,8 @@ class UAttributeComponent;
 
 struct FInputActionValue;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnChangedLevel, int32, Level);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnChangedGold, int32, Gold);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnChangedLevel, int32);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnChangedGold, int32);
 
 UCLASS()
 class MEGABONKLIKE_API AMBLPlayerCharacter : public AMBLCharacterBase
