@@ -18,9 +18,31 @@ void AMBLCharacterBase::BeginPlay()
 float AMBLCharacterBase::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float NewDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
-	CurrHP -= NewDamage;
+	UpdateCurrHP(CurrHP - NewDamage);
 	// UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("%f"), CurrHP));
+	if (CurrHP <= 0.0f)
+	{
+		OnDead.Broadcast();
+	}
 	return NewDamage;
+}
+
+void AMBLCharacterBase::SetMaxHP(float InMaxHP)
+{
+	float DeltaMaxHp = InMaxHP - MaxHP;
+	MaxHP = InMaxHP;
+	UpdateCurrHP(CurrHP + DeltaMaxHp);
+}
+
+void AMBLCharacterBase::AddHealth(float Heal)
+{
+	UpdateCurrHP(CurrHP + Heal);
+}
+
+void AMBLCharacterBase::UpdateCurrHP(float InCurrHP)
+{
+	CurrHP = FMath::Clamp(InCurrHP, 0.0f, MaxHP);
+	OnHPChanged.Broadcast(CurrHP, MaxHP);
 }
 
 void AMBLCharacterBase::SetCameraCollisionIgnore()

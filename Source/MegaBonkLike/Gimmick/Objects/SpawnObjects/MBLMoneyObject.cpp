@@ -1,10 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "Gimmick/MBLMoneyObject.h"
+#include "MBLMoneyObject.h"
 
 AMBLMoneyObject::AMBLMoneyObject()
-	: MoneyValue(5)
+	: MoneyValue(1) // ÀÓ½Ã °ª
 {
 	SpawnObjectType = "Money";
 }

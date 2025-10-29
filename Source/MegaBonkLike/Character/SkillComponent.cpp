@@ -30,6 +30,11 @@ int32 USkillComponent::AddSkill(USkill* NewSkill)
 
 void USkillComponent::RemoveSkill(int32 InSkillId)
 {
+	USkill* Skill = GetSkill(InSkillId);
+	if (IsValid(Skill) == true)
+	{
+		Skill->Deactivate();
+	}
 	Skills.Remove(InSkillId);
 }
 

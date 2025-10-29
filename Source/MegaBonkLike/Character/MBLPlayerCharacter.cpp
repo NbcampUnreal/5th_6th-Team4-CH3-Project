@@ -9,6 +9,7 @@
 #include "Character/AttributeComponent.h"
 #include "Character/SkillComponent.h"
 #include "Attribute/AttributeTags.h"
+#include "Character/CharacterLevelDataRow.h"
 
 AMBLPlayerCharacter::AMBLPlayerCharacter()
 {
@@ -39,28 +40,51 @@ AMBLPlayerCharacter::AMBLPlayerCharacter()
 	SkillComponent = CreateDefaultSubobject<USkillComponent>(TEXT("SkillComponent"));
 
 	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComponent"));
-	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_MoveSpeed, 1.0f);
-	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_Damage, 1.0f);
-	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_Size, 1.0f);
-	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_AttackSpeed, 1.0f);
-	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_ProjectileSpeed, 1.0f);
-	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_AttackProjectiles, 1.0f);
 
-	NormalSpeed = 600.0f;	
+	NormalSpeed = 600.0f;
+	CurrExp = 0.0f;
+	MaxExp = 0.0f;
+	Level = 1;
+	Gold = 0.0f;
+	BaseMaxHP = 100.0f;
 }
 
 void AMBLPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_MoveSpeed, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_Damage, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_Size, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_AttackSpeed, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_ProjectileSpeed, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_AttackProjectiles, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_Duration, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_ExpGain, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_GoldGain, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_MaxHP, 1.0f);
+
 	AttributeComponent->AddAttributeChangedCallback(
-		EAttributeSourceType::Player,
 		TAG_Attribute_MoveSpeed,
-		[WeakThis = TWeakObjectPtr<ThisClass>(this)](const FAttribute& Attribute)
+		this,
+		[WeakThis = TWeakObjectPtr<ThisClass>(this)](const TWeakObjectPtr<UAttribute> Attribute)
 		{
 			if (WeakThis.IsValid())
 				WeakThis->RecalculateSpeed();
 		});
+
+	AttributeComponent->AddAttributeChangedCallback(
+		TAG_Attribute_MaxHP,
+		this,
+		[WeakThis = TWeakObjectPtr<ThisClass>(this)](const TWeakObjectPtr<UAttribute> Attribute)
+		{
+			if (WeakThis.IsValid())
+				WeakThis->SetPlayerMaxHP();
+		});
+
+	SetLevel(1);
+	SetPlayerMaxHP();
+	UpdateCurrHP(MaxHP);
 }
 
 void AMBLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -78,9 +102,55 @@ void AMBLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	}
 }
 
+void AMBLPlayerCharacter::AddAttributeChangedCallback(const FGameplayTag& Tag, TWeakObjectPtr<UObject> InInstigator, TFunction<void(const TWeakObjectPtr<UAttribute>)> NewCallBack)
+{
+	if (IsValid(AttributeComponent) == true)
+	{
+		AttributeComponent->AddAttributeChangedCallback(Tag, InInstigator, NewCallBack);
+	}
+}
+
+void AMBLPlayerCharacter::RemoveAttributeChangedCallback(const FGameplayTag& Tag, TWeakObjectPtr<UObject> InInstigator)
+{
+	if (IsValid(AttributeComponent) == true)
+	{
+		AttributeComponent->RemoveAttributeChangedCallback(Tag, InInstigator);
+	}
+}
+
 float AMBLPlayerCharacter::GetAttributeValue(const FGameplayTag& AttributeTag) const
 {
 	return AttributeComponent == nullptr ? 0.0f : AttributeComponent->GetFinalValue(AttributeTag);
+}
+
+FVector AMBLPlayerCharacter::GetFootLocation() const
+{
+	return GetCharacterMovement()->GetActorFeetLocation();
+}
+
+void AMBLPlayerCharacter::AcquireExp(float Exp)
+{
+	CurrExp += Exp * GetAttributeValue(TAG_Attribute_ExpGain);
+	while (CurrExp >= MaxExp)
+	{
+		CurrExp -= MaxExp;
+		SetLevel(Level + 1);
+	}
+	OnExpChanged.Broadcast(CurrExp, MaxExp);
+}
+
+void AMBLPlayerCharacter::SetLevel(int32 InLevel)
+{
+	Level = InLevel;
+	OnChangedLevel.Broadcast(Level);
+
+	SetMaxExp();
+}
+
+void AMBLPlayerCharacter::AcquireGold(float InGold)
+{
+	Gold += InGold * GetAttributeValue(TAG_Attribute_GoldGain);
+	OnChangedGold.Broadcast(Gold);
 }
 
 void AMBLPlayerCharacter::Input_Move(const FInputActionValue& InputValue)
@@ -108,12 +178,46 @@ void AMBLPlayerCharacter::Input_Look(const FInputActionValue& InputValue)
 void AMBLPlayerCharacter::InputTempAcquireItem()
 {
 	Inventory->AddOrUpgradeItem(100);
+	Inventory->AddOrUpgradeItem(101);
+	Inventory->AddOrUpgradeItem(102);
+	Inventory->AddOrUpgradeItem(103);
 	Inventory->AddOrUpgradeItem(200);
 	Inventory->AddOrUpgradeItem(300);
 }
 
 void AMBLPlayerCharacter::RecalculateSpeed()
 {
-	// 다른 요소까지 다 합쳐서 계산한 걸로 바꿔야 함
 	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed * AttributeComponent->GetFinalValue(TAG_Attribute_MoveSpeed);
+}
+
+FCharacterLevelDataRow* AMBLPlayerCharacter::GetLevelData(int32 InLevel) const
+{
+	if (CharacterLevelDataTable == nullptr)
+		return nullptr;
+
+	const auto& Rows = CharacterLevelDataTable->GetRowMap();
+	for (auto& Row : Rows)
+	{
+		FCharacterLevelDataRow* Data = (FCharacterLevelDataRow*)Row.Value;
+		if (Data->Level == InLevel)
+		{
+			return Data;
+		}
+	}
+	return nullptr;
+}
+
+void AMBLPlayerCharacter::SetMaxExp()
+{
+	FCharacterLevelDataRow* Data = GetLevelData(Level);
+	if (Data == nullptr)
+		return;
+
+	MaxExp = Data->MaxExp;
+	OnExpChanged.Broadcast(CurrExp, MaxExp);
+}
+
+void AMBLPlayerCharacter::SetPlayerMaxHP()
+{
+	SetMaxHP(BaseMaxHP * GetAttributeValue(TAG_Attribute_MaxHP));
 }

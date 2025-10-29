@@ -29,6 +29,16 @@ void UWeaponItem::SetSkillId(int32 InSkillId)
     SkillId = InSkillId;
 }
 
+void UWeaponItem::AddAttributeChangedCallback(const FGameplayTag& Tag, TWeakObjectPtr<UObject> Instigator, const TFunction<void(const TWeakObjectPtr<UAttribute>)> NewCallback)
+{
+	return WeaponAttributeSet.AddChangedCallback(Tag, Instigator, NewCallback);
+}
+
+void UWeaponItem::RemoveAttributeChangedCallback(const FGameplayTag& Tag, TWeakObjectPtr<UObject> Instigator)
+{
+	WeaponAttributeSet.RemoveChangedCallback(Tag, Instigator);
+}
+
 float UWeaponItem::GetAttributeValue(const FGameplayTag& AttributeTag) const
 {
 	return WeaponAttributeSet.GetAttributeValue(AttributeTag);
