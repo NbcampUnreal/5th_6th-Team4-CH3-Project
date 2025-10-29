@@ -14,6 +14,9 @@ class UAttributeComponent;
 
 struct FInputActionValue;
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnChangedLevel, int32, Level);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnChangedGold, int32, Gold);
+
 UCLASS()
 class MEGABONKLIKE_API AMBLPlayerCharacter : public AMBLCharacterBase
 {
@@ -33,12 +36,26 @@ public:
 
 	FVector GetFootLocation() const;
 
+	void AcquireExp(float Exp);
+	void SetLevel(int32 InLevel);
+
+	void AcquireGold(float InGold);
+	
+	FOnChangedProgressValue OnExpChanged;
+	FOnChangedLevel OnChangedLevel;
+	FOnChangedGold OnChangedGold;
+
 protected:
 	void Input_Move(const FInputActionValue& InputValue);
 	void Input_Look(const FInputActionValue& InputValue);
 	void InputTempAcquireItem();
 
 	void RecalculateSpeed();
+
+	struct FCharacterLevelDataRow* GetLevelData(int32 InLevel) const;
+
+	void SetMaxExp();
+	void SetPlayerMaxHP();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -54,7 +71,21 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UMBLPlayerInputConfig> InputConfig;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UDataTable> CharacterLevelDataTable;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float CurrExp;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float MaxExp;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	int32 Level;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float Gold;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float NormalSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float BaseMaxHP;
 };

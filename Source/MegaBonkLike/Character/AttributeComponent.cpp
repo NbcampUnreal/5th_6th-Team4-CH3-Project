@@ -20,28 +20,24 @@ void UAttributeComponent::AddAttribute(EAttributeSourceType SourceType, const FG
 {
 	if (FAttributeSet* Set = AttributeSets.Find(SourceType))
 	{
-		Set->AddAttribute(Tag, InBaseValue);
-	}
-}
-
-void UAttributeComponent::AddAttributeChangedCallback(EAttributeSourceType SourceType, const FGameplayTag& Tag, TWeakObjectPtr<UObject> Instigator, TFunction<void(const TWeakObjectPtr<UAttribute>)> NewCallBack)
-{
-	if (FAttributeSet* Set = AttributeSets.Find(SourceType))
-	{
-		Set->AddChangedCallback(Tag, Instigator, NewCallBack);
-	}
-}
-
-void UAttributeComponent::RemoveAttributeChangedCallback(EAttributeSourceType SourceType, const FGameplayTag& Tag, TWeakObjectPtr<UObject> Instigator)
-{
-	if (FAttributeSet* Set = AttributeSets.Find(SourceType))
-	{
-		Set->RemoveChangedCallback(Tag, Instigator);
+		if (Set->HasAttribute(Tag) == false)
+		{
+			Set->AddAttribute(Tag, InBaseValue);
+			if (auto* Callbacks = CachedCallbacks.Find(Tag))
+			{
+				for (const auto& p : *Callbacks)
+				{
+					Set->AddChangedCallback(Tag, p.Key, p.Value);
+				}
+			}
+		}
 	}
 }
 
 void UAttributeComponent::AddAttributeChangedCallback(const FGameplayTag& Tag, TWeakObjectPtr<UObject> Instigator, TFunction<void(const TWeakObjectPtr<UAttribute>)> NewCallBack)
 {
+	CachedCallbacks.FindOrAdd(Tag).Add(Instigator, NewCallBack);
+
 	for (EAttributeSourceType Type : TEnumRange<EAttributeSourceType>())
 	{
 		if (FAttributeSet* Set = AttributeSets.Find(Type))
@@ -53,6 +49,11 @@ void UAttributeComponent::AddAttributeChangedCallback(const FGameplayTag& Tag, T
 
 void UAttributeComponent::RemoveAttributeChangedCallback(const FGameplayTag& Tag, TWeakObjectPtr<UObject> Instigator)
 {
+	if (auto* Callbacks = CachedCallbacks.Find(Tag))
+	{
+		Callbacks->Remove(Instigator);
+	}
+
 	for (EAttributeSourceType Type : TEnumRange<EAttributeSourceType>())
 	{
 		if (FAttributeSet* Set = AttributeSets.Find(Type))

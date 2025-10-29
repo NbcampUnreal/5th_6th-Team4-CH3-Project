@@ -29,8 +29,6 @@ public:
 
 	void AddAttribute(EAttributeSourceType SourceType, const FGameplayTag& Tag, float InBaseValue);
 
-	void AddAttributeChangedCallback(EAttributeSourceType SourceType, const FGameplayTag& Tag, TWeakObjectPtr<UObject> Instigator, TFunction<void(const TWeakObjectPtr<UAttribute>)> NewCallBack);
-	void RemoveAttributeChangedCallback(EAttributeSourceType SourceType, const FGameplayTag& Tag, TWeakObjectPtr<UObject> Instigator);
 	void AddAttributeChangedCallback(const FGameplayTag& Tag, TWeakObjectPtr<UObject> Instigator, TFunction<void(const TWeakObjectPtr<UAttribute>)> NewCallBack);
 	void RemoveAttributeChangedCallback(const FGameplayTag& Tag, TWeakObjectPtr<UObject> Instigator);
 
@@ -44,4 +42,8 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TMap<EAttributeSourceType, FAttributeSet> AttributeSets;
+
+	// 콜백 함수 먼저 추가되고, Attribute가 나중에 추가될 때를 대비해서 콜백 저장
+	// AttributeSet에 새 Attribute가 추가 될 때, 기존에 추가된 콜백이 있으면 등록
+	TMap<FGameplayTag, TMap<TWeakObjectPtr<UObject>, TFunction<void(const TWeakObjectPtr<UAttribute>)>>> CachedCallbacks;
 };

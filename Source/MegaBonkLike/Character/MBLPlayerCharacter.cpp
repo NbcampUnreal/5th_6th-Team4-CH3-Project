@@ -9,6 +9,7 @@
 #include "Character/AttributeComponent.h"
 #include "Character/SkillComponent.h"
 #include "Attribute/AttributeTags.h"
+#include "Character/CharacterLevelDataRow.h"
 
 AMBLPlayerCharacter::AMBLPlayerCharacter()
 {
@@ -39,6 +40,19 @@ AMBLPlayerCharacter::AMBLPlayerCharacter()
 	SkillComponent = CreateDefaultSubobject<USkillComponent>(TEXT("SkillComponent"));
 
 	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComponent"));
+
+	NormalSpeed = 600.0f;
+	CurrExp = 0.0f;
+	MaxExp = 0.0f;
+	Level = 1;
+	Gold = 0.0f;
+	BaseMaxHP = 100.0f;
+}
+
+void AMBLPlayerCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_MoveSpeed, 1.0f);
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_Damage, 1.0f);
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_Size, 1.0f);
@@ -46,16 +60,11 @@ AMBLPlayerCharacter::AMBLPlayerCharacter()
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_ProjectileSpeed, 1.0f);
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_AttackProjectiles, 1.0f);
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_Duration, 1.0f);
-
-	NormalSpeed = 600.0f;	
-}
-
-void AMBLPlayerCharacter::BeginPlay()
-{
-	Super::BeginPlay();
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_ExpGain, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_GoldGain, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_MaxHP, 1.0f);
 
 	AttributeComponent->AddAttributeChangedCallback(
-		EAttributeSourceType::Player,
 		TAG_Attribute_MoveSpeed,
 		this,
 		[WeakThis = TWeakObjectPtr<ThisClass>(this)](const TWeakObjectPtr<UAttribute> Attribute)
@@ -63,6 +72,19 @@ void AMBLPlayerCharacter::BeginPlay()
 			if (WeakThis.IsValid())
 				WeakThis->RecalculateSpeed();
 		});
+
+	AttributeComponent->AddAttributeChangedCallback(
+		TAG_Attribute_MaxHP,
+		this,
+		[WeakThis = TWeakObjectPtr<ThisClass>(this)](const TWeakObjectPtr<UAttribute> Attribute)
+		{
+			if (WeakThis.IsValid())
+				WeakThis->SetPlayerMaxHP();
+		});
+
+	SetLevel(1);
+	SetPlayerMaxHP();
+	UpdateCurrHP(MaxHP);
 }
 
 void AMBLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -106,6 +128,31 @@ FVector AMBLPlayerCharacter::GetFootLocation() const
 	return GetCharacterMovement()->GetActorFeetLocation();
 }
 
+void AMBLPlayerCharacter::AcquireExp(float Exp)
+{
+	CurrExp += Exp * GetAttributeValue(TAG_Attribute_ExpGain);
+	while (CurrExp >= MaxExp)
+	{
+		CurrExp -= MaxExp;
+		SetLevel(Level + 1);
+	}
+	OnExpChanged.Broadcast(CurrExp, MaxExp);
+}
+
+void AMBLPlayerCharacter::SetLevel(int32 InLevel)
+{
+	Level = InLevel;
+	OnChangedLevel.Broadcast(Level);
+
+	SetMaxExp();
+}
+
+void AMBLPlayerCharacter::AcquireGold(float InGold)
+{
+	Gold += InGold * GetAttributeValue(TAG_Attribute_GoldGain);
+	OnChangedGold.Broadcast(Gold);
+}
+
 void AMBLPlayerCharacter::Input_Move(const FInputActionValue& InputValue)
 {
 	FVector2D MoveVector = InputValue.Get<FVector2D>();
@@ -141,4 +188,36 @@ void AMBLPlayerCharacter::InputTempAcquireItem()
 void AMBLPlayerCharacter::RecalculateSpeed()
 {
 	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed * AttributeComponent->GetFinalValue(TAG_Attribute_MoveSpeed);
+}
+
+FCharacterLevelDataRow* AMBLPlayerCharacter::GetLevelData(int32 InLevel) const
+{
+	if (CharacterLevelDataTable == nullptr)
+		return nullptr;
+
+	const auto& Rows = CharacterLevelDataTable->GetRowMap();
+	for (auto& Row : Rows)
+	{
+		FCharacterLevelDataRow* Data = (FCharacterLevelDataRow*)Row.Value;
+		if (Data->Level == InLevel)
+		{
+			return Data;
+		}
+	}
+	return nullptr;
+}
+
+void AMBLPlayerCharacter::SetMaxExp()
+{
+	FCharacterLevelDataRow* Data = GetLevelData(Level);
+	if (Data == nullptr)
+		return;
+
+	MaxExp = Data->MaxExp;
+	OnExpChanged.Broadcast(CurrExp, MaxExp);
+}
+
+void AMBLPlayerCharacter::SetPlayerMaxHP()
+{
+	SetMaxHP(BaseMaxHP * GetAttributeValue(TAG_Attribute_MaxHP));
 }
