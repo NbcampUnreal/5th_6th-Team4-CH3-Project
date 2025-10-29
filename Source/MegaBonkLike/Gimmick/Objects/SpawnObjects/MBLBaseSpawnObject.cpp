@@ -30,12 +30,6 @@ AMBLBaseSpawnObject::AMBLBaseSpawnObject()
 	DetectionComp->SetSphereRadius(300.f); // 임시 값
 	DetectionComp->SetupAttachment(SceneComp);
 
-	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapBegin);
-	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapEnd);
-	
-	DetectionComp->OnComponentBeginOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapBegin);
-	DetectionComp->OnComponentEndOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapEnd);
-
 	ProjectileComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
 	ProjectileComp->ProjectileGravityScale = 0.f;
 	ProjectileComp->bShouldBounce = false;
@@ -45,6 +39,23 @@ AMBLBaseSpawnObject::AMBLBaseSpawnObject()
 void AMBLBaseSpawnObject::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (!CollisionComp->OnComponentBeginOverlap.IsAlreadyBound(this, &AMBLBaseSpawnObject::OnPlayerOverlapBegin))
+	{
+		CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapBegin);
+	}
+	if (!CollisionComp->OnComponentEndOverlap.IsAlreadyBound(this, &AMBLBaseSpawnObject::OnPlayerOverlapEnd))
+	{
+		CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapEnd);
+	}
+	if (!DetectionComp->OnComponentBeginOverlap.IsAlreadyBound(this, &AMBLBaseSpawnObject::OnPlayerOverlapBegin))
+	{
+		DetectionComp->OnComponentBeginOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapBegin);
+	}
+	if (!DetectionComp->OnComponentEndOverlap.IsAlreadyBound(this, &AMBLBaseSpawnObject::OnPlayerOverlapEnd))
+	{
+		DetectionComp->OnComponentEndOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapEnd);
+	}
 
 	// 스폰시 이미 캐릭터와 겹쳐있을 경우를 위한 오버랩 함수 수동 호출
 	CallOverlap(DetectionComp);
@@ -119,7 +130,7 @@ void AMBLBaseSpawnObject::CallOverlap(UPrimitiveComponent* CollisionComponent)
 
 void AMBLBaseSpawnObject::OnObjectActivated(AActor* Activator)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Gained")));
+	UE_LOG(LogTemp, Warning, TEXT("BaseSpawnObject OnObjectActivated() Called"));
 }
 
 FName AMBLBaseSpawnObject::GetObejctType() const
@@ -157,11 +168,17 @@ void AMBLBaseSpawnObject::ChaseToPlayer()
 	float Distance = FVector::Dist(ObjectLocation, TargetLocation);
 	float DitectionRadius = DetectionComp->GetScaledSphereRadius();
 
-	float AccelerationRange = FMath::Clamp(Distance / DitectionRadius, 0.3f, 1.0f);
-	float CurrentSpeed = BaseSpeed * AccelerationRange;
+	float DistanceRatio = FMath::Clamp(Distance / DitectionRadius, 0.0f, 1.0f);
+
+	float Acceleration = FMath::Lerp(1.0f, 3.5f, DistanceRatio);
+	float CurrentSpeed = FMath::Min(BaseSpeed + Acceleration * 50.0f * GetWorld()->GetDeltaSeconds(), BaseSpeed * 5.0f);
+
+	if (Distance < 100.0f)
+	{
+		CurrentSpeed = FMath::Max(CurrentSpeed * 0.8f, BaseSpeed);
+	}
 
 	ProjectileComp->Velocity = Direction * CurrentSpeed;
 	
 }
-
 

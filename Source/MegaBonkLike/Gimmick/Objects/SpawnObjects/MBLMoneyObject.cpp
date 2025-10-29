@@ -1,13 +1,18 @@
 #include "MBLMoneyObject.h"
+#include "Character/MBLPlayerCharacter.h"
 
 AMBLMoneyObject::AMBLMoneyObject()
-	: MoneyValue(1) // 임시 값
+	: MoneyValue(1.0f) // 임시 값
 {
 	SpawnObjectType = "Money";
 }
 
 void AMBLMoneyObject::OnObjectActivated(AActor* Activator)
 {
-	Super::OnObjectActivated(Activator);
-	Super::DestroyObject();
+	if (AMBLPlayerCharacter* Player = Cast<AMBLPlayerCharacter>(Activator))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Money Plus %.0f"), MoneyValue);
+		Player->AcquireGold(MoneyValue);
+		Super::DestroyObject();
+	}
 }
