@@ -41,8 +41,6 @@ void AProjectile::BeginPlay()
         Trail->SetAsset(TrailEffect);
         Trail->Activate();
     }
-
-    SetLifeSpan(LifeTime);
 }
 
 void AProjectile::SetDirectionAndSpeed(const FVector& InDirection, float InSpeed)
@@ -61,6 +59,17 @@ void AProjectile::SetTargetTag(const FName& NewTargetTag)
 void AProjectile::SetDamage(float InDamage)
 {
     Damage = InDamage;
+}
+
+void AProjectile::SetSize(float InSize)
+{
+    Size = InSize;
+    FVector NewScale = InSize * FVector::OneVector;
+    SetActorScale3D(NewScale);
+    if (IsValid(Trail) == true)
+    {
+        Trail->SetVariableFloat(TEXT("User.Width"), Size * OriginTrailWidth);
+    }
 }
 
 void AProjectile::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 BodyIndex, bool bFromSweep, const FHitResult& Hit)
