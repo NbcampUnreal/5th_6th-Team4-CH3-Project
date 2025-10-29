@@ -1,15 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Gimmick/MBLBaseSpawnObject.h"
 #include "Components/SceneComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 
-// Sets default values
 AMBLBaseSpawnObject::AMBLBaseSpawnObject()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
 	SceneComp = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComponent"));
@@ -54,7 +49,6 @@ void AMBLBaseSpawnObject::OnPlayerOverlapBegin(
 		else if (OverlappedComp == CollisionComp)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Gained"));
-			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Gained")));
 			OnObjectActivated(OtherActor);
 		}
 	}
@@ -83,16 +77,38 @@ void AMBLBaseSpawnObject::DestroyObject()
 	Destroy();
 }
 
-// Called when the game starts or when spawned
 void AMBLBaseSpawnObject::BeginPlay()
 {
 	Super::BeginPlay();
-	UE_LOG(LogTemp, Warning, TEXT("CollisionComp settings: %s"), *CollisionComp->GetCollisionProfileName().ToString());
-	UE_LOG(LogTemp, Warning, TEXT("DetectionComp settings: %s"), *DetectionComp->GetCollisionProfileName().ToString());
+	// 스폰시 이미 캐릭터와 겹쳐있을 경우를 위한 오버랩 함수 수동 호출
+	DetectionComp->UpdateOverlaps();
+	CollisionComp->UpdateOverlaps();
 
+	TArray<AActor*> OverlappingActors;
+	DetectionComp->GetOverlappingActors(OverlappingActors);
+	
+	for (AActor* Actor : OverlappingActors)
+	{
+		if (Actor && Actor->ActorHasTag("Player"))
+		{
+			FHitResult DummyHit;
+			OnPlayerOverlapBegin(DetectionComp, Actor, nullptr, 0, false, DummyHit);
+		}
+	}
+
+	OverlappingActors.Empty();
+	CollisionComp->GetOverlappingActors(OverlappingActors);
+	
+	for (AActor* Actor : OverlappingActors)
+	{
+		if (Actor && Actor->ActorHasTag("Player"))
+		{
+			FHitResult DummyHit;
+			OnPlayerOverlapBegin(CollisionComp, Actor, nullptr, 0, false, DummyHit);
+		}
+	}
 }
 
-// Called every frame
 void AMBLBaseSpawnObject::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
