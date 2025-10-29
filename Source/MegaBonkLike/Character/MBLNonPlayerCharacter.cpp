@@ -33,15 +33,6 @@ AMBLNonPlayerCharacter::AMBLNonPlayerCharacter()
 	Attack = 50;
 }
 
-void AMBLNonPlayerCharacter::HandleNavLinkJump(const FVector& Destination)
-{
-	FVector JumpDirection = (Destination - GetActorLocation()).GetSafeNormal();
-	JumpDirection.Z = 0.7f;
-	LaunchCharacter(JumpDirection * 600.f, true, true);
-
-	UE_LOG(LogTemp, Warning, TEXT("NPC Jump to SmartLink!"));
-}
-
 void AMBLNonPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();

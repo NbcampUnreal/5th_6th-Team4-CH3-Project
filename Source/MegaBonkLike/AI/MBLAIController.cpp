@@ -49,7 +49,6 @@ void AMBLAIController::OnSmartLinkJump(AActor* MovingActor, const FVector& Desti
 	{
 		StopMovement();
 		NPC->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-		NPC->HandleNavLinkJump(DestinationPoint);
 
 		APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 		if (PlayerPawn)

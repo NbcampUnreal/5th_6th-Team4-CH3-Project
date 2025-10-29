@@ -13,9 +13,6 @@ class MEGABONKLIKE_API AMBLNonPlayerCharacter : public AMBLCharacterBase
 public:
 	AMBLNonPlayerCharacter();
 
-	UFUNCTION(BluePrintCallable)
-	void HandleNavLinkJump(const FVector& Destination);
-
 protected:
 	virtual void BeginPlay() override;
 
