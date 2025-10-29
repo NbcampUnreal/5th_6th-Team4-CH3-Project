@@ -10,6 +10,8 @@
 #include "Character/SkillComponent.h"
 #include "Attribute/AttributeTags.h"
 #include "Character/CharacterLevelDataRow.h"
+#include "Gimmick/Objects/Interface/MBLSpawnObjectInterface.h"
+#include "Engine/OverlapResult.h"
 
 AMBLPlayerCharacter::AMBLPlayerCharacter()
 {
@@ -47,6 +49,7 @@ AMBLPlayerCharacter::AMBLPlayerCharacter()
 	Level = 1;
 	Gold = 0.0f;
 	BaseMaxHP = 100.0f;
+	InteractRadius = 250.0f;
 }
 
 void AMBLPlayerCharacter::BeginPlay()
@@ -98,6 +101,8 @@ void AMBLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		EnhancedInputComponent->BindAction(InputConfig->IA_Look, ETriggerEvent::Triggered, this, &ThisClass::Input_Look);
 		EnhancedInputComponent->BindAction(InputConfig->IA_Jump, ETriggerEvent::Started, this, &ThisClass::Jump);
 		EnhancedInputComponent->BindAction(InputConfig->IA_Jump, ETriggerEvent::Completed, this, &ThisClass::StopJumping);
+		EnhancedInputComponent->BindAction(InputConfig->IA_Interact, ETriggerEvent::Started, this, &ThisClass::Interact);
+
 		EnhancedInputComponent->BindAction(InputConfig->IA_TempTest, ETriggerEvent::Started, this, &ThisClass::InputTempAcquireItem);
 	}
 }
@@ -173,6 +178,32 @@ void AMBLPlayerCharacter::Input_Look(const FInputActionValue& InputValue)
 
 	AddControllerYawInput(LookVector.X);
 	AddControllerPitchInput(LookVector.Y);
+}
+
+void AMBLPlayerCharacter::Interact(const FInputActionValue& Value)
+{
+	TArray<FOverlapResult> Overlaps;
+	FCollisionShape Sphere = FCollisionShape::MakeSphere(InteractRadius);
+	bool bHit = GetWorld()->OverlapMultiByChannel(
+		Overlaps,
+		GetActorLocation(),
+		FQuat::Identity,
+		ECC_Pawn,
+		Sphere);
+
+	if (bHit)
+	{
+		for (auto& Result : Overlaps)
+		{
+			AActor* OverlappedActor = Result.GetActor();
+			if (IMBLSpawnObjectInterface* InteractableActor = Cast<IMBLSpawnObjectInterface>(OverlappedActor))
+			{
+				InteractableActor->OnObjectActivated(this);
+				return;
+			}
+		}
+	}
+
 }
 
 void AMBLPlayerCharacter::InputTempAcquireItem()

@@ -48,6 +48,7 @@ public:
 protected:
 	void Input_Move(const FInputActionValue& InputValue);
 	void Input_Look(const FInputActionValue& InputValue);
+	void Interact(const FInputActionValue& Value);
 	void InputTempAcquireItem();
 
 	void RecalculateSpeed();
@@ -88,4 +89,7 @@ protected:
 	float NormalSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float BaseMaxHP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float InteractRadius;
 };
