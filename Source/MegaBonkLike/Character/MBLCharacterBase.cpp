@@ -27,16 +27,16 @@ float AMBLCharacterBase::TakeDamage(float Damage, FDamageEvent const& DamageEven
 	return NewDamage;
 }
 
+void AMBLCharacterBase::AddHealth(float Heal)
+{
+	UpdateCurrHP(CurrHP + Heal);
+}
+
 void AMBLCharacterBase::SetMaxHP(float InMaxHP)
 {
 	float DeltaMaxHp = InMaxHP - MaxHP;
 	MaxHP = InMaxHP;
 	UpdateCurrHP(CurrHP + DeltaMaxHp);
-}
-
-void AMBLCharacterBase::AddHealth(float Heal)
-{
-	UpdateCurrHP(CurrHP + Heal);
 }
 
 void AMBLCharacterBase::UpdateCurrHP(float InCurrHP)

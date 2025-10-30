@@ -12,6 +12,10 @@
 #include "Character/CharacterLevelDataRow.h"
 #include "Gimmick/Objects/Interface/MBLSpawnObjectInterface.h"
 #include "Engine/OverlapResult.h"
+#include "Gimmick/Objects/SpawnObjects/MBLBaseSpawnObject.h"
+#include "Components/WidgetComponent.h"
+#include "IngameUI/HPBar.h"
+#include "MegaBonkLike.h"
 
 AMBLPlayerCharacter::AMBLPlayerCharacter()
 {
@@ -40,8 +44,14 @@ AMBLPlayerCharacter::AMBLPlayerCharacter()
 
 	Inventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
 	SkillComponent = CreateDefaultSubobject<USkillComponent>(TEXT("SkillComponent"));
-
 	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComponent"));
+
+	HPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPBarWidget"));
+	HPBarWidget->SetupAttachment(GetMesh());
+	HPBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
+	HPBarWidget->SetRelativeLocation(FVector(0.0f, 0.0f, -40.0f));
+	HPBarWidget->SetDrawSize(FVector2D(200.0f, 40.0f));
+	HPBarWidget->SetWidgetClass(HPBarClass);
 
 	NormalSpeed = 600.0f;
 	CurrExp = 0.0f;
@@ -50,6 +60,7 @@ AMBLPlayerCharacter::AMBLPlayerCharacter()
 	Gold = 0.0f;
 	BaseMaxHP = 100.0f;
 	InteractRadius = 250.0f;
+	BaseAttractRadius = 300.0f;
 }
 
 void AMBLPlayerCharacter::BeginPlay()
@@ -66,6 +77,7 @@ void AMBLPlayerCharacter::BeginPlay()
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_ExpGain, 1.0f);
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_GoldGain, 1.0f);
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_MaxHP, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_PickupRange, 1.0f);
 
 	AttributeComponent->AddAttributeChangedCallback(
 		TAG_Attribute_MoveSpeed,
@@ -88,6 +100,18 @@ void AMBLPlayerCharacter::BeginPlay()
 	SetLevel(1);
 	SetPlayerMaxHP();
 	UpdateCurrHP(MaxHP);
+	if (UHPBar* HPBar = Cast<UHPBar>(HPBarWidget->GetUserWidgetObject()))
+	{
+		HPBar->UpdateHP(CurrHP, MaxHP);
+		OnHPChanged.AddDynamic(HPBar, &UHPBar::UpdateHP);
+	}
+
+	GetWorldTimerManager().SetTimer(
+		AttractItemHandle,
+		this,
+		&ThisClass::AttractItems,
+		0.2f,
+		true);
 }
 
 void AMBLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -184,11 +208,11 @@ void AMBLPlayerCharacter::Interact(const FInputActionValue& Value)
 {
 	TArray<FOverlapResult> Overlaps;
 	FCollisionShape Sphere = FCollisionShape::MakeSphere(InteractRadius);
-	bool bHit = GetWorld()->OverlapMultiByChannel(
+	bool bHit = GetWorld()->OverlapMultiByObjectType(
 		Overlaps,
 		GetActorLocation(),
 		FQuat::Identity,
-		ECC_Pawn,
+		ECC_MBL_INTERACTOBJECT,
 		Sphere);
 
 	if (bHit)
@@ -203,7 +227,6 @@ void AMBLPlayerCharacter::Interact(const FInputActionValue& Value)
 			}
 		}
 	}
-
 }
 
 void AMBLPlayerCharacter::InputTempAcquireItem()
@@ -251,4 +274,29 @@ void AMBLPlayerCharacter::SetMaxExp()
 void AMBLPlayerCharacter::SetPlayerMaxHP()
 {
 	SetMaxHP(BaseMaxHP * GetAttributeValue(TAG_Attribute_MaxHP));
+}
+
+void AMBLPlayerCharacter::AttractItems()
+{
+	float Radius = BaseAttractRadius * GetAttributeValue(TAG_Attribute_PickupRange);
+	TArray<FOverlapResult> Overlaps;
+	FCollisionShape Sphere = FCollisionShape::MakeSphere(InteractRadius);
+	bool bHit = GetWorld()->OverlapMultiByObjectType(
+		Overlaps,
+		GetActorLocation(),
+		FQuat::Identity,
+		ECC_MBL_INTERACTOBJECT,
+		Sphere);
+
+	if (bHit)
+	{
+		for (auto& Result : Overlaps)
+		{
+			AActor* OverlappedActor = Result.GetActor();
+			if (AMBLBaseSpawnObject* AttractableObject = Cast<AMBLBaseSpawnObject>(OverlappedActor))
+			{
+				AttractableObject->SetTarget(this);
+			}
+		}
+	}
 }
