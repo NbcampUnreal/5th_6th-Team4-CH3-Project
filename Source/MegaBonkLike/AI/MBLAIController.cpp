@@ -5,6 +5,7 @@
 #include "EngineUtils.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/MBLNonPlayerCharacter.h"
+#include "Character/MBLBossCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
@@ -17,7 +18,20 @@ void AMBLAIController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	StartBehaviorTree();
+	if (APawn* NPC = GetPawn())
+	{
+		if (AMBLBossCharacter* Boss = Cast<AMBLBossCharacter>(NPC))
+		{
+			//보스몬스터 BB/BT 실행
+			UseBlackboard(BossBlackboardAsset, BlackboardComp);
+			RunBehaviorTree(BossBehaviorTreeAsset);
+		}
+		else
+		{
+			//일반몬스터 BB/BT 실행
+			StartBehaviorTree();
+		}
+	}
 
 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	if (PlayerPawn && GetBlackboardComp())
