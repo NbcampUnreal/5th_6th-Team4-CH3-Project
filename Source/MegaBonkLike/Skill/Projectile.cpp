@@ -5,6 +5,7 @@
 #include "NiagaraSystem.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "MegaBonkLike.h"
 
 AProjectile::AProjectile()
 {
@@ -12,9 +13,11 @@ AProjectile::AProjectile()
 
     Collision = CreateDefaultSubobject<USphereComponent>(TEXT("Collision"));
     Collision->SetGenerateOverlapEvents(true);
-    Collision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    Collision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
     Collision->SetCollisionResponseToAllChannels(ECR_Ignore);
-    Collision->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+    Collision->SetCollisionResponseToChannel(ECC_MBL_ENEMY, ECR_Overlap);
+    Collision->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+    Collision->OnComponentHit.AddDynamic(this, &ThisClass::OnHit);
     Collision->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnOverlap);
     RootComponent = Collision;
 
@@ -67,20 +70,30 @@ void AProjectile::SetSize(float InSize)
     }
 }
 
+void AProjectile::SetPenetrate(bool bInPenetrate)
+{
+    bPenetrate = bInPenetrate;
+}
+
 void AProjectile::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 BodyIndex, bool bFromSweep, const FHitResult& Hit)
 {
     if (IsValid(OtherActor) == false || OtherActor == GetOwner() || OtherActor == GetInstigator())
         return;
 
-    // 지형에 부딪혔을 때 터지게 할 지 결정해야 함
-
     UGameplayStatics::ApplyDamage(OtherActor, Damage, GetInstigatorController(), this, nullptr);
 
-    if (IsValid(Trail) == true)
+    if (bPenetrate == false)
     {
-        Trail->Deactivate();
+        if (IsValid(Trail) == true)
+        {
+            Trail->Deactivate();
+        }
+        Destroy();
     }
+}
 
+void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
     Destroy();
 }
 
