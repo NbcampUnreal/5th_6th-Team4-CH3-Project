@@ -31,8 +31,8 @@ private:
 	USceneComponent* SceneComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SpawnObject|Component", meta = (AllowPrivateAccess = "true"))
 	USphereComponent* CollisionComp;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SpawnObject|Component", meta = (AllowPrivateAccess = "true"))
-	USphereComponent* DetectionComp;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SpawnObject|Component", meta = (AllowPrivateAccess = "true"))
+	//USphereComponent* DetectionComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SpawnObject|Component", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* StaticMeshComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SpawnObject|Component", meta = (AllowPrivateAccess = "true"))
