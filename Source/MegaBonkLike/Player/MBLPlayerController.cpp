@@ -5,6 +5,8 @@
 #include "Components/TextBlock.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Game/MBLGameInstance.h"
+#include "IngameUI/UIHUD.h"
+#include "Character/MBLPlayerCharacter.h"
 
 void AMBLPlayerController::BeginPlay()
 {
@@ -14,8 +16,7 @@ void AMBLPlayerController::BeginPlay()
 		InputSystem->AddMappingContext(IMC_Base, 0);
 	}
 
-	SetInputMode(FInputModeGameOnly());
-	bShowMouseCursor = false;
+	ShowGameHUD();
 }
 
 
@@ -78,7 +79,33 @@ UUserWidget* AMBLPlayerController::GetHUDWidget() const
 
 void AMBLPlayerController::ShowGameHUD()
 {
+	if (HUDWidgetInstance)
+	{
+		HUDWidgetInstance->RemoveFromParent();
+		HUDWidgetInstance = nullptr;
+	}
 
+	if (MainMenuWidgetInstance)
+	{
+		MainMenuWidgetInstance->RemoveFromParent();
+		MainMenuWidgetInstance = nullptr;
+	}
+
+	if (HUDWidgetClass)
+	{
+		HUDWidgetInstance = CreateWidget<UUIHUD>(this, HUDWidgetClass);
+		if (HUDWidgetInstance)
+		{
+			HUDWidgetInstance->AddToViewport();
+
+			bShowMouseCursor = false;
+			SetInputMode(FInputModeGameOnly());
+			if (AMBLPlayerCharacter* PlayerCharacter = Cast<AMBLPlayerCharacter>(GetPawn()))
+			{
+				HUDWidgetInstance->SetPlayer(PlayerCharacter);
+			}
+		}
+	}
 }
 
 void AMBLPlayerController::ShowMainMenu(bool bIsRestart)

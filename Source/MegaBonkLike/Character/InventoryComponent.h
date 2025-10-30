@@ -8,6 +8,8 @@
 class UItemBase;
 struct FItemDataRow;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnItemChanged);
+
 UCLASS( ClassGroup=(Character), meta=(BlueprintSpawnableComponent) )
 class MEGABONKLIKE_API UInventoryComponent : public UActorComponent
 {
@@ -32,6 +34,9 @@ private:
 	const FItemDataRow* GetItemData(int32 InItemId) const;
 	void AddWeaponSkill(UItemBase* Item);
 	void RemoveWeaponSkill(UItemBase* Item);
+
+public:
+	FOnItemChanged OnItemChanged;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
