@@ -91,7 +91,7 @@ void AMBLBaseSpawnObject::OnPlayerOverlapBegin(
 		if (OverlappedComp == DetectionComp)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Player detected"));
-			TargetActor = OtherActor;
+			//TargetActor = OtherActor;
 		}
 		else if (OverlappedComp == CollisionComp)
 		{
