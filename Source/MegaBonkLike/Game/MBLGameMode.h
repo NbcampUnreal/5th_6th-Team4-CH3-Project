@@ -13,8 +13,10 @@ class MEGABONKLIKE_API AMBLGameMode : public AGameMode
 public:
 	virtual void BeginPlay() override;
 
-	FTimerHandle GameOverTimerHandle;
+	FTimerHandle SpawnTimerHandle;
 
+	void StartWave();
+	void SpawnManager();
 	void GameOver();
 
 };
