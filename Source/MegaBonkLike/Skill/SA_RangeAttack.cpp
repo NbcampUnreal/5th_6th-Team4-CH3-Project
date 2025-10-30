@@ -166,6 +166,7 @@ void USA_RangeAttack::ShootSingle(const FVector& TargetDir)
 		Projectile->SetSize(Size);
 		float Damage = GetWeaponValue(TAG_Attribute_Damage) * GetAttributeValue(TAG_Attribute_Damage);
 		Projectile->SetDamage(Damage);
+		Projectile->SetPenetrate(bPenetrate);
 		Projectile->SetActorEnableCollision(true);
 	}
 }

@@ -75,5 +75,5 @@ void USA_AttachToPlayer::CheckHit()
     if (IsValid(AttachedActor) == false)
         return;
 
-    AttachedActor->CheckHit();
+    AttachedActor->CheckHitOnNextFrame();
 }
