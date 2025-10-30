@@ -34,6 +34,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Menu")
 	UUserWidget* MainMenuWidgetInstance;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu")
+	TSubclassOf<UUserWidget> EndGameScreenWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Menu")
+	UUserWidget* EndGameScreenWidgetInstance;
+
 	UFUNCTION(BlueprintPure, Category = "HUD")
 	UUserWidget* GetHUDWidget() const;
 
@@ -51,6 +57,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void ShowMainMenu(bool bIsRestart);
 
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void ShowEndGameScreen(bool bIsRestart);
+
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void RestartGame();
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void QuitGame();
 
