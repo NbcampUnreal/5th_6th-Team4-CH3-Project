@@ -1,30 +1,72 @@
 ﻿#include "Player/MBLPlayerController.h"
+#include "IngameUI/XPBar.h"
+#include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
-#include "Components/TextBlock.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Game/MBLGameInstance.h"
+#include "Components/ProgressBar.h"
+#include "Components/TextBlock.h"
 
 void AMBLPlayerController::BeginPlay()
 {
-	UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-	if (IsValid(InputSystem) == true)
+	Super::BeginPlay();
+
+	if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
 	{
-		InputSystem->AddMappingContext(IMC_Base, 0);
+		if (UEnhancedInputLocalPlayerSubsystem* InputSystem = 
+			ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer))
+		{
+			if (IMC_Base)
+			{
+				InputSystem->AddMappingContext(IMC_Base, 0);
+			}
+		}
 	}
 
 	SetInputMode(FInputModeGameOnly());
 	bShowMouseCursor = false;
+
+	//경험치
+	if (XPBarWidgetClass)
+	{
+		XPBarWidgetInstance = CreateWidget<UXPBar>(this, XPBarWidgetClass);
+		if (XPBarWidgetInstance)
+		{
+			XPBarWidgetInstance->AddToViewport();
+			XPBarWidgetInstance->UpdateXP(0.f, 100.f);
+		}
+	}
 }
 
+void AMBLPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
 
+	if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent))
+	{
+		if (IA_Pause)
+		{
+			EnhancedInput->BindAction(IA_Pause, ETriggerEvent::Started, this, &AMBLPlayerController::TogglePauseMenu);
+		}
+	}
+}
+
+//경험치
+void AMBLPlayerController::UpdateXPWidget(float CurrentXP, float MaxXP)
+{
+	if (XPBarWidgetInstance)
+	{
+		XPBarWidgetInstance->UpdateXP(CurrentXP, MaxXP);
+	}
+}
 
 void AMBLPlayerController::TogglePauseMenu()
 {
 	if (IsPaused())
 	{
-		// 🔹 재개
+		//재개
 		SetPause(false);
 		if (PauseMenuInstance)
 		{
@@ -37,7 +79,7 @@ void AMBLPlayerController::TogglePauseMenu()
 	}
 	else
 	{
-		// 🔹 일시정지
+		//일시정지
 		SetPause(true);
 		if (PauseMenuClass)
 		{
@@ -61,14 +103,6 @@ void AMBLPlayerController::QuitGame()
 		EQuitPreference::Quit,
 		false
 	);
-}
-
-void AMBLPlayerController::SetupInputComponent()
-{
-	Super::SetupInputComponent();
-
-
-	InputComponent->BindAction("Pause", IE_Pressed, this, &AMBLPlayerController::TogglePauseMenu);
 }
 
 UUserWidget* AMBLPlayerController::GetHUDWidget() const
@@ -146,4 +180,5 @@ void AMBLPlayerController::ShowMainMenu(bool bIsRestart)
 
 	}
 }
+
 
