@@ -59,5 +59,5 @@ public:
 
 	//test
 	
-	void UpdateWidget();
+	//void UpdateWidget();
 };

@@ -26,14 +26,22 @@ AMBLBaseInteractionObject::AMBLBaseInteractionObject()
 	InteractableWidget->SetupAttachment(StaticMeshComp);
 	InteractableWidget->SetWidgetSpace(EWidgetSpace::Screen);
 	InteractableWidget->SetVisibility(false);
+
 }
 
 void AMBLBaseInteractionObject::BeginPlay()
 {
 	Super::BeginPlay();
 
-	DetectionComp->OnComponentBeginOverlap.AddDynamic(this, &AMBLBaseInteractionObject::OnPlayerOverlapBegin);
-	DetectionComp->OnComponentEndOverlap.AddDynamic(this, &AMBLBaseInteractionObject::OnPlayerOverlapEnd);
+	if (!DetectionComp->OnComponentBeginOverlap.IsAlreadyBound(this, &AMBLBaseInteractionObject::OnPlayerOverlapBegin))
+	{
+		DetectionComp->OnComponentBeginOverlap.AddDynamic(this, &AMBLBaseInteractionObject::OnPlayerOverlapBegin);
+	}
+
+	if (!DetectionComp->OnComponentEndOverlap.IsAlreadyBound(this, &AMBLBaseInteractionObject::OnPlayerOverlapEnd))
+	{
+		DetectionComp->OnComponentEndOverlap.AddDynamic(this, &AMBLBaseInteractionObject::OnPlayerOverlapEnd);
+	}
 
 	CallOverlap(DetectionComp);
 	
@@ -58,7 +66,6 @@ void AMBLBaseInteractionObject::OnPlayerOverlapBegin(
 		{
 			InteractableWidget->SetVisibility(true);
 			UE_LOG(LogTemp, Warning, TEXT("Player can interact this object"));
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Player can interact this object")));
 		}
 	}
 }
@@ -75,7 +82,6 @@ void AMBLBaseInteractionObject::OnPlayerOverlapEnd(
 		{
 			InteractableWidget->SetVisibility(false);
 			UE_LOG(LogTemp, Warning, TEXT("Player lost"));
-			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Player lost")));
 		}
 	}
 }
@@ -114,15 +120,15 @@ void AMBLBaseInteractionObject::DestroyObject()
 	Destroy();
 }
 
-void AMBLBaseInteractionObject::UpdateWidget()
-{
-	if (!InteractableWidget) return;
-
-	UUserWidget* InteractableWidgetInstance = InteractableWidget->GetUserWidgetObject();
-	if (!InteractableWidgetInstance) return;
-
-	if (UTextBlock* InteractableText = Cast<UTextBlock>(InteractableWidgetInstance->GetWidgetFromName(TEXT("Press"))))
-	{
-		InteractableText->SetText(FText::FromString(FString::Printf(TEXT("Press 'E'"))));
-	}
-}
+//void AMBLBaseInteractionObject::UpdateWidget()
+//{
+//	if (!InteractableWidget) return;
+//
+//	UUserWidget* InteractableWidgetInstance = InteractableWidget->GetUserWidgetObject();
+//	if (!InteractableWidgetInstance) return;
+//
+//	if (UTextBlock* InteractableText = Cast<UTextBlock>(InteractableWidgetInstance->GetWidgetFromName(TEXT("Press"))))
+//	{
+//		InteractableText->SetText(FText::FromString(FString::Printf(TEXT("Press 'E'"))));
+//	}
+//}

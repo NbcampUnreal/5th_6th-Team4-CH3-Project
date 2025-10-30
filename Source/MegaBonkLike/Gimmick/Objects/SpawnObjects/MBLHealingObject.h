@@ -15,5 +15,5 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HealingObject", meta = (AllowPrivateAccess = "true"))
-	int32 HealAmount;
+	float HealAmount;
 };

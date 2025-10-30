@@ -63,6 +63,8 @@ void UInventoryComponent::AddItem(int32 InItemId)
 		AddWeaponSkill(Item);
 	Items.Add(Item);
 	CachedItemsByType[Data->ItemType].Add(Item);
+
+	OnItemChanged.Broadcast();
 }
 
 void UInventoryComponent::UpgradeItem(int32 InItemId, EItemRarity InRarity)
@@ -80,6 +82,8 @@ void UInventoryComponent::UpgradeItem(int32 InItemId, EItemRarity InRarity)
 	{
 		Item->AddAttributeModifiers(AttributeComponent, InRarity);
 	}
+
+	OnItemChanged.Broadcast();
 }
 
 void UInventoryComponent::RemoveItem(int32 InItemId)
@@ -95,6 +99,8 @@ void UInventoryComponent::RemoveItem(int32 InItemId)
 	Item->RemoveAttributeModifiers(AttributeComponent);
 	Items.Remove(Item);
 	CachedItemsByType[Item->GetData()->ItemType].Remove(Item);
+
+	OnItemChanged.Broadcast();
 }
 
 UItemBase* UInventoryComponent::FindItem(int32 InItemId)
