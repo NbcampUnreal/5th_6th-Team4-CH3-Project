@@ -14,7 +14,6 @@ public:
 
 	virtual void BeginPlay() override;
 
-	void SetTargetTag(const FName& InTargetTag);
 	void SetDamage(float InDamage);
 	void SetSize(float InSize);
 	void SetLifeTime(float InLifeTime);
@@ -32,8 +31,6 @@ protected:
 	float Size = 1.0f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float DamageInterval = 1.0f;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	FName TargetTag;
 
 	FTimerHandle HitTimerHandle;
 	FTimerHandle LifeTimeHandle;

@@ -23,7 +23,6 @@ protected:
 
 public:
     void SetDirectionAndSpeed(const FVector& InDirection, float InSpeed);
-    void SetTargetTag(const FName& NewTargetTag);
     void SetDamage(float InDamage);
     void SetSize(float InSize);
 
@@ -49,8 +48,6 @@ protected:
     float Speed;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     float Size;
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-    FName TargetTag;
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     float OriginTrailWidth;
 

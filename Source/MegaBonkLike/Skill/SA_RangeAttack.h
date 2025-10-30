@@ -31,8 +31,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<AProjectile> ProjectileClass;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FName TargetTag;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float AutoDetectRadius;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bAutoDetect;

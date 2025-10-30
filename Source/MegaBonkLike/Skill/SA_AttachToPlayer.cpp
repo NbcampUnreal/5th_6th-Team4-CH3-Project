@@ -21,7 +21,6 @@ void USA_AttachToPlayer::Activate(TWeakObjectPtr<AActor> InInstigator)
             FAttachmentTransformRules AttachRules(EAttachmentRule::KeepWorld, true);
             AttachedActor->AttachToComponent(Instigator->GetRootComponent(), AttachRules);
 
-            AttachedActor->SetTargetTag(TargetTag);
             SetDamage();
             SetSize();
         }

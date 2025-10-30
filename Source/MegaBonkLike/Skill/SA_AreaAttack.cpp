@@ -2,6 +2,7 @@
 #include "Engine/OverlapResult.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "MegaBonkLike.h"
 
 void USA_AreaAttack::Activate(TWeakObjectPtr<AActor> InInstigator)
 {
@@ -21,11 +22,11 @@ void USA_AreaAttack::CheckHit()
     TArray<FOverlapResult> Overlaps;
     FCollisionShape CollisionShape;
     CollisionShape.SetSphere(Radius);
-    bool bHit = Instigator->GetWorld()->OverlapMultiByChannel(
+    bool bHit = Instigator->GetWorld()->OverlapMultiByObjectType(
         Overlaps,
         Origin,
         FQuat::Identity,
-        ECC_Pawn,
+        ECC_MBL_ENEMY,
         CollisionShape
     );
 
@@ -35,9 +36,6 @@ void USA_AreaAttack::CheckHit()
         {
             AActor* HitActor = Result.GetActor();
             if (IsValid(HitActor) == false || HitActor == Instigator)
-                continue;
-
-            if (TargetTag.IsNone() == false && HitActor->ActorHasTag(TargetTag) == false)
                 continue;
 
             float Damage = GetWeaponValue(TAG_Attribute_Damage) * GetAttributeValue(TAG_Attribute_Damage);

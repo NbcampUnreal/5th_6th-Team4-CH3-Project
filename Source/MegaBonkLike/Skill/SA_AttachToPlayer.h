@@ -30,7 +30,4 @@ protected:
 	FVector LocationOffset;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FRotator RotationOffset;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FName TargetTag;
 };

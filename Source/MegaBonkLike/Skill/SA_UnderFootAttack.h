@@ -20,7 +20,4 @@ private:
 protected:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ADamageAreaActor> SpawnActorClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FName TargetTag;
 };
