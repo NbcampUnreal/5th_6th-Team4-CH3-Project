@@ -63,14 +63,6 @@ void AMBLBaseInteractionObject::OnPlayerOverlapBegin(
 {
 	InteractableWidget->SetVisibility(true);
 	UE_LOG(LogTemp, Warning, TEXT("Player can interact this object"));
-	//if (OtherActor && OtherActor->ActorHasTag("Player"))
-	//{
-	//	if (OverlappedComp == DetectionComp)
-	//	{
-	//		InteractableWidget->SetVisibility(true);
-	//		UE_LOG(LogTemp, Warning, TEXT("Player can interact this object"));
-	//	}
-	//}
 }
 
 void AMBLBaseInteractionObject::OnPlayerOverlapEnd(
@@ -81,15 +73,6 @@ void AMBLBaseInteractionObject::OnPlayerOverlapEnd(
 {
 	InteractableWidget->SetVisibility(false);
 	UE_LOG(LogTemp, Warning, TEXT("Player lost"));
-
-	//if (OtherActor && OtherActor->ActorHasTag("Player"))
-	//{
-	//	if (OverlappedComp == DetectionComp)
-	//	{
-	//		InteractableWidget->SetVisibility(false);
-	//		UE_LOG(LogTemp, Warning, TEXT("Player lost"));
-	//	}
-	//}
 }
 
 void AMBLBaseInteractionObject::CallOverlap(UPrimitiveComponent* CollisionComponent)
@@ -103,11 +86,8 @@ void AMBLBaseInteractionObject::CallOverlap(UPrimitiveComponent* CollisionCompon
 
 	for (AActor* Actor : OverlappingActors)
 	{
-		if (Actor && Actor->ActorHasTag("Player"))
-		{
-			FHitResult DummyHit;
-			OnPlayerOverlapBegin(CollisionComponent, Actor, nullptr, 0, false, DummyHit);
-		}
+		FHitResult DummyHit;
+		OnPlayerOverlapBegin(CollisionComponent, Actor, nullptr, 0, false, DummyHit);
 	}
 }
 
@@ -126,15 +106,3 @@ void AMBLBaseInteractionObject::DestroyObject()
 	Destroy();
 }
 
-//void AMBLBaseInteractionObject::UpdateWidget()
-//{
-//	if (!InteractableWidget) return;
-//
-//	UUserWidget* InteractableWidgetInstance = InteractableWidget->GetUserWidgetObject();
-//	if (!InteractableWidgetInstance) return;
-//
-//	if (UTextBlock* InteractableText = Cast<UTextBlock>(InteractableWidgetInstance->GetWidgetFromName(TEXT("Press"))))
-//	{
-//		InteractableText->SetText(FText::FromString(FString::Printf(TEXT("Press 'E'"))));
-//	}
-//}
