@@ -22,6 +22,7 @@ public:
 	virtual void AddAttributeModifiers(UAttributeComponent* AttributeComponent, EItemRarity InRarity = EItemRarity::Common) {}
 	virtual void RemoveAttributeModifiers(UAttributeComponent* AttributeComponent) {}
 
+	int32 GetLevel() const { return Level; }
 	const FItemDataRow* GetData() const { return Data; }
 
 protected:

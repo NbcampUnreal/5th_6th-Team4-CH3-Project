@@ -2,9 +2,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "InputAction.h"
+#include "InputMappingContext.h"
 #include "MBLPlayerController.generated.h"
 
 class UInputMappingContext;
+class UXPBar;
+class UUIHUD;
 
 UCLASS()
 class MEGABONKLIKE_API AMBLPlayerController : public APlayerController
@@ -14,15 +18,15 @@ class MEGABONKLIKE_API AMBLPlayerController : public APlayerController
 
 protected:
 	virtual void BeginPlay() override;
-
+	virtual void SetupInputComponent() override;
 
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD")
-	TSubclassOf<UUserWidget> HUDWidgetClass;
+	TSubclassOf<UUIHUD> HUDWidgetClass;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "HUD")
-	UUserWidget* HUDWidgetInstance;
+	TObjectPtr<UUIHUD> HUDWidgetInstance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu")
 	TSubclassOf<UUserWidget> MainMenuWidgetClass;
@@ -36,14 +40,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void ShowGameHUD();
 
+	//경험치
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD|XPBar") 
+	TSubclassOf<UXPBar> XPBarWidgetClass;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "HUD|XPBar")
+	TObjectPtr<UXPBar> XPBarWidgetInstance;
+	UFUNCTION(BlueprintCallable, Category = "HUD|XPBar")
+	void UpdateXPWidget(float CurrentXP, float MaxXP);
+
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void ShowMainMenu(bool bIsRestart);
 
-	
-
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void QuitGame();
-
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu")
 	TSubclassOf<UUserWidget> PauseMenuClass;
@@ -54,13 +63,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void TogglePauseMenu();
 
-	virtual void SetupInputComponent() override;
-
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputMappingContext> IMC_Base;
 
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_Pause;
 
 };
 
