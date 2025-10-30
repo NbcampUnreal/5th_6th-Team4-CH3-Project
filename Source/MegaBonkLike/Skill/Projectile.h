@@ -10,7 +10,7 @@ class UNiagaraComponent;
 class UNiagaraSystem;
 class UProjectileMovementComponent;
 
-UCLASS()
+UCLASS(Abstract)
 class MEGABONKLIKE_API AProjectile : public AActor
 {
 	GENERATED_BODY()
@@ -25,6 +25,7 @@ public:
     void SetDirectionAndSpeed(const FVector& InDirection, float InSpeed);
     void SetTargetTag(const FName& NewTargetTag);
     void SetDamage(float InDamage);
+    void SetSize(float InSize);
 
 protected:
     UFUNCTION()
@@ -36,20 +37,22 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     TObjectPtr<UStaticMeshComponent> StaticMesh;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-    UNiagaraComponent* Trail;
+    TObjectPtr<UNiagaraComponent> Trail;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     TObjectPtr<UProjectileMovementComponent> ProjectileMovement;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
     TObjectPtr<UNiagaraSystem> TrailEffect;
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     float Damage;
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     float Speed;
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+    float Size;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     FName TargetTag;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    float LifeTime = 5.0f;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    float OriginTrailWidth;
 
     FTimerHandle DestroyTimerHandle;
 };

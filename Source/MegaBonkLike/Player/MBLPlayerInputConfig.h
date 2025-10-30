@@ -18,6 +18,8 @@ public:
 	TObjectPtr<UInputAction> IA_Look;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UInputAction> IA_Jump;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UInputAction> IA_Interact;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UInputAction> IA_TempTest;

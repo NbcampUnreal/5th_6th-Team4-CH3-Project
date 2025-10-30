@@ -1,25 +1,18 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/NoExportTypes.h"
 #include "Attribute/AttributeModifier.h"
 #include "GameplayTagContainer.h"
 #include "Attribute.generated.h"
 
-USTRUCT(BlueprintType)
-struct MEGABONKLIKE_API FAttribute
+UCLASS(BlueprintType)
+class MEGABONKLIKE_API UAttribute : public UObject
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
-	FGameplayTag AttributeTag;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float BaseValue;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TMap<int32, FAttributeModifier> Modifiers;
-
-	TArray<TFunction<void(const FAttribute&)>> OnChangedCallbacks;
-
-	int32 NextId = 0;
+public:
+	void Init(const FGameplayTag& Tag, float InBaseValue);
 
 	int32 AddModifier(const FAttributeModifier& InModifier);
 	int32 AddModifier(EAttributeModifierType InType, float InValue);
@@ -28,7 +21,23 @@ struct MEGABONKLIKE_API FAttribute
 	const FAttributeModifier* GetModifier(int32 InId) const;
 	float GetValue() const;
 
-	void AddChangedCallback(TFunction<void(const FAttribute&)> NewCallback);
-	void AddChangedCallback(TFunction<void()> NewCallBack);
+	void RecalculateFinalValue();
+
+	void AddChangedCallback(TWeakObjectPtr<UObject> Instigator, TFunction<void(const TWeakObjectPtr<UAttribute>)> NewCallback);
+	void AddChangedCallback(TWeakObjectPtr<UObject> Instigator, TFunction<void()> NewCallBack);
+	void RemoveChangedCallback(TWeakObjectPtr<UObject> Instigator);
 	void BroadCastChanged();
+
+protected:
+	UPROPERTY(EditAnywhere)
+	FGameplayTag AttributeTag;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float BaseValue;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TMap<int32, FAttributeModifier> Modifiers;
+
+	UPROPERTY(VisibleAnywhere)
+	float FinalValue = 0.0f;
+	TMap<TWeakObjectPtr<UObject>, TFunction<void(const TWeakObjectPtr<UAttribute>)>> OnChangedCallbacks;
+	int32 NextModifierId = 0;
 };

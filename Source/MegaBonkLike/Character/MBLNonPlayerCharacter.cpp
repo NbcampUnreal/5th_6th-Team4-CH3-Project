@@ -17,11 +17,19 @@ AMBLNonPlayerCharacter::AMBLNonPlayerCharacter()
 	FRotator PivotRotation(0.f, -90.f, 0.f);
 	GetMesh()->SetRelativeLocationAndRotation(PivotPosition, PivotRotation);
 
-	GetCharacterMovement()->MaxWalkSpeed = 600.f;
-	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
-	GetCharacterMovement()->JumpZVelocity = 700.f;
-	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	GetCharacterMovement()->JumpZVelocity = 600.f;
+	GetCharacterMovement()->AirControl = 0.5f;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f);
+
+	GetCharacterMovement()->bUseRVOAvoidance = true;
+	GetCharacterMovement()->AvoidanceWeight = 1.f;
+
+	bIsDead = false;
+	MaxHP = 100;
+	CurrHP = MaxHP;
+	Attack = 50;
 }
 
 void AMBLNonPlayerCharacter::BeginPlay()
@@ -32,10 +40,55 @@ void AMBLNonPlayerCharacter::BeginPlay()
 	{
 		bUseControllerRotationYaw = false;
 
-		GetCharacterMovement()->bOrientRotationToMovement = false;
+		GetCharacterMovement()->bOrientRotationToMovement = true;
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
 		GetCharacterMovement()->RotationRate = FRotator(0.f, 480.f, 0.f);
 
 		GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	}
+
+	OnDead.AddDynamic(this, &ThisClass::OnDeath);
+
+	//KillSelf();       몬스터죽음 테스트용
+}
+
+
+void AMBLNonPlayerCharacter::SetMovementSpeed(float NewSpeed)
+{
+	if (UCharacterMovementComponent* Movement = GetCharacterMovement())
+	{
+		Movement->MaxWalkSpeed = NewSpeed;
+		UE_LOG(LogTemp, Warning, TEXT("Speed changed: %.1f"), NewSpeed);
+	}
+}
+
+void AMBLNonPlayerCharacter::OnDeath()
+{
+	if (bIsDead) return;
+
+	bIsDead = true;
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCharacterMovement()->DisableMovement();
+
+	FVector SpawnLocation = GetActorLocation();
+
+	if (GoldCoin)
+	{
+		GetWorld()->SpawnActor<AMBLMoneyObject>(GoldCoin, SpawnLocation, FRotator::ZeroRotator);
+	}
+	
+	if (ExpCoin)
+	{
+		GetWorld()->SpawnActor<AMBLExpObject>(ExpCoin, SpawnLocation, FRotator::ZeroRotator);
+	}
+
+	Destroy();
+	UE_LOG(LogTemp, Warning, TEXT("Died."));
+}
+
+//테스트용 코드
+void AMBLNonPlayerCharacter::KillSelf()
+{
+	OnDeath();
 }

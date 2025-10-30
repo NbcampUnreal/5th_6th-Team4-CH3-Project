@@ -8,6 +8,8 @@
 #include "Game/MBLGameInstance.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "IngameUI/UIHUD.h"
+#include "Character/MBLPlayerCharacter.h"
 
 void AMBLPlayerController::BeginPlay()
 {
@@ -25,9 +27,6 @@ void AMBLPlayerController::BeginPlay()
 		}
 	}
 
-	SetInputMode(FInputModeGameOnly());
-	bShowMouseCursor = false;
-
 	//경험치
 	if (XPBarWidgetClass)
 	{
@@ -38,6 +37,8 @@ void AMBLPlayerController::BeginPlay()
 			XPBarWidgetInstance->UpdateXP(0.f, 100.f);
 		}
 	}
+
+	ShowGameHUD();
 }
 
 void AMBLPlayerController::SetupInputComponent()
@@ -112,7 +113,33 @@ UUserWidget* AMBLPlayerController::GetHUDWidget() const
 
 void AMBLPlayerController::ShowGameHUD()
 {
+	if (HUDWidgetInstance)
+	{
+		HUDWidgetInstance->RemoveFromParent();
+		HUDWidgetInstance = nullptr;
+	}
 
+	if (MainMenuWidgetInstance)
+	{
+		MainMenuWidgetInstance->RemoveFromParent();
+		MainMenuWidgetInstance = nullptr;
+	}
+
+	if (HUDWidgetClass)
+	{
+		HUDWidgetInstance = CreateWidget<UUIHUD>(this, HUDWidgetClass);
+		if (HUDWidgetInstance)
+		{
+			HUDWidgetInstance->AddToViewport();
+
+			bShowMouseCursor = false;
+			SetInputMode(FInputModeGameOnly());
+			if (AMBLPlayerCharacter* PlayerCharacter = Cast<AMBLPlayerCharacter>(GetPawn()))
+			{
+				HUDWidgetInstance->SetPlayer(PlayerCharacter);
+			}
+		}
+	}
 }
 
 void AMBLPlayerController::ShowMainMenu(bool bIsRestart)

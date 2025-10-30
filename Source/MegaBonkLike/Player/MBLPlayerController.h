@@ -8,6 +8,7 @@
 
 class UInputMappingContext;
 class UXPBar;
+class UUIHUD;
 
 UCLASS()
 class MEGABONKLIKE_API AMBLPlayerController : public APlayerController
@@ -22,10 +23,10 @@ protected:
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD")
-	TSubclassOf<UUserWidget> HUDWidgetClass;
+	TSubclassOf<UUIHUD> HUDWidgetClass;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "HUD")
-	UUserWidget* HUDWidgetInstance;
+	TObjectPtr<UUIHUD> HUDWidgetInstance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu")
 	TSubclassOf<UUserWidget> MainMenuWidgetClass;

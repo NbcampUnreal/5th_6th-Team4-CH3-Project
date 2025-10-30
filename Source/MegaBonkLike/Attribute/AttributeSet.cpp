@@ -7,31 +7,36 @@ bool FAttributeSet::HasAttribute(const FGameplayTag& Tag) const
 
 float FAttributeSet::GetAttributeValue(const FGameplayTag& Tag) const
 {
-    if (const FAttribute* Attribute = Attributes.Find(Tag))
+    if (const auto& Attribute = Attributes.Find(Tag))
     {
-        return Attribute->GetValue();
+        return (*Attribute)->GetValue();
     }
     return 1.0f;
 }
 
 void FAttributeSet::AddAttribute(const FGameplayTag& Tag, float InBaseValue)
 {
-    FAttribute NewAttribute;
-    NewAttribute.AttributeTag = Tag;
-    NewAttribute.BaseValue = InBaseValue;
-    AddAttribute(NewAttribute);
+    if (Attributes.Contains(Tag))
+        return;
+
+    UAttribute* NewAttribute = NewObject<UAttribute>();
+    NewAttribute->Init(Tag, InBaseValue);
+    Attributes.Add(Tag, NewAttribute);
 }
 
-void FAttributeSet::AddAttribute(const FAttribute& Attribute)
-{
-    Attributes.Add(Attribute.AttributeTag, Attribute);
-}
-
-void FAttributeSet::AddChangedCallback(const FGameplayTag& Tag, const TFunction<void(const FAttribute&)> NewCallback)
+void FAttributeSet::AddChangedCallback(const FGameplayTag& Tag, TWeakObjectPtr<UObject> Instigator, TFunction<void(const TWeakObjectPtr<UAttribute>)> NewCallback)
 {
     if (Attributes.Contains(Tag))
     {
-        Attributes[Tag].AddChangedCallback(NewCallback);
+        Attributes[Tag]->AddChangedCallback(Instigator, NewCallback);
+    }
+}
+
+void FAttributeSet::RemoveChangedCallback(const FGameplayTag& Tag, TWeakObjectPtr<UObject> Instigator)
+{
+    if (Attributes.Contains(Tag))
+    {
+        Attributes[Tag]->RemoveChangedCallback(Instigator);
     }
 }
 
@@ -39,7 +44,7 @@ int32 FAttributeSet::AddModifier(const FGameplayTag& Tag, const FAttributeModifi
 {
     if (Attributes.Contains(Tag))
     {
-        return Attributes[Tag].AddModifier(Modifier);
+        return Attributes[Tag]->AddModifier(Modifier);
     }
     return -1;
 }
@@ -48,7 +53,7 @@ void FAttributeSet::ChangeModifier(const FGameplayTag& Tag, int32 InModifierId, 
 {
     if (Attributes.Contains(Tag))
     {
-        Attributes[Tag].ChangeModifier(InModifierId, NewModifier);
+        Attributes[Tag]->ChangeModifier(InModifierId, NewModifier);
     }
 }
 
@@ -56,6 +61,6 @@ void FAttributeSet::RemoveModifier(const FGameplayTag& Tag, int32 ModifierId)
 {
     if (Attributes.Contains(Tag))
     {
-        Attributes[Tag].RemoveModifier(ModifierId);
+        Attributes[Tag]->RemoveModifier(ModifierId);
     }
 }

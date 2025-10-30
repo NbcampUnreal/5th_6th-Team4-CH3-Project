@@ -1,13 +1,24 @@
 ﻿#include "Attribute/Attribute.h"
 
-int32 FAttribute::AddModifier(const FAttributeModifier& InModifier)
+void UAttribute::Init(const FGameplayTag& Tag, float InBaseValue)
 {
-	Modifiers.Add(NextId, InModifier);
-	BroadCastChanged();
-	return NextId++;
+	AttributeTag = Tag;
+	BaseValue = InBaseValue;
+
+	RecalculateFinalValue();
 }
 
-int32 FAttribute::AddModifier(EAttributeModifierType InType, float InValue)
+int32 UAttribute::AddModifier(const FAttributeModifier& InModifier)
+{
+	Modifiers.Add(NextModifierId, InModifier);
+
+	RecalculateFinalValue();
+	BroadCastChanged();
+
+	return NextModifierId++;
+}
+
+int32 UAttribute::AddModifier(EAttributeModifierType InType, float InValue)
 {
 	FAttributeModifier NewModifier;
 	NewModifier.Type = InType;
@@ -15,29 +26,38 @@ int32 FAttribute::AddModifier(EAttributeModifierType InType, float InValue)
 	return AddModifier(NewModifier);
 }
 
-bool FAttribute::ChangeModifier(int32 InModifierId, const FAttributeModifier& NewModifier)
+bool UAttribute::ChangeModifier(int32 InModifierId, const FAttributeModifier& NewModifier)
 {
 	FAttributeModifier* Modifier = Modifiers.Find(InModifierId);
 	if (Modifier == nullptr)
 		return false;
 
 	*Modifier = NewModifier;
+
+	RecalculateFinalValue();
 	BroadCastChanged();
 	return true;
 }
 
-void FAttribute::RemoveModifier(int32 InId)
+void UAttribute::RemoveModifier(int32 InId)
 {
 	Modifiers.Remove(InId);
+
+	RecalculateFinalValue();
 	BroadCastChanged();
 }
 
-const FAttributeModifier* FAttribute::GetModifier(int32 InId) const
+const FAttributeModifier* UAttribute::GetModifier(int32 InId) const
 {
 	return Modifiers.Find(InId);
 }
 
-float FAttribute::GetValue() const
+float UAttribute::GetValue() const
+{
+	return FinalValue;
+}
+
+void UAttribute::RecalculateFinalValue()
 {
 	float AdditiveVal = 0.0f;
 	float MultiplyVal = 1.0f;
@@ -54,28 +74,33 @@ float FAttribute::GetValue() const
 		}
 	}
 
-	float Result = (BaseValue + AdditiveVal) * MultiplyVal + FinalAdditiveVal;
-	return Result;
+	FinalValue = (BaseValue + AdditiveVal) * MultiplyVal + FinalAdditiveVal;
 }
 
-void FAttribute::AddChangedCallback(TFunction<void(const FAttribute&)> NewCallback)
+void UAttribute::AddChangedCallback(TWeakObjectPtr<UObject> Instigator, TFunction<void(const TWeakObjectPtr<UAttribute>)> NewCallback)
 {
-	OnChangedCallbacks.Add(NewCallback);
+	OnChangedCallbacks.Add(Instigator, NewCallback);
 }
 
-void FAttribute::AddChangedCallback(TFunction<void()> NewCallBack)
+void UAttribute::AddChangedCallback(TWeakObjectPtr<UObject> Instigator, TFunction<void()> NewCallBack)
 {
 	OnChangedCallbacks.Add(
-		[NewCallBack](const FAttribute&)
+		Instigator,
+		[NewCallBack](const TWeakObjectPtr<UAttribute>)
 		{
 			NewCallBack();
 		});
 }
 
-void FAttribute::BroadCastChanged()
+void UAttribute::RemoveChangedCallback(TWeakObjectPtr<UObject> Instigator)
 {
-	for (const auto& Callback : OnChangedCallbacks)
+	OnChangedCallbacks.Remove(Instigator);
+}
+
+void UAttribute::BroadCastChanged()
+{
+	for (const auto& [CallbackId, Callback] : OnChangedCallbacks)
 	{
-		Callback(*this);
+		Callback(this);
 	}
 }

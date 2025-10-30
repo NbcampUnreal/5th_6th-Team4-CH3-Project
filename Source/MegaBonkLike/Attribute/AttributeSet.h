@@ -10,12 +10,12 @@ struct MEGABONKLIKE_API FAttributeSet
 	GENERATED_BODY()
 
     UPROPERTY(VisibleAnywhere)
-    TMap<FGameplayTag, FAttribute> Attributes;
+    TMap<FGameplayTag, TObjectPtr<UAttribute>> Attributes;
 
     void AddAttribute(const FGameplayTag& Tag, float InBaseValue);
-    void AddAttribute(const FAttribute& Attribute);
 
-    void AddChangedCallback(const FGameplayTag& Tag, const TFunction<void(const FAttribute&)> NewCallback);
+    void AddChangedCallback(const FGameplayTag& Tag, TWeakObjectPtr<UObject> Instigator, TFunction<void(const TWeakObjectPtr<UAttribute>)> NewCallback);
+    void RemoveChangedCallback(const FGameplayTag& Tag, TWeakObjectPtr<UObject> Instigator);
 
     int32 AddModifier(const FGameplayTag& Tag, const FAttributeModifier& Modifier);
     void ChangeModifier(const FGameplayTag& Tag, int32 InModifierId, const FAttributeModifier& NewModifier);
