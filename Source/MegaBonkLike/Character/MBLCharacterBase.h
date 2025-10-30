@@ -19,8 +19,11 @@ protected:
 	virtual void BeginPlay() override;
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
-	void SetMaxHP(float InMaxHP);
+public:
 	void AddHealth(float Heal);
+
+protected:
+	void SetMaxHP(float InMaxHP);
 	void UpdateCurrHP(float InCurrHP);
 
 private:

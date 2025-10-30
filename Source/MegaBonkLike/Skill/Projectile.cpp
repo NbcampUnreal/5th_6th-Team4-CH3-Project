@@ -51,11 +51,6 @@ void AProjectile::SetDirectionAndSpeed(const FVector& InDirection, float InSpeed
     ProjectileMovement->Velocity = InDirection * InSpeed;
 }
 
-void AProjectile::SetTargetTag(const FName& NewTargetTag)
-{
-    TargetTag = NewTargetTag;
-}
-
 void AProjectile::SetDamage(float InDamage)
 {
     Damage = InDamage;
@@ -78,9 +73,6 @@ void AProjectile::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherAc
         return;
 
     // 지형에 부딪혔을 때 터지게 할 지 결정해야 함
-
-    if (TargetTag.IsNone() == false && OtherActor->ActorHasTag(TargetTag) == false)
-        return;
 
     UGameplayStatics::ApplyDamage(OtherActor, Damage, GetInstigatorController(), this, nullptr);
 

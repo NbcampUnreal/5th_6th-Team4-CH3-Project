@@ -8,12 +8,7 @@ ADamageAreaActor::ADamageAreaActor()
 }
 void ADamageAreaActor::BeginPlay()
 {
-	Super::BeginPlay();	
-}
-
-void ADamageAreaActor::SetTargetTag(const FName& InTargetTag)
-{
-    TargetTag = InTargetTag;
+    Super::BeginPlay();
 }
 
 void ADamageAreaActor::SetDamage(float InDamage)
@@ -47,7 +42,7 @@ void ADamageAreaActor::CheckHit()
     for (UPrimitiveComponent* PrimComp : PrimitiveComponents)
     {
         if (IsValid(PrimComp) == false || PrimComp->GetGenerateOverlapEvents() == false)
-            return;
+            continue;
 
         TArray<AActor*> OverlappingActors;
         PrimComp->GetOverlappingActors(OverlappingActors);
@@ -56,10 +51,6 @@ void ADamageAreaActor::CheckHit()
         {
             // 액터가 유효하지 않으면
             if (IsValid(OverlapActor) == false || OverlapActor == GetInstigator())
-                continue;
-
-            // 태그 대상이 아니라면
-            if (TargetTag.IsNone() == false && OverlapActor->ActorHasTag(TargetTag) == false)
                 continue;
 
             if (AlreadyHit.Contains(OverlapActor) == false)
