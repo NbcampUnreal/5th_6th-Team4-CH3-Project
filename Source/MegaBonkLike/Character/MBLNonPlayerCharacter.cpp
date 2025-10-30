@@ -71,16 +71,16 @@ void AMBLNonPlayerCharacter::OnDeath()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCharacterMovement()->DisableMovement();
 
-	FVector SpawnLocation = GetActorLocation();
-
+	FVector GoldSpawnLocation = GetActorLocation() + FVector(25.f, 0.f, 0.f);
+	FVector ExpSpawnLocation = GetActorLocation() + FVector(-25.f, 0.f, 0.f);
 	if (GoldCoin)
 	{
-		GetWorld()->SpawnActor<AMBLMoneyObject>(GoldCoin, SpawnLocation, FRotator::ZeroRotator);
+		GetWorld()->SpawnActor<AMBLMoneyObject>(GoldCoin, GoldSpawnLocation, FRotator::ZeroRotator);
 	}
 	
 	if (ExpCoin)
 	{
-		GetWorld()->SpawnActor<AMBLExpObject>(ExpCoin, SpawnLocation, FRotator::ZeroRotator);
+		GetWorld()->SpawnActor<AMBLExpObject>(ExpCoin, ExpSpawnLocation, FRotator::ZeroRotator);
 	}
 
 	Destroy();
