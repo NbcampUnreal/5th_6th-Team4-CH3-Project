@@ -143,6 +143,14 @@ void AMBLBaseSpawnObject::DestroyObject()
 	Destroy();
 }
 
+void AMBLBaseSpawnObject::SetTarget(AActor* Target)
+{
+	if (Target && Target->ActorHasTag("Player"))
+	{
+		TargetActor = Target;
+	}
+}
+
 void AMBLBaseSpawnObject::RotationObject()
 {
 	FRotator CurrentRotation = StaticMeshComp->GetRelativeRotation();

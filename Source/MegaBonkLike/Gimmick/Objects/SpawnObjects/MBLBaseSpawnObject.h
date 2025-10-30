@@ -72,7 +72,7 @@ public:
 	virtual void OnObjectActivated(AActor* Activator) override;
 	virtual FName GetObejctType() const override;
 	virtual void DestroyObject() override;
-
+	void SetTarget(AActor* Target);
 private:
 	void RotationObject();
 	void ChaseToPlayer();
