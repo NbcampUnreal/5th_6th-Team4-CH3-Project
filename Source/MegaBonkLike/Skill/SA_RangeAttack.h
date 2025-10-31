@@ -36,6 +36,8 @@ protected:
 	bool bAutoDetect;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bShootSpread;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool bPenetrate;
 
 	FTimerHandle AttackIntervalHandle;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)

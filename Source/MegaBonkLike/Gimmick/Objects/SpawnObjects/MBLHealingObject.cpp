@@ -10,13 +10,10 @@ AMBLHealingObject::AMBLHealingObject()
 
 void AMBLHealingObject::OnObjectActivated(AActor* Activator)
 {
-	if (AMBLPlayerCharacter* Actor = Cast<AMBLPlayerCharacter>(Activator))
+	if (AMBLPlayerCharacter* Player = Cast<AMBLPlayerCharacter>(Activator))
 	{
-		if (AMBLCharacterBase* Player = Cast<AMBLCharacterBase>(Actor))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Heal"));
-			Super::OnObjectActivated(Activator);
-			Super::DestroyObject();
-		}
+		Player->AddHealth(HealAmount);
+		Super::OnObjectActivated(Activator);
+		Super::DestroyObject();
 	}
 }

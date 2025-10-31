@@ -18,13 +18,18 @@ public:
 	void SetSize(float InSize);
 	void SetLifeTime(float InLifeTime);
 
-	void CheckHit();
+	void CheckHitOnNextFrame();
 	void ApplyDamage(AActor* TargetActor);
 
 private:
 	void Shrink();
+	void SetOverlapEnable(bool bInEnable);
+	void CheckHit();
 
 protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<class USphereComponent> CollisionComp;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float Damage;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
