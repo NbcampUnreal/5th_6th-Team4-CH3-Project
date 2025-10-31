@@ -8,6 +8,7 @@
 
 AMBLGameMode::AMBLGameMode()
     : SpawnVolume(nullptr)
+    , MaxSpawnObject(50)
     , Enemy(nullptr)
     , Boss(nullptr)
     , SpawnInterval(0.5f)
@@ -97,7 +98,7 @@ FInteractionObjectsRow* AMBLGameMode::GetDropObject() const
 
 void AMBLGameMode::StartWave()
 {
-    for (int i = 0; i < 20; ++i)
+    for (int i = 0; i < MaxSpawnObject; ++i)
     {
         if (FInteractionObjectsRow* SelectedRow = GetDropObject())
         {

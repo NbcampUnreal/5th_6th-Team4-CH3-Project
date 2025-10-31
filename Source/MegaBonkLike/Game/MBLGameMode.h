@@ -21,6 +21,8 @@ public:
 	FTimerHandle BossSpawnTimerHandle;
 	FTimerHandle GameOverTimerHandle;
 	AMBLSpawnVolume* SpawnVolume;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test|ItemObjects")
+	int32 MaxSpawnObject;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test|EnemyClass")
 	TSubclassOf<AActor> Enemy;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test|BossClass")
