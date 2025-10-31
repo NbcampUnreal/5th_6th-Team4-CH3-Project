@@ -17,10 +17,20 @@ AMBLAIController::AMBLAIController()
 void AMBLAIController::BeginPlay()
 {
 	Super::BeginPlay();
+}
 
-	if (APawn* NPC = GetPawn())
+void AMBLAIController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	if (InPawn)
 	{
-		if (AMBLBossCharacter* Boss = Cast<AMBLBossCharacter>(NPC))
+		UE_LOG(LogTemp, Warning, TEXT("AI Controller is Controlling %s."), *InPawn->GetName());
+	}
+
+	if (InPawn)
+	{
+		if (AMBLBossCharacter* Boss = Cast<AMBLBossCharacter>(InPawn))
 		{
 			//보스몬스터 BB/BT 실행
 			UseBlackboard(BossBlackboardAsset, BlackboardComp);
@@ -38,16 +48,6 @@ void AMBLAIController::BeginPlay()
 	{
 
 		GetBlackboardComp()->SetValueAsObject(TEXT("TargetCharacter"), PlayerPawn);
-	}
-}
-
-void AMBLAIController::OnPossess(APawn* InPawn)
-{
-	Super::OnPossess(InPawn);
-
-	if (InPawn)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("AI Controller is Controlling %s."), *InPawn->GetName());
 	}
 }
 

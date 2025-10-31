@@ -49,10 +49,10 @@ void AMBLCharacterBase::UpdateCurrHP(float InCurrHP)
 
 void AMBLCharacterBase::DeadHandle()
 {
-//	if (AMBLGameMode* GameMode = Cast<AMBLGameMode>(GetWorld()->GetAuthGameMode()))
-//	{
-//		GameMode->Dead(this);
-//	}
+	if (AMBLGameMode* GameMode = Cast<AMBLGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		GameMode->Dead(this);
+	}
 }
 
 void AMBLCharacterBase::SetCameraCollisionIgnore()
