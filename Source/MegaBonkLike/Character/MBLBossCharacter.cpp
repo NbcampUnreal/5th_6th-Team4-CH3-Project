@@ -29,7 +29,7 @@ AMBLBossCharacter::AMBLBossCharacter()
 	GetCharacterMovement()->AvoidanceWeight = 1.f;
 
 	bIsDead = false;
-	MaxHP = 100;
+	MaxHP = 1000;
 	CurrHP = MaxHP;
 	Attack = 50;
 
