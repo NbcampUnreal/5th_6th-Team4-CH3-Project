@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Skill/SkillActionBase.h"
+#include "Skill/SkillEffect/SkillEffectSet.h"
 #include "SA_AttachToPlayer.generated.h"
 
 class ADamageAreaActor;
@@ -30,4 +31,7 @@ protected:
 	FVector LocationOffset;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FRotator RotationOffset;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FSkillEffectSet CheckHitEffects;
 };
