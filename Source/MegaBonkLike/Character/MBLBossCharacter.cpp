@@ -52,7 +52,8 @@ void AMBLBossCharacter::BeginPlay()
 	}
 	OnDead.AddDynamic(this, &ThisClass::OnDeath);
 
-	GroundAttack();
+	//공격로직테스트용
+	//GroundAttack();
 }
 
 void AMBLBossCharacter::SetMovementSpeed(float NewSpeed)

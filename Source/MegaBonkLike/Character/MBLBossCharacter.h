@@ -12,8 +12,11 @@ class MEGABONKLIKE_API AMBLBossCharacter : public AMBLCharacterBase
 public:
 	AMBLBossCharacter();
 
+	void GroundAttack();
+
 protected:
 	virtual void BeginPlay() override;
+
 
 #pragma region NPC Stat 
 
@@ -44,7 +47,6 @@ private:
 	bool bIsDead;
 	UFUNCTION()
 	void OnDeath();
-	void GroundAttack();
 	void SpawnGroundAttack();
 
 	FTimerHandle AttackTimerHandle;
