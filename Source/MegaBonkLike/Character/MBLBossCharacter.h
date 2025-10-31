@@ -45,8 +45,7 @@ private:
 
 private:
 	bool bIsDead;
-	UFUNCTION()
-	void OnDeath();
+	void DeadHandle() override;
 	void SpawnGroundAttack();
 
 	FTimerHandle AttackTimerHandle;

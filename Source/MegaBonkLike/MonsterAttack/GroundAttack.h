@@ -42,7 +42,7 @@ protected:
 
 private:
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void OnTimelineFinished();
 
 

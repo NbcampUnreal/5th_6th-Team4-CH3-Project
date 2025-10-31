@@ -50,8 +50,6 @@ void AMBLBossCharacter::BeginPlay()
 
 		GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	}
-	OnDead.AddDynamic(this, &ThisClass::OnDeath);
-
 	//공격로직테스트용
 	//GroundAttack();
 }
@@ -65,7 +63,7 @@ void AMBLBossCharacter::SetMovementSpeed(float NewSpeed)
 	}
 }
 
-void AMBLBossCharacter::OnDeath()
+void AMBLBossCharacter::DeadHandle()
 {
 	if (bIsDead) return;
 

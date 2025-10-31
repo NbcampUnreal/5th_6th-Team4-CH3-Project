@@ -44,7 +44,7 @@ void AGroundAttack::OnTimelineFinished()
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(SkillOwner);
 
-	bool bHit = GetWorld()->OverlapMultiByChannel(
+	bool bHit = GetWorld()->OverlapMultiByObjectType(
 		Overlaps,
 		GetActorLocation(),
 		FQuat::Identity,
