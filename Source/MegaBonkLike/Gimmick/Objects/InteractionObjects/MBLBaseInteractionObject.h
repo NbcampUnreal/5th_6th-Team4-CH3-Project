@@ -57,7 +57,4 @@ public:
 	virtual FName GetObejctType() const override;
 	virtual void DestroyObject() override;
 
-	//test
-	
-	//void UpdateWidget();
 };

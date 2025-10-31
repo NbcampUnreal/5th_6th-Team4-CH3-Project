@@ -11,6 +11,7 @@ class UCameraComponent;
 class UInventoryComponent;
 class USkillComponent;
 class UAttributeComponent;
+class UWidgetComponent;
 
 struct FInputActionValue;
 
@@ -58,6 +59,8 @@ protected:
 	void SetMaxExp();
 	void SetPlayerMaxHP();
 
+	void AttractItems();
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USpringArmComponent> SpringArm;
@@ -69,6 +72,10 @@ protected:
 	TObjectPtr<UInventoryComponent> Inventory;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USkillComponent> SkillComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UWidgetComponent> HPBarWidget;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<class UHPBar> HPBarClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UMBLPlayerInputConfig> InputConfig;
@@ -89,7 +96,11 @@ protected:
 	float NormalSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float BaseMaxHP;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float BaseAttractRadius;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float InteractRadius;
+
+	FTimerHandle AttractItemHandle;
 };

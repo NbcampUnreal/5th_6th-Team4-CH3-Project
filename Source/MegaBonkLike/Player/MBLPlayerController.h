@@ -7,7 +7,7 @@
 #include "MBLPlayerController.generated.h"
 
 class UInputMappingContext;
-class UXPBar;
+//class UXPBar;
 class UUIHUD;
 
 UCLASS()
@@ -27,13 +27,16 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "HUD")
 	TObjectPtr<UUIHUD> HUDWidgetInstance;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu")
 	TSubclassOf<UUserWidget> MainMenuWidgetClass;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Menu")
 	UUserWidget* MainMenuWidgetInstance;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu")
+	TSubclassOf<UUserWidget> PauseMenuClass;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu")
 	TSubclassOf<UUserWidget> EndGameScreenWidgetClass;
 
@@ -46,14 +49,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void ShowGameHUD();
 
-	//경험치
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD|XPBar") 
-	TSubclassOf<UXPBar> XPBarWidgetClass;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "HUD|XPBar")
-	TObjectPtr<UXPBar> XPBarWidgetInstance;
 	UFUNCTION(BlueprintCallable, Category = "HUD|XPBar")
-	void UpdateXPWidget(float CurrentXP, float MaxXP);
-
+	void UpdateXP(float CurrentXP, float MaxXP);
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void ShowMainMenu(bool bIsRestart);
 
@@ -64,9 +61,6 @@ public:
 	void RestartGame();
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void QuitGame();
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu")
-	TSubclassOf<UUserWidget> PauseMenuClass;
 
 	UPROPERTY()
 	UUserWidget* PauseMenuInstance;

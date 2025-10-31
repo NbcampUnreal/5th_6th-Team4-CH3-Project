@@ -2,6 +2,7 @@
 #include "Skill/DamageAreaActor.h"
 #include "Character/MBLPlayerCharacter.h"
 #include "Engine/HitResult.h"
+#include "MegaBonkLike.h"
 
 void USA_UnderFootAttack::Activate(TWeakObjectPtr<AActor> InInstigator)
 {
@@ -43,7 +44,6 @@ void USA_UnderFootAttack::SpawnUnderFootAttackActor()
                 SpawnActor->SetDamage(Damage);
                 SpawnActor->SetSize(Size);
                 SpawnActor->SetLifeTime(LifeTime);
-                SpawnActor->SetTargetTag(TargetTag);
             }
         }
     }

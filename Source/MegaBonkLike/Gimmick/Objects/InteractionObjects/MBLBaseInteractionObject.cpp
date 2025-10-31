@@ -15,12 +15,13 @@ AMBLBaseInteractionObject::AMBLBaseInteractionObject()
 	SetRootComponent(SceneComp);
 
 	DetectionComp = CreateDefaultSubobject<USphereComponent>(TEXT("DetectionComponent"));
-	DetectionComp->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+	DetectionComp->SetCollisionProfileName(TEXT("InteractObject"));
 	DetectionComp->SetSphereRadius(150.f); // 값 조율 필요
 	DetectionComp->SetupAttachment(SceneComp);
 
 	StaticMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	StaticMeshComp->SetupAttachment(DetectionComp);
+	StaticMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	InteractableWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractableWidget"));
 	InteractableWidget->SetupAttachment(StaticMeshComp);
@@ -60,14 +61,8 @@ void AMBLBaseInteractionObject::OnPlayerOverlapBegin(
 	bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	if (OtherActor && OtherActor->ActorHasTag("Player"))
-	{
-		if (OverlappedComp == DetectionComp)
-		{
-			InteractableWidget->SetVisibility(true);
-			UE_LOG(LogTemp, Warning, TEXT("Player can interact this object"));
-		}
-	}
+	InteractableWidget->SetVisibility(true);
+	UE_LOG(LogTemp, Warning, TEXT("Player can interact this object"));
 }
 
 void AMBLBaseInteractionObject::OnPlayerOverlapEnd(
@@ -76,14 +71,8 @@ void AMBLBaseInteractionObject::OnPlayerOverlapEnd(
 	UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex)
 {
-	if (OtherActor && OtherActor->ActorHasTag("Player"))
-	{
-		if (OverlappedComp == DetectionComp)
-		{
-			InteractableWidget->SetVisibility(false);
-			UE_LOG(LogTemp, Warning, TEXT("Player lost"));
-		}
-	}
+	InteractableWidget->SetVisibility(false);
+	UE_LOG(LogTemp, Warning, TEXT("Player lost"));
 }
 
 void AMBLBaseInteractionObject::CallOverlap(UPrimitiveComponent* CollisionComponent)
@@ -97,11 +86,8 @@ void AMBLBaseInteractionObject::CallOverlap(UPrimitiveComponent* CollisionCompon
 
 	for (AActor* Actor : OverlappingActors)
 	{
-		if (Actor && Actor->ActorHasTag("Player"))
-		{
-			FHitResult DummyHit;
-			OnPlayerOverlapBegin(CollisionComponent, Actor, nullptr, 0, false, DummyHit);
-		}
+		FHitResult DummyHit;
+		OnPlayerOverlapBegin(CollisionComponent, Actor, nullptr, 0, false, DummyHit);
 	}
 }
 
@@ -120,15 +106,3 @@ void AMBLBaseInteractionObject::DestroyObject()
 	Destroy();
 }
 
-//void AMBLBaseInteractionObject::UpdateWidget()
-//{
-//	if (!InteractableWidget) return;
-//
-//	UUserWidget* InteractableWidgetInstance = InteractableWidget->GetUserWidgetObject();
-//	if (!InteractableWidgetInstance) return;
-//
-//	if (UTextBlock* InteractableText = Cast<UTextBlock>(InteractableWidgetInstance->GetWidgetFromName(TEXT("Press"))))
-//	{
-//		InteractableText->SetText(FText::FromString(FString::Printf(TEXT("Press 'E'"))));
-//	}
-//}

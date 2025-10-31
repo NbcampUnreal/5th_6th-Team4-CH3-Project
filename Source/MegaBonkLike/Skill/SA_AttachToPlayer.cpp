@@ -21,7 +21,6 @@ void USA_AttachToPlayer::Activate(TWeakObjectPtr<AActor> InInstigator)
             FAttachmentTransformRules AttachRules(EAttachmentRule::KeepWorld, true);
             AttachedActor->AttachToComponent(Instigator->GetRootComponent(), AttachRules);
 
-            AttachedActor->SetTargetTag(TargetTag);
             SetDamage();
             SetSize();
         }
@@ -76,5 +75,5 @@ void USA_AttachToPlayer::CheckHit()
     if (IsValid(AttachedActor) == false)
         return;
 
-    AttachedActor->CheckHit();
+    AttachedActor->CheckHitOnNextFrame();
 }

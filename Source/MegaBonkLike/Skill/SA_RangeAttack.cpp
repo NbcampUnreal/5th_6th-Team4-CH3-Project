@@ -3,6 +3,7 @@
 #include "Engine/OverlapResult.h"
 #include "TimerManager.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "MegaBonkLike.h"
 
 void USA_RangeAttack::Activate(TWeakObjectPtr<AActor> InInstigator)
 {
@@ -46,11 +47,11 @@ void USA_RangeAttack::DetectEnemy()
 	TArray<FOverlapResult> Overlaps;
 	FCollisionShape CollisionShape;
 	CollisionShape.SetSphere(AutoDetectRadius);
-	bool bHit = Instigator->GetWorld()->OverlapMultiByChannel(
+	bool bHit = Instigator->GetWorld()->OverlapMultiByObjectType(
 		Overlaps,
 		Origin,
 		FQuat::Identity,
-		ECC_Pawn,
+		ECC_MBL_ENEMY,
 		CollisionShape);
 
 	if (bHit)
@@ -59,9 +60,6 @@ void USA_RangeAttack::DetectEnemy()
 		{
 			AActor* HitActor = Result.GetActor();
 			if (IsValid(HitActor) == false || HitActor == Instigator)
-				continue;
-
-			if (TargetTag.IsNone() == false && HitActor->ActorHasTag(TargetTag) == false)
 				continue;
 
 			// 적의 생존 여부 확인 후 유효한 적 추가
@@ -152,7 +150,7 @@ void USA_RangeAttack::ShootSpread(const FVector& TargetDir)
 
 void USA_RangeAttack::ShootSingle(const FVector& TargetDir)
 {
-	FVector SpawnLocation = Instigator->GetActorLocation() + TargetDir * 30.f;
+	FVector SpawnLocation = Instigator->GetActorLocation() + TargetDir * 10.f;
 	FRotator SpawnRotation = TargetDir.Rotation();
 	FActorSpawnParameters Params;
 	Params.Owner = Instigator.Get();
@@ -161,12 +159,14 @@ void USA_RangeAttack::ShootSingle(const FVector& TargetDir)
 	AProjectile* Projectile = Instigator->GetWorld()->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, Params);
 	if (IsValid(Projectile) == true)
 	{
+		Projectile->SetActorEnableCollision(false);
 		float ProjectileSpeed = GetWeaponValue(TAG_Attribute_ProjectileSpeed) * GetAttributeValue(TAG_Attribute_ProjectileSpeed);
 		Projectile->SetDirectionAndSpeed(TargetDir, ProjectileSpeed);
-		Projectile->SetTargetTag(TargetTag);
 		float Size = GetWeaponValue(TAG_Attribute_Size) * GetAttributeValue(TAG_Attribute_Size);
 		Projectile->SetSize(Size);
 		float Damage = GetWeaponValue(TAG_Attribute_Damage) * GetAttributeValue(TAG_Attribute_Damage);
 		Projectile->SetDamage(Damage);
+		Projectile->SetPenetrate(bPenetrate);
+		Projectile->SetActorEnableCollision(true);
 	}
 }

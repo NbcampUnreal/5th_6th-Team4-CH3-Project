@@ -18,17 +18,13 @@ AMBLBaseSpawnObject::AMBLBaseSpawnObject()
 	SetRootComponent(SceneComp);
 
 	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponent"));	
-	CollisionComp->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+	CollisionComp->SetCollisionProfileName(TEXT("InteractObject"));
 	CollisionComp->SetSphereRadius(20.f); // 임시 값
 	CollisionComp->SetupAttachment(SceneComp);
 
 	StaticMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	StaticMeshComp->SetupAttachment(CollisionComp);
-
-	DetectionComp = CreateDefaultSubobject<USphereComponent>(TEXT("DetectionComponent"));
-	DetectionComp->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
-	DetectionComp->SetSphereRadius(300.f); // 임시 값
-	DetectionComp->SetupAttachment(SceneComp);
+	StaticMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	ProjectileComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
 	ProjectileComp->ProjectileGravityScale = 0.f;
@@ -48,17 +44,8 @@ void AMBLBaseSpawnObject::BeginPlay()
 	{
 		CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapEnd);
 	}
-	if (!DetectionComp->OnComponentBeginOverlap.IsAlreadyBound(this, &AMBLBaseSpawnObject::OnPlayerOverlapBegin))
-	{
-		DetectionComp->OnComponentBeginOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapBegin);
-	}
-	if (!DetectionComp->OnComponentEndOverlap.IsAlreadyBound(this, &AMBLBaseSpawnObject::OnPlayerOverlapEnd))
-	{
-		DetectionComp->OnComponentEndOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapEnd);
-	}
 
 	// 스폰시 이미 캐릭터와 겹쳐있을 경우를 위한 오버랩 함수 수동 호출
-	CallOverlap(DetectionComp);
 	CallOverlap(CollisionComp);
 
 	GetWorldTimerManager().SetTimer(
@@ -86,19 +73,8 @@ void AMBLBaseSpawnObject::OnPlayerOverlapBegin(
 	bool bFromSweep, const 
 	FHitResult& SweepResult)
 {
-	if (OtherActor && OtherActor->ActorHasTag("Player"))
-	{
-		if (OverlappedComp == DetectionComp)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Player detected"));
-			//TargetActor = OtherActor;
-		}
-		else if (OverlappedComp == CollisionComp)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Gained"));
-			OnObjectActivated(OtherActor);
-		}
-	}
+	UE_LOG(LogTemp, Warning, TEXT("Gained"));
+	OnObjectActivated(OtherActor);
 }
 
 void AMBLBaseSpawnObject::OnPlayerOverlapEnd(
@@ -120,11 +96,8 @@ void AMBLBaseSpawnObject::CallOverlap(UPrimitiveComponent* CollisionComponent)
 
 	for (AActor* Actor : OverlappingActors)
 	{
-		if (Actor && Actor->ActorHasTag("Player"))
-		{
-			FHitResult DummyHit;
-			OnPlayerOverlapBegin(CollisionComponent, Actor, nullptr, 0, false, DummyHit);
-		}
+		FHitResult DummyHit;
+		OnPlayerOverlapBegin(CollisionComponent, Actor, nullptr, 0, false, DummyHit);
 	}
 }
 
@@ -174,7 +147,7 @@ void AMBLBaseSpawnObject::ChaseToPlayer()
 	FVector Direction = (TargetLocation - ObjectLocation).GetSafeNormal();
 
 	float Distance = FVector::Dist(ObjectLocation, TargetLocation);
-	float DitectionRadius = DetectionComp->GetScaledSphereRadius();
+	float DitectionRadius = 300.f;
 
 	float DistanceRatio = FMath::Clamp(Distance / DitectionRadius, 0.0f, 1.0f);
 
