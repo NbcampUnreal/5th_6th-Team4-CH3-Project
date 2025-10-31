@@ -37,9 +37,12 @@ EBTNodeResult::Type UBTTask_GroundAttack::ExecuteTask(UBehaviorTreeComponent& Ow
 
     FTimerHandle CooldownHandle;
     FTimerDelegate CooldownDelegate;
-    CooldownDelegate.BindLambda([BlackboardComp]()
+    TWeakObjectPtr<UBlackboardComponent> WeakBlackboard = TWeakObjectPtr<UBlackboardComponent>(BlackboardComp);
+    CooldownDelegate.BindLambda([WeakBlackboard]()
         {
-            BlackboardComp->SetValueAsBool(TEXT("IsAttacking"), false);
+            if (WeakBlackboard.IsValid() == false) return;
+
+            WeakBlackboard->SetValueAsBool(TEXT("IsAttacking"), false);
             UE_LOG(LogTemp, Warning, TEXT("Ground Attack Cooldown Ended!"));
         });
 
