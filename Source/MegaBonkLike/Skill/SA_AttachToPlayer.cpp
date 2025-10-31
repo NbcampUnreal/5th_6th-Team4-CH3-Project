@@ -36,6 +36,8 @@ void USA_AttachToPlayer::Activate(TWeakObjectPtr<AActor> InInstigator)
     
     TimerDelegate.BindUObject(this, &ThisClass::CheckHit);
     SetIntervalTimer();
+
+    CheckHitEffects.SetOwner(Instigator);
 }
 
 void USA_AttachToPlayer::Deactivate()
@@ -76,4 +78,5 @@ void USA_AttachToPlayer::CheckHit()
         return;
 
     AttachedActor->CheckHitOnNextFrame();
+    CheckHitEffects.ActivateAll(FVector::ZeroVector, FRotator::ZeroRotator);
 }

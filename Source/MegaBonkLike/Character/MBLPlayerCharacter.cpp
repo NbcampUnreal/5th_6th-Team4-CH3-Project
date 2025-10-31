@@ -16,6 +16,7 @@
 #include "Components/WidgetComponent.h"
 #include "IngameUI/HPBar.h"
 #include "MegaBonkLike.h"
+#include "Player/MBLPlayerController.h"
 
 AMBLPlayerCharacter::AMBLPlayerCharacter()
 {
@@ -98,6 +99,12 @@ void AMBLPlayerCharacter::BeginPlay()
 		});
 
 	SetLevel(1);
+	if (AMBLPlayerController* PlayerController = Cast<AMBLPlayerController>(GetController()))
+	{
+		PlayerController->UpdateXP(CurrExp, MaxExp);
+		OnExpChanged.AddDynamic(PlayerController, &AMBLPlayerController::UpdateXP);
+	}
+
 	SetPlayerMaxHP();
 	UpdateCurrHP(MaxHP);
 	if (UHPBar* HPBar = Cast<UHPBar>(HPBarWidget->GetUserWidgetObject()))

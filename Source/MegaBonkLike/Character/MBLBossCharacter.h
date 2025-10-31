@@ -12,8 +12,11 @@ class MEGABONKLIKE_API AMBLBossCharacter : public AMBLCharacterBase
 public:
 	AMBLBossCharacter();
 
+	void GroundAttack();
+
 protected:
 	virtual void BeginPlay() override;
+
 
 #pragma region NPC Stat 
 
@@ -28,13 +31,22 @@ public:
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Stats")
 	int32 Attack;
-
 #pragma endregion 
 
+private:
+	UPROPERTY(EditDefaultsOnly, Category="Skill")
+	TSubclassOf<class AGroundAttack> GroundAttackClass;
+	UPROPERTY(EditDefaultsOnly, Category = "Skill")
+	float AttackInterval = 0.8f;
+	UPROPERTY(EditDefaultsOnly, Category = "Skill")
+	int32 AttackRepeatCount = 5;
+
+	int32 CurrentAttackCount = 0;
 
 private:
 	bool bIsDead;
-	UFUNCTION()
-	void OnDeath();
+	void DeadHandle() override;
+	void SpawnGroundAttack();
 
+	FTimerHandle AttackTimerHandle;
 };
