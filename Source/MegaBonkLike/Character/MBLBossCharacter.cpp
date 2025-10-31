@@ -2,6 +2,8 @@
 #include "AI/MBLAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "MonsterAttack/GroundAttack.h"
+#include "Kismet/GameplayStatics.h"
 
 AMBLBossCharacter::AMBLBossCharacter()
 {
@@ -48,7 +50,8 @@ void AMBLBossCharacter::BeginPlay()
 
 		GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	}
-	OnDead.AddDynamic(this, &ThisClass::OnDeath);
+	//공격로직테스트용
+	//GroundAttack();
 }
 
 void AMBLBossCharacter::SetMovementSpeed(float NewSpeed)
@@ -60,7 +63,7 @@ void AMBLBossCharacter::SetMovementSpeed(float NewSpeed)
 	}
 }
 
-void AMBLBossCharacter::OnDeath()
+void AMBLBossCharacter::DeadHandle()
 {
 	if (bIsDead) return;
 
@@ -71,4 +74,54 @@ void AMBLBossCharacter::OnDeath()
 
 	Destroy();
 	UE_LOG(LogTemp, Warning, TEXT("Died."));
+}
+
+void AMBLBossCharacter::GroundAttack()
+{
+	if (!GroundAttackClass) return;
+
+	CurrentAttackCount = 0;
+
+	SpawnGroundAttack();
+
+	GetWorld()->GetTimerManager().SetTimer(
+		AttackTimerHandle,
+		this,
+		&AMBLBossCharacter::SpawnGroundAttack,
+		AttackInterval,
+		true
+	);
+}
+
+void AMBLBossCharacter::SpawnGroundAttack()
+{
+	if (CurrentAttackCount >= AttackRepeatCount)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(AttackTimerHandle);
+		return;
+	}
+
+	CurrentAttackCount++;
+
+	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	if (!PlayerPawn) return;
+
+	FVector SpawnLocation = PlayerPawn->GetActorLocation();
+	FRotator SpawnRotation = FRotator::ZeroRotator;
+
+	FActorSpawnParameters Params;
+	Params.Owner = this;
+
+
+	AGroundAttack* SkillArea = GetWorld()->SpawnActor<AGroundAttack>(
+		GroundAttackClass,
+		SpawnLocation,
+		SpawnRotation,
+		Params
+	);
+
+	if (SkillArea)
+	{
+		SkillArea->Initialize(this);
+	}
 }

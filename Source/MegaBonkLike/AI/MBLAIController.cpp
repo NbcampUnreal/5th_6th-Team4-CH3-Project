@@ -5,6 +5,7 @@
 #include "EngineUtils.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/MBLNonPlayerCharacter.h"
+#include "Character/MBLBossCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
@@ -16,15 +17,6 @@ AMBLAIController::AMBLAIController()
 void AMBLAIController::BeginPlay()
 {
 	Super::BeginPlay();
-
-	StartBehaviorTree();
-
-	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	if (PlayerPawn && GetBlackboardComp())
-	{
-
-		GetBlackboardComp()->SetValueAsObject(TEXT("TargetCharacter"), PlayerPawn);
-	}
 }
 
 void AMBLAIController::OnPossess(APawn* InPawn)
@@ -34,6 +26,28 @@ void AMBLAIController::OnPossess(APawn* InPawn)
 	if (InPawn)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AI Controller is Controlling %s."), *InPawn->GetName());
+	}
+
+	if (InPawn)
+	{
+		if (AMBLBossCharacter* Boss = Cast<AMBLBossCharacter>(InPawn))
+		{
+			//보스몬스터 BB/BT 실행
+			UseBlackboard(BossBlackboardAsset, BlackboardComp);
+			RunBehaviorTree(BossBehaviorTreeAsset);
+		}
+		else
+		{
+			//일반몬스터 BB/BT 실행
+			StartBehaviorTree();
+		}
+	}
+
+	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	if (PlayerPawn && GetBlackboardComp())
+	{
+
+		GetBlackboardComp()->SetValueAsObject(TEXT("TargetCharacter"), PlayerPawn);
 	}
 }
 

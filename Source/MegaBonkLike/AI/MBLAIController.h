@@ -23,8 +23,14 @@ public:
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	UBlackboardComponent* BlackboardComp;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
+	UBlackboardData* BlackboardAsset;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
+	UBlackboardData* BossBlackboardAsset;
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	UBehaviorTree* BehaviorTreeAsset;
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	UBehaviorTree* BossBehaviorTreeAsset;
 
 	UPROPERTY()
 	AActor* CurrentTarget = nullptr;
