@@ -18,13 +18,18 @@ public:
 
 	// 프로토 타입
 	FTimerHandle SpawnTimerHandle;
+	FTimerHandle BossSpawnTimerHandle;
 	FTimerHandle GameOverTimerHandle;
 	AMBLSpawnVolume* SpawnVolume;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnemyClass")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test|EnemyClass")
 	TSubclassOf<AActor> Enemy;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test|BossClass")
+	TSubclassOf<AActor> Boss;
 	float SpawnInterval;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test")
 	int32 MaxSpawnEnemy;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test")
+	float BossTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test")
 	float GameTime;
 	int32 CurrentEnemy;
@@ -32,8 +37,9 @@ public:
 	UDataTable* DropTable;
 	FInteractionObjectsRow* GetDropObject() const;
 	void StartWave();
+	void SpawnBoss();
 	void SpawnManager();
-	void DeadEnemy();
+	void Dead(AActor* DeadActor);
 
 	void GameOver();
 

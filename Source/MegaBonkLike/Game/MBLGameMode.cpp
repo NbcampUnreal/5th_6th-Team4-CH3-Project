@@ -4,12 +4,15 @@
 #include "Player/MBLPlayerController.h"
 #include "Gimmick/Spawn/MBLSpawnVolume.h"
 #include "Gimmick/Data/InteractionObjectsRow.h"
+#include "Character/MBLBossCharacter.h"
 
 AMBLGameMode::AMBLGameMode()
     : SpawnVolume(nullptr)
     , Enemy(nullptr)
+    , Boss(nullptr)
     , SpawnInterval(0.5f)
     , MaxSpawnEnemy(40)
+    , BossTime(10)
     , GameTime(30.f)
     , CurrentEnemy(0)
     , DropTable(nullptr)
@@ -34,6 +37,14 @@ void AMBLGameMode::BeginPlay()
         this,
         &AMBLGameMode::GameOver,
         GameTime,
+        false
+    );
+
+    GetWorldTimerManager().SetTimer(
+        BossSpawnTimerHandle,
+        this,
+        &AMBLGameMode::SpawnBoss,
+        BossTime,
         false
     );
 
@@ -98,6 +109,11 @@ void AMBLGameMode::StartWave()
     }
 }
 
+void AMBLGameMode::SpawnBoss()
+{
+    SpawnVolume->SpawnEnemy(Boss);
+}
+
 void AMBLGameMode::SpawnManager()
 {
     if (!SpawnVolume) return;
@@ -110,15 +126,26 @@ void AMBLGameMode::SpawnManager()
     
 }
 
-void AMBLGameMode::DeadEnemy()
+void AMBLGameMode::Dead(AActor* DeadActor)
 {
-    if (CurrentEnemy <= 0)
+    if (!IsValid(DeadActor)) return;
+
+    if (DeadActor->ActorHasTag("Player"))
     {
-        CurrentEnemy = 0;
+        GameOver();
         return;
     }
 
-    CurrentEnemy--;
+    if (DeadActor->ActorHasTag("Enemy"))
+    {
+        if (CurrentEnemy <= 0)
+        {
+            CurrentEnemy = 0;
+            return;
+        }
+
+        CurrentEnemy--;
+    }
 }
 
 void AMBLGameMode::GameOver()
