@@ -27,15 +27,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "HUD")
 	TObjectPtr<UUIHUD> HUDWidgetInstance;
-
-		UFUNCTION(BlueprintPure, Category = "HUD")
-	UUserWidget* GetHUDWidget() const;
-
-	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void ShowGameHUD();
-
-	UFUNCTION(BlueprintCallable, Category = "HUD|XPBar")
-	void UpdateXP(float CurrentXP, float MaxXP);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu")
 	TSubclassOf<UUserWidget> MainMenuWidgetClass;
@@ -46,9 +37,28 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu")
 	TSubclassOf<UUserWidget> PauseMenuClass;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu")
+	TSubclassOf<UUserWidget> EndGameScreenWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Menu")
+	UUserWidget* EndGameScreenWidgetInstance;
+
+	UFUNCTION(BlueprintPure, Category = "HUD")
+	UUserWidget* GetHUDWidget() const;
+
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void ShowGameHUD();
+
+	UFUNCTION(BlueprintCallable, Category = "HUD|XPBar")
+	void UpdateXP(float CurrentXP, float MaxXP);
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void ShowMainMenu(bool bIsRestart);
 
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void ShowEndGameScreen(bool bIsRestart);
+
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void RestartGame();
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void QuitGame();
 

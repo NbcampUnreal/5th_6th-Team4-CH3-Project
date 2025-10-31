@@ -1,19 +1,25 @@
 ﻿#include "Skill/DamageAreaActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/SphereComponent.h"
+#include "MegaBonkLike.h"
 
 ADamageAreaActor::ADamageAreaActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
-
+    
+    // 기본값 Sphere
+    CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComp"));
+    CollisionComp->SetupAttachment(GetRootComponent());
+    CollisionComp->SetGenerateOverlapEvents(true);
+    CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    CollisionComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+    CollisionComp->SetCollisionResponseToChannel(ECC_MBL_ENEMY, ECR_Overlap);
 }
 void ADamageAreaActor::BeginPlay()
 {
-	Super::BeginPlay();	
-}
+    Super::BeginPlay();
 
-void ADamageAreaActor::SetTargetTag(const FName& InTargetTag)
-{
-    TargetTag = InTargetTag;
+    SetOverlapEnable(false);
 }
 
 void ADamageAreaActor::SetDamage(float InDamage)
@@ -38,37 +44,13 @@ void ADamageAreaActor::SetLifeTime(float InLifeTime)
         true);
 }
 
-void ADamageAreaActor::CheckHit()
+void ADamageAreaActor::CheckHitOnNextFrame()
 {
-    TSet<AActor*> AlreadyHit;
+    SetOverlapEnable(true);
 
-    TArray<UPrimitiveComponent*> PrimitiveComponents;
-    GetComponents<UPrimitiveComponent>(PrimitiveComponents);
-    for (UPrimitiveComponent* PrimComp : PrimitiveComponents)
-    {
-        if (IsValid(PrimComp) == false || PrimComp->GetGenerateOverlapEvents() == false)
-            return;
-
-        TArray<AActor*> OverlappingActors;
-        PrimComp->GetOverlappingActors(OverlappingActors);
-
-        for (AActor* OverlapActor : OverlappingActors)
-        {
-            // 액터가 유효하지 않으면
-            if (IsValid(OverlapActor) == false || OverlapActor == GetInstigator())
-                continue;
-
-            // 태그 대상이 아니라면
-            if (TargetTag.IsNone() == false && OverlapActor->ActorHasTag(TargetTag) == false)
-                continue;
-
-            if (AlreadyHit.Contains(OverlapActor) == false)
-            {
-                ApplyDamage(OverlapActor);
-                AlreadyHit.Add(OverlapActor);
-            }
-        }
-    }
+    GetWorldTimerManager().SetTimerForNextTick(
+        this,
+        &ThisClass::CheckHit);
 }
 
 void ADamageAreaActor::ApplyDamage(AActor* TargetActor)
@@ -87,4 +69,31 @@ void ADamageAreaActor::Shrink()
         GetWorldTimerManager().ClearTimer(LifeTimeHandle);
         Destroy();
     }
+}
+
+void ADamageAreaActor::SetOverlapEnable(bool bInEnable)
+{
+    if (IsValid(CollisionComp) == false)
+        return;
+
+    CollisionComp->SetCollisionEnabled(bInEnable == true ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
+}
+
+void ADamageAreaActor::CheckHit()
+{
+    if (IsValid(CollisionComp) == false || CollisionComp->GetGenerateOverlapEvents() == false)
+        return;
+
+    TArray<AActor*> OverlappingActors;
+    CollisionComp->GetOverlappingActors(OverlappingActors);
+    for (AActor* OverlapActor : OverlappingActors)
+    {
+        // 액터가 유효하지 않으면
+        if (IsValid(OverlapActor) == false || OverlapActor == GetInstigator())
+            continue;
+
+        ApplyDamage(OverlapActor);
+    }
+
+    SetOverlapEnable(false);
 }

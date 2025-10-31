@@ -15,5 +15,5 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ExpObject", meta = (AllowPrivateAccess = "true"))
-	int32 Exp;
+	float Exp;
 };

@@ -16,6 +16,4 @@ private:
 	void CheckHit();
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FName TargetTag;
 };

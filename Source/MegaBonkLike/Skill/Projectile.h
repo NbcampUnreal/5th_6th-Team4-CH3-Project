@@ -23,13 +23,16 @@ protected:
 
 public:
     void SetDirectionAndSpeed(const FVector& InDirection, float InSpeed);
-    void SetTargetTag(const FName& NewTargetTag);
     void SetDamage(float InDamage);
     void SetSize(float InSize);
+    void SetPenetrate(bool bInPenetrate);
 
 protected:
     UFUNCTION()
     void OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 BodyIndex, bool bFromSweep, const FHitResult& Hit);
+    UFUNCTION()
+    void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
+        UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -50,7 +53,7 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     float Size;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-    FName TargetTag;
+    bool bPenetrate;
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     float OriginTrailWidth;
 

@@ -18,23 +18,18 @@ AMBLBaseSpawnObject::AMBLBaseSpawnObject()
 	SetRootComponent(SceneComp);
 
 	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponent"));	
-	CollisionComp->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+	CollisionComp->SetCollisionProfileName(TEXT("InteractObject"));
 	CollisionComp->SetSphereRadius(20.f); // 임시 값
 	CollisionComp->SetupAttachment(SceneComp);
 
 	StaticMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	StaticMeshComp->SetupAttachment(CollisionComp);
+	StaticMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	DetectionComp = CreateDefaultSubobject<USphereComponent>(TEXT("DetectionComponent"));
-	DetectionComp->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
-	DetectionComp->SetSphereRadius(300.f); // 임시 값
-	DetectionComp->SetupAttachment(SceneComp);
-
-	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapBegin);
-	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapEnd);
-	
-	DetectionComp->OnComponentBeginOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapBegin);
-	DetectionComp->OnComponentEndOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapEnd);
+	//DetectionComp = CreateDefaultSubobject<USphereComponent>(TEXT("DetectionComponent"));
+	//DetectionComp->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+	//DetectionComp->SetSphereRadius(300.f); // 임시 값
+	//DetectionComp->SetupAttachment(SceneComp);
 
 	ProjectileComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
 	ProjectileComp->ProjectileGravityScale = 0.f;
@@ -46,8 +41,25 @@ void AMBLBaseSpawnObject::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (!CollisionComp->OnComponentBeginOverlap.IsAlreadyBound(this, &AMBLBaseSpawnObject::OnPlayerOverlapBegin))
+	{
+		CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapBegin);
+	}
+	if (!CollisionComp->OnComponentEndOverlap.IsAlreadyBound(this, &AMBLBaseSpawnObject::OnPlayerOverlapEnd))
+	{
+		CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapEnd);
+	}
+	/*if (!DetectionComp->OnComponentBeginOverlap.IsAlreadyBound(this, &AMBLBaseSpawnObject::OnPlayerOverlapBegin))
+	{
+		DetectionComp->OnComponentBeginOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapBegin);
+	}
+	if (!DetectionComp->OnComponentEndOverlap.IsAlreadyBound(this, &AMBLBaseSpawnObject::OnPlayerOverlapEnd))
+	{
+		DetectionComp->OnComponentEndOverlap.AddDynamic(this, &AMBLBaseSpawnObject::OnPlayerOverlapEnd);
+	}*/
+
 	// 스폰시 이미 캐릭터와 겹쳐있을 경우를 위한 오버랩 함수 수동 호출
-	CallOverlap(DetectionComp);
+	//CallOverlap(DetectionComp);
 	CallOverlap(CollisionComp);
 
 	GetWorldTimerManager().SetTimer(
@@ -75,19 +87,22 @@ void AMBLBaseSpawnObject::OnPlayerOverlapBegin(
 	bool bFromSweep, const 
 	FHitResult& SweepResult)
 {
-	if (OtherActor && OtherActor->ActorHasTag("Player"))
-	{
-		if (OverlappedComp == DetectionComp)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Player detected"));
-			TargetActor = OtherActor;
-		}
-		else if (OverlappedComp == CollisionComp)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Gained"));
-			OnObjectActivated(OtherActor);
-		}
-	}
+	UE_LOG(LogTemp, Warning, TEXT("Gained"));
+	OnObjectActivated(OtherActor);
+
+	//if (OtherActor && OtherActor->ActorHasTag("Player"))
+	//{
+	//	//if (OverlappedComp == DetectionComp)
+	//	//{
+	//	//	UE_LOG(LogTemp, Warning, TEXT("Player detected"));
+	//	//	//TargetActor = OtherActor;
+	//	//}
+	//	if (OverlappedComp == CollisionComp)
+	//	{
+	//		UE_LOG(LogTemp, Warning, TEXT("Gained"));
+	//		OnObjectActivated(OtherActor);
+	//	}
+	//}
 }
 
 void AMBLBaseSpawnObject::OnPlayerOverlapEnd(
@@ -119,7 +134,7 @@ void AMBLBaseSpawnObject::CallOverlap(UPrimitiveComponent* CollisionComponent)
 
 void AMBLBaseSpawnObject::OnObjectActivated(AActor* Activator)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Gained")));
+	UE_LOG(LogTemp, Warning, TEXT("BaseSpawnObject OnObjectActivated() Called"));
 }
 
 FName AMBLBaseSpawnObject::GetObejctType() const
@@ -130,6 +145,14 @@ FName AMBLBaseSpawnObject::GetObejctType() const
 void AMBLBaseSpawnObject::DestroyObject()
 {
 	Destroy();
+}
+
+void AMBLBaseSpawnObject::SetTarget(AActor* Target)
+{
+	if (Target && Target->ActorHasTag("Player"))
+	{
+		TargetActor = Target;
+	}
 }
 
 void AMBLBaseSpawnObject::RotationObject()
@@ -155,13 +178,19 @@ void AMBLBaseSpawnObject::ChaseToPlayer()
 	FVector Direction = (TargetLocation - ObjectLocation).GetSafeNormal();
 
 	float Distance = FVector::Dist(ObjectLocation, TargetLocation);
-	float DitectionRadius = DetectionComp->GetScaledSphereRadius();
+	float DitectionRadius = 300.f;
 
-	float AccelerationRange = FMath::Clamp(Distance / DitectionRadius, 0.3f, 1.0f);
-	float CurrentSpeed = BaseSpeed * AccelerationRange;
+	float DistanceRatio = FMath::Clamp(Distance / DitectionRadius, 0.0f, 1.0f);
+
+	float Acceleration = FMath::Lerp(1.0f, 3.5f, DistanceRatio);
+	float CurrentSpeed = FMath::Min(BaseSpeed + Acceleration * 50.0f * GetWorld()->GetDeltaSeconds(), BaseSpeed * 5.0f);
+
+	if (Distance < 100.0f)
+	{
+		CurrentSpeed = FMath::Max(CurrentSpeed * 0.8f, BaseSpeed);
+	}
 
 	ProjectileComp->Velocity = Direction * CurrentSpeed;
 	
 }
-
 

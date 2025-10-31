@@ -15,6 +15,6 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MoneyObject", meta = (AllowPrivateAccess="true"))
-	int32 MoneyValue;
+	float MoneyValue;
 	
 };

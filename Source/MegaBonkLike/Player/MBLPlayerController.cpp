@@ -189,4 +189,35 @@ void AMBLPlayerController::ShowMainMenu(bool bIsRestart)
 	}
 }
 
+void AMBLPlayerController::ShowEndGameScreen(bool bIsRestart)
+{
+	if (HUDWidgetInstance)
+	{
+		HUDWidgetInstance->RemoveFromParent();
+		HUDWidgetInstance = nullptr;
+	}
 
+	if (EndGameScreenWidgetInstance)
+	{
+		EndGameScreenWidgetInstance->RemoveFromParent();
+		EndGameScreenWidgetInstance = nullptr;
+	}
+
+	if (EndGameScreenWidgetClass)
+	{
+		EndGameScreenWidgetInstance = CreateWidget<UUserWidget>(this, EndGameScreenWidgetClass);
+		if (EndGameScreenWidgetInstance)
+		{
+			EndGameScreenWidgetInstance->AddToViewport();
+
+			bShowMouseCursor = true;
+			SetInputMode(FInputModeUIOnly());
+		}
+	}
+}
+
+void AMBLPlayerController::RestartGame()
+{
+	UGameplayStatics::OpenLevel(GetWorld(), FName("StartLevel"));
+	SetPause(false);
+}

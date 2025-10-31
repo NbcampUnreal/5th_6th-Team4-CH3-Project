@@ -25,7 +25,6 @@ void AOutgameUIPlayerController::BeginPlay()
 
 void AOutgameUIPlayerController::ShowMainMenu(bool bIsRestart)
 {
-
 	if (MainMenuWidgetInstance)
 	{
 		MainMenuWidgetInstance->RemoveFromParent();
@@ -41,18 +40,6 @@ void AOutgameUIPlayerController::ShowMainMenu(bool bIsRestart)
 
 			bShowMouseCursor = true;
 			SetInputMode(FInputModeUIOnly());
-		}
-
-		if (UTextBlock* ButtonText = Cast<UTextBlock>(MainMenuWidgetInstance->GetWidgetFromName(TEXT("StartButtonText"))))
-		{
-			if (bIsRestart)
-			{
-				ButtonText->SetText(FText::FromString(TEXT("Restart")));
-			}
-			else
-			{
-				ButtonText->SetText(FText::FromString(TEXT("Start")));
-			}
 		}
 	}
 }

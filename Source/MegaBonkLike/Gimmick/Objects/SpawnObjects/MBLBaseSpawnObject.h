@@ -31,8 +31,8 @@ private:
 	USceneComponent* SceneComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SpawnObject|Component", meta = (AllowPrivateAccess = "true"))
 	USphereComponent* CollisionComp;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SpawnObject|Component", meta = (AllowPrivateAccess = "true"))
-	USphereComponent* DetectionComp;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SpawnObject|Component", meta = (AllowPrivateAccess = "true"))
+	//USphereComponent* DetectionComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SpawnObject|Component", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* StaticMeshComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SpawnObject|Component", meta = (AllowPrivateAccess = "true"))
@@ -72,7 +72,7 @@ public:
 	virtual void OnObjectActivated(AActor* Activator) override;
 	virtual FName GetObejctType() const override;
 	virtual void DestroyObject() override;
-
+	void SetTarget(AActor* Target);
 private:
 	void RotationObject();
 	void ChaseToPlayer();
