@@ -18,11 +18,15 @@ public:
 
 	// 프로토 타입
 	FTimerHandle SpawnTimerHandle;
+	FTimerHandle GameOverTimerHandle;
 	AMBLSpawnVolume* SpawnVolume;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnemyClass")
 	TSubclassOf<AActor> Enemy;
 	float SpawnInterval;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test")
 	int32 MaxSpawnEnemy;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test")
+	float GameTime;
 	int32 CurrentEnemy;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DropTable")
 	UDataTable* DropTable;

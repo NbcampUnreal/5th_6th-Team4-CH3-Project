@@ -10,6 +10,7 @@ AMBLGameMode::AMBLGameMode()
     , Enemy(nullptr)
     , SpawnInterval(0.5f)
     , MaxSpawnEnemy(40)
+    , GameTime(30.f)
     , CurrentEnemy(0)
     , DropTable(nullptr)
 {
@@ -27,6 +28,14 @@ void AMBLGameMode::BeginPlay()
     SpawnVolume = Cast<AMBLSpawnVolume>(UGameplayStatics::GetActorOfClass(GetWorld(), AMBLSpawnVolume::StaticClass()));
 
     if (!SpawnVolume) UE_LOG(LogTemp, Error, TEXT("SpawnVolume not found"));
+
+    GetWorldTimerManager().SetTimer(
+        GameOverTimerHandle,
+        this,
+        &AMBLGameMode::GameOver,
+        GameTime,
+        false
+    );
 
     GetWorldTimerManager().SetTimer(
         SpawnTimerHandle,
