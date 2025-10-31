@@ -1,15 +1,13 @@
 ﻿#include "Player/MBLPlayerController.h"
-#include "IngameUI/XPBar.h"
+#include "IngameUI/UIHUD.h"
+#include "Character/MBLPlayerCharacter.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Game/MBLGameInstance.h"
-#include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
-#include "IngameUI/UIHUD.h"
-#include "Character/MBLPlayerCharacter.h"
 
 void AMBLPlayerController::BeginPlay()
 {
@@ -26,18 +24,7 @@ void AMBLPlayerController::BeginPlay()
 			}
 		}
 	}
-
-	//경험치
-	if (XPBarWidgetClass)
-	{
-		XPBarWidgetInstance = CreateWidget<UXPBar>(this, XPBarWidgetClass);
-		if (XPBarWidgetInstance)
-		{
-			XPBarWidgetInstance->AddToViewport();
-			XPBarWidgetInstance->UpdateXP(0.f, 100.f);
-		}
-	}
-
+	
 	ShowGameHUD();
 }
 
@@ -54,12 +41,37 @@ void AMBLPlayerController::SetupInputComponent()
 	}
 }
 
-//경험치
-void AMBLPlayerController::UpdateXPWidget(float CurrentXP, float MaxXP)
+void AMBLPlayerController::ShowGameHUD()
 {
-	if (XPBarWidgetInstance)
+	if (HUDWidgetInstance)
 	{
-		XPBarWidgetInstance->UpdateXP(CurrentXP, MaxXP);
+		HUDWidgetInstance->RemoveFromParent();
+		HUDWidgetInstance = nullptr;
+	}
+
+	if (HUDWidgetClass)
+	{
+		HUDWidgetInstance = CreateWidget<UUIHUD>(this, HUDWidgetClass);
+		if (HUDWidgetInstance)
+		{
+			HUDWidgetInstance->AddToViewport();
+
+			bShowMouseCursor = false;
+			SetInputMode(FInputModeGameOnly());
+
+			if (AMBLPlayerCharacter* PlayerCharacter = Cast<AMBLPlayerCharacter>(GetPawn()))
+			{
+				HUDWidgetInstance->SetPlayer(PlayerCharacter);
+			}
+		}
+	}
+}
+
+void AMBLPlayerController::UpdateXP(float CurrentXP, float MaxXP)
+{
+	if (HUDWidgetInstance)
+	{
+		HUDWidgetInstance->UpdateXP(CurrentXP, MaxXP);
 	}
 }
 
@@ -108,38 +120,7 @@ void AMBLPlayerController::QuitGame()
 
 UUserWidget* AMBLPlayerController::GetHUDWidget() const
 {
-	return nullptr;
-}
-
-void AMBLPlayerController::ShowGameHUD()
-{
-	if (HUDWidgetInstance)
-	{
-		HUDWidgetInstance->RemoveFromParent();
-		HUDWidgetInstance = nullptr;
-	}
-
-	if (MainMenuWidgetInstance)
-	{
-		MainMenuWidgetInstance->RemoveFromParent();
-		MainMenuWidgetInstance = nullptr;
-	}
-
-	if (HUDWidgetClass)
-	{
-		HUDWidgetInstance = CreateWidget<UUIHUD>(this, HUDWidgetClass);
-		if (HUDWidgetInstance)
-		{
-			HUDWidgetInstance->AddToViewport();
-
-			bShowMouseCursor = false;
-			SetInputMode(FInputModeGameOnly());
-			if (AMBLPlayerCharacter* PlayerCharacter = Cast<AMBLPlayerCharacter>(GetPawn()))
-			{
-				HUDWidgetInstance->SetPlayer(PlayerCharacter);
-			}
-		}
-	}
+	return HUDWidgetInstance;
 }
 
 void AMBLPlayerController::ShowMainMenu(bool bIsRestart)

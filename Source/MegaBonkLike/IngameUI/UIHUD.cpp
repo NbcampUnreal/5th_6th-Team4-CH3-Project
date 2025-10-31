@@ -1,4 +1,5 @@
 ﻿#include "IngameUI/UIHUD.h"
+#include "IngameUI/XPBar.h"
 #include "Character/MBLPlayerCharacter.h"
 #include "Character/InventoryComponent.h"
 #include "IngameUI/UIHorizontalItemList.h"
@@ -40,5 +41,13 @@ void UUIHUD::UpdateItems()
 		{
 			MiscList->SetItems(Inventory->GetCachedItems(EItemType::Misc));
 		}
+	}
+}
+
+void UUIHUD::UpdateXP(float CurrentXP, float MaxXP)
+{
+	if (XPBarWidget)
+	{
+		XPBarWidget->UpdateXP(CurrentXP, MaxXP);
 	}
 }
