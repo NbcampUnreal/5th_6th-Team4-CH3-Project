@@ -13,17 +13,37 @@ class MEGABONKLIKE_API AMBLNonPlayerCharacter : public AMBLCharacterBase
 
 public:
 	AMBLNonPlayerCharacter();
+	void ApplyDamage(AActor* DamagedActor);
+	void DeadHandle() override;
+	UFUNCTION()
+	void OnDamageColliderBeginOverlap(
+		UPrimitiveComponent* OverlappedComp, 
+		AActor* OtherActor, 
+		UPrimitiveComponent* OtherComp, 
+		int32 TherBodyIndex, 
+		bool bFromSweep, 
+		const FHitResult& SweepResult
+	);
+	UFUNCTION()
+	void OnDamageColliderEndOverlap(
+		UPrimitiveComponent* OverlappedComp,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex
+	);
+	
+	void DamageTick();
 
 protected:
 	virtual void BeginPlay() override;
-
-	void DeadHandle() override;
 
 #pragma region NPC Stat 
 
 public:
 	void SetMovementSpeed(float NewSpeed);
 
+	UPROPERTY(VisibleAnywhere)
+	UCapsuleComponent* DamageCollider;
 	UPROPERTY(EditAnywhere, Category = "Stats")
 	float WalkSpeed = 300.f;
 	UPROPERTY(EditAnywhere, Category = "Stats")
@@ -33,17 +53,19 @@ public:
 	TSubclassOf<class AMBLMoneyObject> GoldCoin;
 	UPROPERTY(EditDefaultsOnly, Category = "Drop")
 	TSubclassOf<class AMBLExpObject> ExpCoin;
+	TObjectPtr<AActor> DamageTarget;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Stats")
-	int32 Attack;
+	float Attack;
 
 #pragma endregion 
 
 
 private:
 	bool bIsDead;
-
+	bool bCanDamagePlayer;
+	FTimerHandle DamageTimerHandle;
 	//테스트용 코드
 	void KillSelf();
 };
