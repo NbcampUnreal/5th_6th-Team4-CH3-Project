@@ -1,14 +1,14 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Skill/SkillActionBase.h"
+#include "Skill/WeaponSkillAction.h"
 #include "Skill/SkillEffect/SkillEffectSet.h"
-#include "SA_AttachToPlayer.generated.h"
+#include "WSA_AttachToPlayer.generated.h"
 
 class ADamageAreaActor;
 
 UCLASS()
-class MEGABONKLIKE_API USA_AttachToPlayer : public USkillActionBase
+class MEGABONKLIKE_API UWSA_AttachToPlayer : public UWeaponSkillAction
 {
 	GENERATED_BODY()
 

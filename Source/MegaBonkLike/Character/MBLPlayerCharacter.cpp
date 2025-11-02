@@ -17,6 +17,7 @@
 #include "IngameUI/HPBar.h"
 #include "MegaBonkLike.h"
 #include "Player/MBLPlayerController.h"
+#include "Item/ItemSelectOption.h"
 
 AMBLPlayerCharacter::AMBLPlayerCharacter()
 {
@@ -62,6 +63,7 @@ AMBLPlayerCharacter::AMBLPlayerCharacter()
 	BaseMaxHP = 100.0f;
 	InteractRadius = 250.0f;
 	BaseAttractRadius = 300.0f;
+	BaseJumpVelocity = 560.0f;
 }
 
 void AMBLPlayerCharacter::BeginPlay()
@@ -79,8 +81,10 @@ void AMBLPlayerCharacter::BeginPlay()
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_GoldGain, 1.0f);
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_MaxHP, 1.0f);
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_PickupRange, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_JumpCount, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_JumpHeight, 1.0f);
 
-	AttributeComponent->AddAttributeChangedCallback(
+	AddAttributeChangedCallback(
 		TAG_Attribute_MoveSpeed,
 		this,
 		[WeakThis = TWeakObjectPtr<ThisClass>(this)](const TWeakObjectPtr<UAttribute> Attribute)
@@ -89,13 +93,31 @@ void AMBLPlayerCharacter::BeginPlay()
 				WeakThis->RecalculateSpeed();
 		});
 
-	AttributeComponent->AddAttributeChangedCallback(
+	AddAttributeChangedCallback(
 		TAG_Attribute_MaxHP,
 		this,
 		[WeakThis = TWeakObjectPtr<ThisClass>(this)](const TWeakObjectPtr<UAttribute> Attribute)
 		{
 			if (WeakThis.IsValid())
 				WeakThis->SetPlayerMaxHP();
+		});
+
+	AddAttributeChangedCallback(
+		TAG_Attribute_JumpCount,
+		this,
+		[WeakThis = TWeakObjectPtr<ThisClass>(this)](const TWeakObjectPtr<UAttribute> Attribute)
+		{
+			if (WeakThis.IsValid())
+				WeakThis->SetPlayerMaxJumpCount();
+		});
+
+	AddAttributeChangedCallback(
+		TAG_Attribute_JumpHeight,
+		this,
+		[WeakThis = TWeakObjectPtr<ThisClass>(this)](const TWeakObjectPtr<UAttribute> Attribute)
+		{
+			if (WeakThis.IsValid())
+				WeakThis->SetPlayerMaxJumpHeight();
 		});
 
 	SetLevel(1);
@@ -106,6 +128,8 @@ void AMBLPlayerCharacter::BeginPlay()
 	}
 
 	SetPlayerMaxHP();
+	SetPlayerMaxJumpCount();
+	SetPlayerMaxJumpHeight();
 	UpdateCurrHP(MaxHP);
 	if (UHPBar* HPBar = Cast<UHPBar>(HPBarWidget->GetUserWidgetObject()))
 	{
@@ -170,16 +194,26 @@ void AMBLPlayerCharacter::AcquireExp(float Exp)
 	while (CurrExp >= MaxExp)
 	{
 		CurrExp -= MaxExp;
-		SetLevel(Level + 1);
+		LevelUp();
 	}
 	OnExpChanged.Broadcast(CurrExp, MaxExp);
+}
+
+void AMBLPlayerCharacter::LevelUp()
+{
+	SetLevel(Level + 1);
+	OnChangedLevel.Broadcast(Level);
+
+	auto SelectOptions = Inventory->GetItemSelectOptionsInWeaponAndTomes(3);
+	for (int i = 0; i < SelectOptions.Num(); ++i)
+	{
+		Inventory->AddOrUpgradeItem(SelectOptions[i]);
+	}
 }
 
 void AMBLPlayerCharacter::SetLevel(int32 InLevel)
 {
 	Level = InLevel;
-	OnChangedLevel.Broadcast(Level);
-
 	SetMaxExp();
 }
 
@@ -238,12 +272,24 @@ void AMBLPlayerCharacter::Interact(const FInputActionValue& Value)
 
 void AMBLPlayerCharacter::InputTempAcquireItem()
 {
-	Inventory->AddOrUpgradeItem(100);
-	Inventory->AddOrUpgradeItem(101);
-	Inventory->AddOrUpgradeItem(102);
-	Inventory->AddOrUpgradeItem(103);
-	Inventory->AddOrUpgradeItem(200);
-	Inventory->AddOrUpgradeItem(300);
+	auto SelectOptions = Inventory->GetItemSelectOptionsInWeaponAndTomes(3);
+	for (int i = 0; i < SelectOptions.Num(); ++i)
+	{
+		Inventory->AddOrUpgradeItem(SelectOptions[i]);
+	}
+
+	auto SelectMiscOptions = Inventory->GetItemSelectOptionsInMisc(1);
+	for (int i = 0; i < SelectMiscOptions.Num(); ++i)
+	{
+		Inventory->AddOrUpgradeItem(SelectMiscOptions[i]);
+	}
+	/*Inventory->AddItem(100);
+	Inventory->AddItem(101);
+
+	Inventory->AddItem(102);
+	Inventory->AddItem(103);
+	Inventory->AddItem(200);
+	Inventory->AddItem(300);*/
 }
 
 void AMBLPlayerCharacter::RecalculateSpeed()
@@ -281,6 +327,19 @@ void AMBLPlayerCharacter::SetMaxExp()
 void AMBLPlayerCharacter::SetPlayerMaxHP()
 {
 	SetMaxHP(BaseMaxHP * GetAttributeValue(TAG_Attribute_MaxHP));
+}
+
+void AMBLPlayerCharacter::SetPlayerMaxJumpCount()
+{
+	JumpMaxCount = GetAttributeValue(TAG_Attribute_JumpCount);
+}
+
+void AMBLPlayerCharacter::SetPlayerMaxJumpHeight()
+{
+	if (UCharacterMovementComponent* Movement = GetCharacterMovement())
+	{
+		Movement->JumpZVelocity = BaseJumpVelocity * GetAttributeValue(TAG_Attribute_JumpHeight);
+	}
 }
 
 void AMBLPlayerCharacter::AttractItems()

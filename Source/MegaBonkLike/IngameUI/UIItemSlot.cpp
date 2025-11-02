@@ -1,6 +1,8 @@
 ﻿#include "IngameUI/UIItemSlot.h"
 #include "Components/TextBlock.h"
-#include "Item/ItemBase.h"
+#include "Item/WeaponItem.h"
+#include "Item/TomesItem.h"
+#include "Item/MiscItem.h"
 #include "Item/ItemDataRow.h"
 
 void UUIItemSlot::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -17,9 +19,9 @@ void UUIItemSlot::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
 	// 아이템 상세 설명창 제거
 }
 
-void UUIItemSlot::SetItem(const UItemBase* InItem)
+void UUIItemSlot::SetItem(TWeakObjectPtr<UItemBase> InItem)
 {
-	Item = TWeakObjectPtr<const UItemBase>(InItem);
+	Item = InItem;
 	if (Item.IsValid() == false)
 		return;
 
@@ -27,8 +29,20 @@ void UUIItemSlot::SetItem(const UItemBase* InItem)
 	{
 		TextItemName->SetText(Item->GetData()->ItemName);
 	}
+
 	if (IsValid(TextItemLevel) == true)
 	{
-		TextItemLevel->SetText(FText::FromString(FString::Printf(TEXT("lvl %d"), Item->GetLevel())));
+		if (const UWeaponItem* Weapon = Cast<const UWeaponItem>(Item))
+		{
+			TextItemLevel->SetText(FText::FromString(FString::Printf(TEXT("lvl %d"), Weapon->GetLevel())));
+		}
+		else if (const UTomesItem* Tomes = Cast<const UTomesItem>(Item))
+		{
+			TextItemLevel->SetText(FText::FromString(FString::Printf(TEXT("lvl %d"), Tomes->GetLevel())));
+		}
+		else if (const UMiscItem* Misc = Cast<const UMiscItem>(Item))
+		{
+			TextItemLevel->SetText(FText::FromString(FString::Printf(TEXT("%d"), Misc->GetStackCount())));
+		}
 	}
 }

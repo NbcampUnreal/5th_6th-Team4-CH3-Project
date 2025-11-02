@@ -1,26 +1,58 @@
 ﻿#include "Item/WeaponItem.h"
 #include "Item/ItemDataRow.h"
 #include "Character/AttributeComponent.h"
+#include "Character/SkillComponent.h"
+#include "Skill/Skill.h"
 
-void UWeaponItem::AddAttributeModifiers(UAttributeComponent*, EItemRarity InRarity)
+void UWeaponItem::Init(AActor* InOwner, const FItemDataRow* InData)
 {
+	Super::Init(InOwner, InData);
+
+	Level = 1;
+
 	const FWeaponItemDataRow* WeaponData = (FWeaponItemDataRow*)Data;
 	if (WeaponData == nullptr)
 		return;
 
 	for (const auto& Entry : WeaponData->WeaponAttributeEntry)
 	{
-		if (Level == 1)
-		{
-			WeaponAttributeSet.AddAttribute(Entry.AttributeTag, Entry.BaseValue);
-		}
-		else
-		{
-			FAttributeModifier NewModifier;
-			NewModifier.Type = Entry.UpgradeModifier.Type;
-			NewModifier.Value = Entry.UpgradeModifier.Value * GetRarityMultiplier(InRarity);
-			WeaponAttributeSet.AddModifier(Entry.AttributeTag, NewModifier);
-		}
+		WeaponAttributeSet.AddAttribute(Entry.AttributeTag, Entry.BaseValue);
+	}
+
+	if (Owner.IsValid() == false)
+		return;
+
+	if (USkillComponent* SkillComponent = Owner->FindComponentByClass<USkillComponent>())
+	{
+		USkill* CDO = WeaponData->SkillClass->GetDefaultObject<USkill>();
+		USkill* NewSkill = DuplicateObject<USkill>(CDO, SkillComponent);
+		NewSkill->SetOwnerWeapon(this);
+		SkillId = SkillComponent->AddSkill(NewSkill);
+	}
+}
+
+void UWeaponItem::Upgrade(const FItemUpgradeContext& Context)
+{
+	++Level;
+
+	const FWeaponItemDataRow* WeaponData = (FWeaponItemDataRow*)Data;
+	if (WeaponData == nullptr)
+		return;
+
+	for (const auto& [Tag, Modifier] : Context.AttributeChanges)
+	{
+		WeaponAttributeSet.AddModifier(Tag, Modifier);
+	}
+}
+
+void UWeaponItem::OnDestroy()
+{
+	if (Owner.IsValid() == false)
+		return;
+
+	if (USkillComponent* SkillComponent = Owner->FindComponentByClass<USkillComponent>())
+	{
+		SkillComponent->RemoveSkill(SkillId);
 	}
 }
 

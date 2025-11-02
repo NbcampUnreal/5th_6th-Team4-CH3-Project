@@ -1,10 +1,10 @@
-﻿#include "Skill/SA_AttachToPlayer.h"
+﻿#include "Skill/WSA_AttachToPlayer.h"
 #include "Skill/DamageAreaActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Item/WeaponItem.h"
 #include "Character/MBLPlayerCharacter.h"
 
-void USA_AttachToPlayer::Activate(TWeakObjectPtr<AActor> InInstigator)
+void UWSA_AttachToPlayer::Activate(TWeakObjectPtr<AActor> InInstigator)
 {
     Super::Activate(InInstigator);
 
@@ -40,7 +40,7 @@ void USA_AttachToPlayer::Activate(TWeakObjectPtr<AActor> InInstigator)
     CheckHitEffects.SetOwner(Instigator);
 }
 
-void USA_AttachToPlayer::Deactivate()
+void UWSA_AttachToPlayer::Deactivate()
 {
     if (IsValid(AttachedActor) == true)
     {
@@ -56,23 +56,24 @@ void USA_AttachToPlayer::Deactivate()
     }
 }
 
-void USA_AttachToPlayer::SetDamage()
+void UWSA_AttachToPlayer::SetDamage()
 {
     if (IsValid(AttachedActor) == false)
         return;
-    float Damage = GetWeaponValue(TAG_Attribute_Damage) * GetAttributeValue(TAG_Attribute_Damage);
+
+    float Damage = GetValue(TAG_Attribute_Damage);
     AttachedActor->SetDamage(Damage);
 }
 
-void USA_AttachToPlayer::SetSize()
+void UWSA_AttachToPlayer::SetSize()
 {
     if (IsValid(AttachedActor) == false)
         return;
-    float Size = GetWeaponValue(TAG_Attribute_Size) * GetAttributeValue(TAG_Attribute_Size);
-    AttachedActor->SetActorScale3D(Size * FVector::OneVector);
+
+    AttachedActor->SetActorScale3D(GetValue(TAG_Attribute_Size) * FVector::OneVector);
 }
 
-void USA_AttachToPlayer::CheckHit()
+void UWSA_AttachToPlayer::CheckHit()
 {
     if (IsValid(AttachedActor) == false)
         return;

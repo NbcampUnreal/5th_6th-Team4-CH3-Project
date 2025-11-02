@@ -11,7 +11,11 @@ class MEGABONKLIKE_API UWeaponItem : public UItemBase
 	GENERATED_BODY()
 
 public:
-	virtual void AddAttributeModifiers(UAttributeComponent*, EItemRarity InRarity = EItemRarity::Common) override;
+	virtual void Init(AActor* InOwner, const FItemDataRow* InData) override;
+	virtual void Upgrade(const FItemUpgradeContext& UpgradeContext) override;
+	virtual void OnDestroy() override;
+
+	int32 GetLevel() const { return Level; }
 
 	int32 GetSkillId() const { return SkillId; }
 	void SetSkillId(int32 InSkillId);
@@ -25,4 +29,7 @@ protected:
 	int32 SkillId;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	FAttributeSet WeaponAttributeSet;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	int32 Level = 1;
 };

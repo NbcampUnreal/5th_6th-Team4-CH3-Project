@@ -25,12 +25,3 @@ enum class EItemRarity : uint8
 	Epic,
 	Legendary
 };
-
-UENUM()
-enum class EMiscItemRarity : uint8
-{
-	Common,
-	Uncommon,
-	Rare,
-	Legendary
-};

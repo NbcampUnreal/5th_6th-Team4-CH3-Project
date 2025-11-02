@@ -11,3 +11,5 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Attribute_ExpGain, "Attribute.ExpGain");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Attribute_GoldGain, "Attribute.GoldGain");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Attribute_MaxHP, "Attribute.MaxHP");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Attribute_PickupRange, "Attribute.PickupRange");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Attribute_JumpCount, "Attribute.JumpCount");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Attribute_JumpHeight, "Attribute.JumpHeight");

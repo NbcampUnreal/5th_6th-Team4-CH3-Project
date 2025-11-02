@@ -13,7 +13,7 @@ class MEGABONKLIKE_API UUIHorizontalItemList : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void SetItems(const TArray<UItemBase*> Items);
+	void SetItems(const TArray<TWeakObjectPtr<UItemBase>>& Items);
 
 protected:
 	UPROPERTY(meta = (BindWidget))

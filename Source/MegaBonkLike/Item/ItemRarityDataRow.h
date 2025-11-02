@@ -2,15 +2,18 @@
 
 #include "CoreMinimal.h"
 #include "Item/ItemEnums.h"
-#include "MiscItemWeightDataRow.generated.h"
+#include "ItemRarityDataRow.generated.h"
+
 
 USTRUCT(BlueprintType)
-struct MEGABONKLIKE_API FMiscItemWeightDataRow : public FTableRowBase
+struct MEGABONKLIKE_API FItemRarityDataRow : public FTableRowBase
 {
 	GENERATED_BODY()
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EItemRarity ItemRarity;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Weight;
+	float Multiplier;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AppearanceRate;
 };

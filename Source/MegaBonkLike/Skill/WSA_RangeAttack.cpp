@@ -1,11 +1,11 @@
-﻿#include "Skill/SA_RangeAttack.h"
+﻿#include "Skill/WSA_RangeAttack.h"
 #include "Skill/Projectile.h"
 #include "Engine/OverlapResult.h"
 #include "TimerManager.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "MegaBonkLike.h"
 
-void USA_RangeAttack::Activate(TWeakObjectPtr<AActor> InInstigator)
+void UWSA_RangeAttack::Activate(TWeakObjectPtr<AActor> InInstigator)
 {
 	Super::Activate(InInstigator);
 
@@ -13,15 +13,15 @@ void USA_RangeAttack::Activate(TWeakObjectPtr<AActor> InInstigator)
 	SetIntervalTimer();
 }
 
-void USA_RangeAttack::StartShoot()
+void UWSA_RangeAttack::StartShoot()
 {
-	ProjectileCount = GetWeaponValue(TAG_Attribute_AttackProjectiles) * GetAttributeValue(TAG_Attribute_AttackProjectiles);
-	float Interval = BaseTimerInterval / GetWeaponValue(TAG_Attribute_AttackSpeed) * GetAttributeValue(TAG_Attribute_AttackSpeed);
+	ProjectileCount = GetValue(TAG_Attribute_AttackProjectiles);
+	float Interval = BaseTimerInterval / GetValue(TAG_Attribute_AttackSpeed);
 	AttackInterval = ProjectileCount > 1 ? Interval * 0.5f / (ProjectileCount - 1) : 0.0f;
 	ExecuteShoot();
 }
 
-void USA_RangeAttack::ExecuteShoot()
+void UWSA_RangeAttack::ExecuteShoot()
 {
 	if (ProjectileCount <= 0)
 		return;
@@ -39,7 +39,7 @@ void USA_RangeAttack::ExecuteShoot()
 	}
 }
 
-void USA_RangeAttack::DetectEnemy()
+void UWSA_RangeAttack::DetectEnemy()
 {
 	AttackTargets.Empty();
 
@@ -69,7 +69,7 @@ void USA_RangeAttack::DetectEnemy()
 	}
 }
 
-void USA_RangeAttack::ShootRandomTarget()
+void UWSA_RangeAttack::ShootRandomTarget()
 {
 	DetectEnemy();
 	if (AttackTargets.IsEmpty())
@@ -103,7 +103,7 @@ void USA_RangeAttack::ShootRandomTarget()
 	Shoot(TargetDir);
 }
 
-void USA_RangeAttack::Shoot(const FVector& TargetDir)
+void UWSA_RangeAttack::Shoot(const FVector& TargetDir)
 {
 	if (bShootSpread)
 	{
@@ -128,7 +128,7 @@ void USA_RangeAttack::Shoot(const FVector& TargetDir)
 	}
 }
 
-void USA_RangeAttack::ShootSpread(const FVector& TargetDir)
+void UWSA_RangeAttack::ShootSpread(const FVector& TargetDir)
 {
 	if (ProjectileCount == 1)
 	{
@@ -148,7 +148,7 @@ void USA_RangeAttack::ShootSpread(const FVector& TargetDir)
 	}
 }
 
-void USA_RangeAttack::ShootSingle(const FVector& TargetDir)
+void UWSA_RangeAttack::ShootSingle(const FVector& TargetDir)
 {
 	FVector SpawnLocation = Instigator->GetActorLocation() + TargetDir * 10.f;
 	FRotator SpawnRotation = TargetDir.Rotation();
@@ -160,12 +160,9 @@ void USA_RangeAttack::ShootSingle(const FVector& TargetDir)
 	if (IsValid(Projectile) == true)
 	{
 		Projectile->SetActorEnableCollision(false);
-		float ProjectileSpeed = GetWeaponValue(TAG_Attribute_ProjectileSpeed) * GetAttributeValue(TAG_Attribute_ProjectileSpeed);
-		Projectile->SetDirectionAndSpeed(TargetDir, ProjectileSpeed);
-		float Size = GetWeaponValue(TAG_Attribute_Size) * GetAttributeValue(TAG_Attribute_Size);
-		Projectile->SetSize(Size);
-		float Damage = GetWeaponValue(TAG_Attribute_Damage) * GetAttributeValue(TAG_Attribute_Damage);
-		Projectile->SetDamage(Damage);
+		Projectile->SetDirectionAndSpeed(TargetDir, GetValue(TAG_Attribute_ProjectileSpeed));
+		Projectile->SetSize(GetValue(TAG_Attribute_Size));
+		Projectile->SetDamage(GetValue(TAG_Attribute_Damage));
 		Projectile->SetPenetrate(bPenetrate);
 		Projectile->SetActorEnableCollision(true);
 	}

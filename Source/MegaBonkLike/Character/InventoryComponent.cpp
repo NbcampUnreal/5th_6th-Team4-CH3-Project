@@ -7,6 +7,11 @@
 #include "Item/TomesItem.h"
 #include "Item/MiscItem.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Algo/RandomShuffle.h"
+#include "Item/ItemRarityDataRow.h"
+#include "Item/ItemSelectOption.h"
+#include "Item/ItemUpgradeContext.h"
+#include "Item/MiscItemWeightDataRow.h"
 
 UInventoryComponent::UInventoryComponent()
 {
@@ -14,7 +19,7 @@ UInventoryComponent::UInventoryComponent()
 
 	for (EItemType Type : TEnumRange<EItemType>())
 	{
-		CachedItemsByType.Add(Type, TArray<UItemBase*>());
+		CachedItemsByType.Add(Type, FCachedItems());
 	}
 }
 
@@ -23,16 +28,21 @@ void UInventoryComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-void UInventoryComponent::AddOrUpgradeItem(int32 InItemId, EItemRarity InRarity)
+void UInventoryComponent::AddOrUpgradeItem(const FItemSelectOption& SelectedOption)
 {
-	UItemBase* Item = FindItem(InItemId);
-	if (IsValid(Item) == false)
+	if (SelectedOption.bIsNewItem == true)
 	{
-		AddItem(InItemId);
+		AddItem(SelectedOption.ItemId);
 	}
 	else
 	{
-		UpgradeItem(InItemId, InRarity);
+		FItemUpgradeContext UpgradeContext;
+		UpgradeContext.ItemId = SelectedOption.ItemId;
+		for (const auto& Changes : SelectedOption.AttributeChanges)
+		{
+			UpgradeContext.AttributeChanges.Add(Changes.AttributeTag, FAttributeModifier(Changes.ModifierType, Changes.DeltaValue));
+		}
+		UpgradeItem(UpgradeContext);
 	}
 }
 
@@ -53,35 +63,20 @@ void UInventoryComponent::AddItem(int32 InItemId)
 		case EItemType::Misc: Item = NewObject<UMiscItem>(); break;
 		default: return;
 	}
-	Item->SetData(Data);
-	if (UAttributeComponent* AttributeComponent = GetOwner()->FindComponentByClass<UAttributeComponent>())
-	{
-		Item->AddAttributeModifiers(AttributeComponent);
-	}
-
-	if (Data->ItemType == EItemType::Weapon)
-		AddWeaponSkill(Item);
+	Item->Init(GetOwner(), Data);
 	Items.Add(Item);
-	CachedItemsByType[Data->ItemType].Add(Item);
+	CachedItemsByType[Data->ItemType].Items.Add(Item);
 
 	OnItemChanged.Broadcast();
 }
 
-void UInventoryComponent::UpgradeItem(int32 InItemId, EItemRarity InRarity)
+void UInventoryComponent::UpgradeItem(const FItemUpgradeContext& Context)
 {
-	const FItemDataRow* Data = GetItemData(InItemId);
-	if (Data == nullptr)
+	UItemBase* Item = FindItem(Context.ItemId);
+	if (IsValid(Item) == false)
 		return;
 
-	UItemBase* Item = FindItem(InItemId);
-	if (Item == nullptr)
-		return;
-
-	Item->Upgrade();	
-	if (UAttributeComponent* AttributeComponent = GetOwner()->FindComponentByClass<UAttributeComponent>())
-	{
-		Item->AddAttributeModifiers(AttributeComponent, InRarity);
-	}
+	Item->Upgrade(Context);
 
 	OnItemChanged.Broadcast();
 }
@@ -92,18 +87,15 @@ void UInventoryComponent::RemoveItem(int32 InItemId)
 	if (Item == nullptr)
 		return;
 
-	if (Item->GetData()->ItemType == EItemType::Weapon)
-		RemoveWeaponSkill(Item);
+	Item->OnDestroy();
 
-	UAttributeComponent* AttributeComponent = GetOwner()->FindComponentByClass<UAttributeComponent>();
-	Item->RemoveAttributeModifiers(AttributeComponent);
 	Items.Remove(Item);
-	CachedItemsByType[Item->GetData()->ItemType].Remove(Item);
+	CachedItemsByType[Item->GetData()->ItemType].Items.Remove(Item);
 
 	OnItemChanged.Broadcast();
 }
 
-UItemBase* UInventoryComponent::FindItem(int32 InItemId)
+UItemBase* UInventoryComponent::FindItem(int32 InItemId) const
 {
 	auto* Item = Items.FindByPredicate(
 		[InItemId](const TObjectPtr<UItemBase>& Item)
@@ -111,6 +103,19 @@ UItemBase* UInventoryComponent::FindItem(int32 InItemId)
 			return Item->GetData()->ItemId == InItemId;
 		});
 	return Item ? *Item : nullptr;
+}
+
+bool UInventoryComponent::CanAddItem(EItemType InType) const
+{
+	switch (InType)
+	{
+		case EItemType::Weapon: 
+			return CachedItemsByType[EItemType::Weapon].Items.Num() < MaxWeaponCount;
+		case EItemType::Tomes:
+			return CachedItemsByType[EItemType::Tomes].Items.Num() < MaxTomesCount;
+		default:
+			return true;
+	}
 }
 
 const FItemDataRow* UInventoryComponent::GetItemData(EItemType InItemType, int32 InItemId) const
@@ -142,34 +147,181 @@ const FItemDataRow* UInventoryComponent::GetItemData(int32 InItemId) const
 	return nullptr;
 }
 
-void UInventoryComponent::AddWeaponSkill(UItemBase* Item)
+TArray<FItemSelectOption> UInventoryComponent::GetItemSelectOptionsInWeaponAndTomes(int Count) const
 {
-	auto* Weapon = (UWeaponItem*)Item;
-	if (IsValid(Weapon) == false)
-		return;
+	TArray<FItemSelectOption> Results;
 
-	auto* Data = (FWeaponItemDataRow*)Item->GetData();
-	if (Data == nullptr)
-		return;
+	TArray<const FItemDataRow*> TargetDatas;
+	auto GetTargetDatas =
+		[&](EItemType Type)
+		{
+			if (CanAddItem(Type) == true)
+			{
+				const auto& Rows = ItemDataTables[Type]->GetRowMap();
+				for (const auto& Row : Rows)
+				{
+					FItemDataRow* Data = (FItemDataRow*)Row.Value;
+					TargetDatas.Add(Data);
+				}
+			}
+			else
+			{
+				const auto& CurrItems = GetCachedItems(Type);
+				for (const auto& Item : CurrItems)
+				{
+					TargetDatas.Add(Item->GetData());
+				}
+			}
+		};
 
-	if (USkillComponent* SkillComponent = GetOwner()->FindComponentByClass<USkillComponent>())
+	GetTargetDatas(EItemType::Weapon);
+	GetTargetDatas(EItemType::Tomes);
+
+	Algo::RandomShuffle(TargetDatas);
+
+	for (int i = 0; i < Count && i < TargetDatas.Num(); ++i)
 	{
-		USkill* CDO = Data->SkillClass->GetDefaultObject<USkill>();
-		USkill* NewSkill = DuplicateObject<USkill>(CDO, SkillComponent);
-		NewSkill->SetOwnerWeapon(Weapon);
-		int32 SkillId = SkillComponent->AddSkill(NewSkill);
-		Weapon->SetSkillId(SkillId);
+		const FItemRarityDataRow* Rarity = GetRandomRarity();
+		if (Rarity == nullptr)
+			continue;
+
+		FItemSelectOption Result;
+		FItemUpgradeContext UpgradeContext;
+		Result.ItemId = TargetDatas[i]->ItemId;
+		Result.Rarity = Rarity->ItemRarity;
+		UItemBase* ExistItem = FindItem(Result.ItemId);
+		Result.bIsNewItem = ExistItem == nullptr;
+		if (TargetDatas[i]->ItemType == EItemType::Weapon)
+		{
+			FWeaponItemDataRow* WeaponData = (FWeaponItemDataRow*)TargetDatas[i];
+			int EntryCount = WeaponData->WeaponAttributeEntry.Num();
+			TArray<int32> IdxArray;
+			IdxArray.SetNum(EntryCount);
+			for (int j = 0; j < EntryCount; ++j)
+			{
+				IdxArray[j] = j;
+			}
+			Algo::RandomShuffle(IdxArray);
+			int UpgradeEntryCount = FMath::Min(EntryCount, (Result.Rarity > EItemRarity::Common ? 2 : FMath::RandRange(1, 2)));
+			for (int j = 0; j < UpgradeEntryCount; ++j)
+			{
+				FAttributeComparison NewComparison;
+				const auto& UpgradeEntry = WeaponData->WeaponAttributeEntry[IdxArray[j]];
+				NewComparison.AttributeTag = UpgradeEntry.AttributeTag;
+				const UWeaponItem* ExistWeapon = Cast<UWeaponItem>(ExistItem);
+				if (ExistWeapon != nullptr)
+				{
+					NewComparison.CurrentValue = ExistWeapon->GetAttributeValue(UpgradeEntry.AttributeTag);
+					NewComparison.DeltaValue = UpgradeEntry.UpgradeModifier.Value * Rarity->Multiplier;
+
+				}
+				else
+				{
+					NewComparison.CurrentValue = 0.0f;
+					NewComparison.DeltaValue = WeaponData->WeaponAttributeEntry[IdxArray[j]].BaseValue;
+				}
+				NewComparison.NewValue = NewComparison.CurrentValue + NewComparison.DeltaValue;
+				Result.AttributeChanges.Add(NewComparison);
+			}
+		}
+		else if (TargetDatas[i]->ItemType == EItemType::Tomes)
+		{
+			FTomesItemDataRow* TomesData = (FTomesItemDataRow*)TargetDatas[i];
+			if (TomesData->AttributeModifiers.IsEmpty() == true)
+				continue;
+
+			TArray<FGameplayTag> Keys;
+			TomesData->AttributeModifiers.GetKeys(Keys);		
+			int32 RandomKeyIdx = FMath::RandRange(0, TomesData->AttributeModifiers.Num() - 1);
+			FGameplayTag Tag = Keys[RandomKeyIdx];
+			const auto& UpgradeModifier = TomesData->AttributeModifiers[Tag];
+			FAttributeComparison NewComparison;
+			NewComparison.AttributeTag = Tag;
+			const UTomesItem* ExistTomes = Cast<UTomesItem>(ExistItem);
+			NewComparison.CurrentValue = ExistTomes != nullptr ? ExistTomes->GetModifierValue(Tag) : 0.0f;
+			NewComparison.DeltaValue = UpgradeModifier.Value;
+			NewComparison.NewValue = NewComparison.CurrentValue + NewComparison.DeltaValue;
+			Result.AttributeChanges.Add(NewComparison);
+		}
+
+		Results.Add(Result);
 	}
+
+	return Results;
 }
 
-void UInventoryComponent::RemoveWeaponSkill(UItemBase* Item)
+TArray<FItemSelectOption> UInventoryComponent::GetItemSelectOptionsInMisc(int Count) const
 {
-	auto* Weapon = (UWeaponItem*)Item;
-	if (IsValid(Weapon) == false)
-		return;
+	TArray<FItemSelectOption> Results;
 
-	if (USkillComponent* SkillComponent = GetOwner()->FindComponentByClass<USkillComponent>())
+	const auto& MiscWeightRows = MiscItemWeightTable->GetRowMap();
+	TMap<EItemRarity, float> MiscWeightMap;
+	for (const auto& Row : MiscWeightRows)
 	{
-		SkillComponent->RemoveSkill(Weapon->GetSkillId());
+		FMiscItemWeightDataRow* Data = (FMiscItemWeightDataRow*)Row.Value;
+		MiscWeightMap.Add(Data->ItemRarity, Data->Weight);
 	}
+
+	const auto& MiscTable = ItemDataTables[EItemType::Misc]->GetRowMap();
+	float TotalMiscWeight = 0.0f;
+	TMap<int32, float> ItemWeights;
+	for (const auto& Row : MiscTable)
+	{
+		FMiscItemDataRow* Data = (FMiscItemDataRow*)Row.Value;
+		float ItemWeight = MiscWeightMap[Data->ItemRarity];
+		ItemWeights.Add(Data->ItemId, ItemWeight);
+		TotalMiscWeight += ItemWeight;
+	}
+
+	int32 MaxItemCount = FMath::Min(Count, ItemWeights.Num());
+	for (int i = 0; i < MaxItemCount; ++i)
+	{
+		float RandomWeight = FMath::RandRange(0.0f, TotalMiscWeight);
+		int32 SelectedId = ItemWeights.begin()->Key;
+		for (const auto& [ItemId, Weight] : ItemWeights)
+		{
+			RandomWeight -= Weight;
+			if (RandomWeight <= 0.0f)
+			{
+				SelectedId = ItemId;
+				break;
+			}
+		}
+
+		FItemSelectOption Result;
+		Result.ItemId = SelectedId;
+		Result.bIsNewItem = FindItem(SelectedId) == nullptr;
+		// FItemSelectOption의 나머지 요소 안 씀.
+		Results.Add(Result);
+
+		TotalMiscWeight -= ItemWeights[SelectedId];
+		ItemWeights.Remove(SelectedId);
+	}
+
+	return Results;
+}
+
+const FItemRarityDataRow* UInventoryComponent::GetRandomRarity() const
+{
+	const auto& RarityRows = ItemRarityTable->GetRowMap();
+	TArray<FItemRarityDataRow*> RarityArray;
+	RarityArray.Reserve(RarityRows.Num());
+	float TotalRarityAppearRate = 0.0f;
+	for (const auto& Row : RarityRows)
+	{
+		FItemRarityDataRow* Data = (FItemRarityDataRow*)Row.Value;
+		TotalRarityAppearRate += Data->AppearanceRate;
+		RarityArray.Add(Data);
+	}
+
+	float RandomRate = FMath::RandRange(0.0f, TotalRarityAppearRate);
+	for (auto* Rarity : RarityArray)
+	{
+		RandomRate -= Rarity->AppearanceRate;
+		if (RandomRate <= 0.0f)
+		{
+			return Rarity;
+		}
+	}
+	return RarityArray.IsEmpty() ? nullptr : *RarityArray.begin();
 }

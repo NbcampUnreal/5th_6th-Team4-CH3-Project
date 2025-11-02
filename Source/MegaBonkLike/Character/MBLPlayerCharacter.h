@@ -38,6 +38,7 @@ public:
 	FVector GetFootLocation() const;
 
 	void AcquireExp(float Exp);
+	void LevelUp();
 	void SetLevel(int32 InLevel);
 
 	void AcquireGold(float InGold);
@@ -58,6 +59,8 @@ protected:
 
 	void SetMaxExp();
 	void SetPlayerMaxHP();
+	void SetPlayerMaxJumpCount();
+	void SetPlayerMaxJumpHeight();
 
 	void AttractItems();
 
@@ -98,6 +101,11 @@ protected:
 	float BaseMaxHP;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float BaseAttractRadius;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float BaseJumpVelocity;
+
+	UPROPERTY(VisibleAnywhere)
+	int32 CurrJumpCount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float InteractRadius;
