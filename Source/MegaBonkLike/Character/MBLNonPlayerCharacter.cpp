@@ -47,8 +47,6 @@ void AMBLNonPlayerCharacter::BeginPlay()
 		GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	}
 
-	OnDead.AddDynamic(this, &ThisClass::OnDeath);
-
 	//KillSelf();       몬스터죽음 테스트용
 }
 
@@ -62,8 +60,10 @@ void AMBLNonPlayerCharacter::SetMovementSpeed(float NewSpeed)
 	}
 }
 
-void AMBLNonPlayerCharacter::OnDeath()
+void AMBLNonPlayerCharacter::DeadHandle()
 {
+	Super::DeadHandle();
+
 	if (bIsDead) return;
 
 	bIsDead = true;
@@ -90,5 +90,5 @@ void AMBLNonPlayerCharacter::OnDeath()
 //테스트용 코드
 void AMBLNonPlayerCharacter::KillSelf()
 {
-	OnDeath();
+	DeadHandle();
 }

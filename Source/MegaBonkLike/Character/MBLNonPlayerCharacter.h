@@ -17,6 +17,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	void DeadHandle() override;
+
 #pragma region NPC Stat 
 
 public:
@@ -41,8 +43,6 @@ private:
 
 private:
 	bool bIsDead;
-	UFUNCTION()
-	void OnDeath();
 
 	//테스트용 코드
 	void KillSelf();
