@@ -21,6 +21,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateXP(float CurrentXP, float MaxXP);
 
+	UFUNCTION(BlueprintCallable)
+	void UpdateLevel(int32 CurrentLevel);
+
 	UFUNCTION()
 	void UpdateItems();
 
