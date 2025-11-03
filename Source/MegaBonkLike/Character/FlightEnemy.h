@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "Gimmick/Objects/SpawnObjects/MBLMoneyObject.h"
+#include "Gimmick/Objects/SpawnObjects/MBLExpObject.h"
 #include "FlightEnemy.generated.h"
 
 class USphereComponent;
@@ -50,6 +52,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float CurrHP;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Drop")
+	TSubclassOf<class AMBLMoneyObject> GoldCoin;
+	UPROPERTY(EditDefaultsOnly, Category = "Drop")
+	TSubclassOf<class AMBLExpObject> ExpCoin;
+
 	TObjectPtr<AActor> DamageTarget;
 
 private:
@@ -78,5 +85,5 @@ private:
 		FDamageEvent const& DamageEvent, 
 		AController* EventInstigator, 
 		AActor* DamageCauser) override;
-	void OnDead();
+	void DeadHandle();
 };

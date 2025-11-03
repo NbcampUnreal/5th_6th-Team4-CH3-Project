@@ -46,7 +46,6 @@ AMBLNonPlayerCharacter::AMBLNonPlayerCharacter()
 	GetCharacterMovement()->AvoidanceWeight = 1.f;
 
 	bIsDead = false;
-	bCanDamagePlayer = true;
 	MaxHP = 100;
 	CurrHP = MaxHP;
 	Attack = 5.f;
@@ -91,16 +90,35 @@ void AMBLNonPlayerCharacter::DeadHandle()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCharacterMovement()->DisableMovement();
 
-	FVector GoldSpawnLocation = GetActorLocation() + FVector(25.f, 0.f, 0.f);
-	FVector ExpSpawnLocation = GetActorLocation() + FVector(-25.f, 0.f, 0.f);
+	FVector Start = GetActorLocation();
+	FVector End = Start - FVector(0.f, 0.f, 10000.f);
+
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	FVector SpawnLocation = GetActorLocation();
+
+
+	if (GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		Start,
+		End,
+		ECC_Visibility,
+		Params))
+	{
+		SpawnLocation = HitResult.ImpactPoint + FVector(0.f, 0.f, 10.f);
+	}
+
 	if (GoldCoin)
 	{
-		GetWorld()->SpawnActor<AMBLMoneyObject>(GoldCoin, GoldSpawnLocation, FRotator::ZeroRotator);
+		GetWorld()->SpawnActor<AMBLMoneyObject>(GoldCoin, SpawnLocation + FVector(25.f, 0.f, 0.f), FRotator::ZeroRotator);
 	}
+
 	
 	if (ExpCoin)
 	{
-		GetWorld()->SpawnActor<AMBLExpObject>(ExpCoin, ExpSpawnLocation, FRotator::ZeroRotator);
+		GetWorld()->SpawnActor<AMBLExpObject>(ExpCoin, SpawnLocation + FVector(-25.f, 0.f, 0.f), FRotator::ZeroRotator);
 	}
 
 	Destroy();
@@ -165,8 +183,8 @@ void AMBLNonPlayerCharacter::ApplyDamage(AActor* DamagedActor)
 }
 
 
-//테스트용 코드
+/*테스트용 코드
 void AMBLNonPlayerCharacter::KillSelf()
 {
 	DeadHandle();
-}
+}*/

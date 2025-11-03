@@ -64,8 +64,8 @@ private:
 
 private:
 	bool bIsDead;
-	bool bCanDamagePlayer;
 	FTimerHandle DamageTimerHandle;
-	//테스트용 코드
-	void KillSelf();
+
+	/*테스트용 코드
+	void KillSelf();*/
 };

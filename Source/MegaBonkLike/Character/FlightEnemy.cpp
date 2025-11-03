@@ -5,6 +5,7 @@
 #include "GameFramework/Character.h"
 #include "TimerManager.h"
 #include "MegaBonkLike.h"
+#include "Game/MBLGameMode.h"
 
 AFlightEnemy::AFlightEnemy()
 {
@@ -162,12 +163,48 @@ float AFlightEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	CurrHP -= DamageAmount;
 	if (CurrHP <= 0.f)
 	{
-		OnDead();
+		DeadHandle();
 	}
 	return DamageAmount;
 }
 
-void AFlightEnemy::OnDead()
+void AFlightEnemy::DeadHandle()
 {
+	if (AMBLGameMode* GameMode = Cast<AMBLGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		GameMode->Dead(this);
+	}
+
+	FVector Start = GetActorLocation();
+	FVector End = Start - FVector(0.f, 0.f, 10000.f);
+
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	FVector SpawnLocation = GetActorLocation();
+
+
+	if (GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		Start,
+		End,
+		ECC_Visibility,
+		Params))
+	{
+		SpawnLocation = HitResult.ImpactPoint + FVector(0.f, 0.f, 10.f);
+	}
+
+	if (GoldCoin)
+	{
+		GetWorld()->SpawnActor<AMBLMoneyObject>(GoldCoin, SpawnLocation + FVector(25.f, 0.f, 0.f), FRotator::ZeroRotator);
+	}
+
+
+	if (ExpCoin)
+	{
+		GetWorld()->SpawnActor<AMBLExpObject>(ExpCoin, SpawnLocation + FVector(-25.f, 0.f, 0.f), FRotator::ZeroRotator);
+	}
+
 	Destroy();
 }
