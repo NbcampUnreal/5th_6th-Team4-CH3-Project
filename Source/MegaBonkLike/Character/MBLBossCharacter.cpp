@@ -80,6 +80,8 @@ void AMBLBossCharacter::SetMovementSpeed(float NewSpeed)
 
 void AMBLBossCharacter::DeadHandle()
 {
+	Super::DeadHandle();
+
 	if (bIsDead) return;
 
 	bIsDead = true;
