@@ -169,19 +169,13 @@ void AMBLNonPlayerCharacter::DamageTick()
 {
 	if (DamageTarget)
 	{
-		ApplyDamage(DamageTarget);
+		UGameplayStatics::ApplyDamage(DamageTarget, Attack, GetInstigatorController(), GetInstigator(), UDamageType::StaticClass());
 	}
 	else
 	{
 		GetWorldTimerManager().ClearTimer(DamageTimerHandle);
 	}
 }
-
-void AMBLNonPlayerCharacter::ApplyDamage(AActor* DamagedActor)
-{
-	UGameplayStatics::ApplyDamage(DamagedActor, Attack, GetInstigatorController(), GetInstigator(), UDamageType::StaticClass());
-}
-
 
 /*테스트용 코드
 void AMBLNonPlayerCharacter::KillSelf()

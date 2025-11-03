@@ -13,7 +13,6 @@ class MEGABONKLIKE_API AMBLNonPlayerCharacter : public AMBLCharacterBase
 
 public:
 	AMBLNonPlayerCharacter();
-	void ApplyDamage(AActor* DamagedActor);
 	void DeadHandle() override;
 	UFUNCTION()
 	void OnDamageColliderBeginOverlap(

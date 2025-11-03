@@ -4,6 +4,7 @@
 #include "Components/CapsuleComponent.h"
 #include "MonsterAttack/GroundAttack.h"
 #include "Kismet/GameplayStatics.h"
+#include "MegaBonkLike.h"
 
 AMBLBossCharacter::AMBLBossCharacter()
 {
@@ -19,6 +20,20 @@ AMBLBossCharacter::AMBLBossCharacter()
 	FRotator PivotRotation(0.f, -90.f, 0.f);
 	GetMesh()->SetRelativeLocationAndRotation(PivotPosition, PivotRotation);
 
+	//°¨Áö¿ë Ä¸½¶ÄÄÆ÷
+	DamageCollider = CreateDefaultSubobject<UCapsuleComponent>(TEXT("DamageCollider"));
+	DamageCollider->SetupAttachment(GetMesh());
+	DamageCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	DamageCollider->SetCollisionObjectType(ECC_WorldDynamic);
+	DamageCollider->SetCollisionResponseToAllChannels(ECR_Ignore);
+	DamageCollider->SetCollisionResponseToChannel(ECC_MBL_PLAYER, ECR_Overlap);
+	DamageCollider->SetRelativeLocation(FVector(0.f, 0.f, 90.f));
+	DamageCollider->SetCapsuleRadius(45.f);
+	DamageCollider->SetCapsuleHalfHeight(100.f);
+
+	DamageCollider->OnComponentBeginOverlap.AddDynamic(this, &AMBLBossCharacter::OnDamageColliderBeginOverlap);
+	DamageCollider->OnComponentEndOverlap.AddDynamic(this, &AMBLBossCharacter::OnDamageColliderEndOverlap);
+
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->AirControl = 0.5f;
@@ -31,7 +46,7 @@ AMBLBossCharacter::AMBLBossCharacter()
 	bIsDead = false;
 	MaxHP = 1000;
 	CurrHP = MaxHP;
-	Attack = 50;
+	Attack = 20;
 
 }
 
@@ -123,5 +138,60 @@ void AMBLBossCharacter::SpawnGroundAttack()
 	if (SkillArea)
 	{
 		SkillArea->Initialize(this);
+	}
+}
+
+void AMBLBossCharacter::OnDamageColliderBeginOverlap(
+	UPrimitiveComponent* OverlappedComp,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 TherBodyIndex,
+	bool bFromSweep,
+	const FHitResult& SweepResult)
+{
+	if (!OtherActor || !OtherComp) return;
+
+	if (OtherComp->GetCollisionObjectType() == ECC_MBL_PLAYER)
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Player Detected."));
+		DamageTarget = OtherActor;
+
+		if (!GetWorldTimerManager().IsTimerActive(DamageTimerHandle))
+		{
+			GetWorldTimerManager().SetTimer(
+				DamageTimerHandle,
+				this,
+				&AMBLBossCharacter::DamageTick,
+				0.5f,
+				true,
+				0.f
+			);
+		}
+	}
+}
+
+void AMBLBossCharacter::OnDamageColliderEndOverlap(
+	UPrimitiveComponent* OverlappedComp,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex)
+{
+	if (OtherActor && OtherActor == DamageTarget)
+	{
+		DamageTarget = nullptr;
+		GetWorldTimerManager().ClearTimer(DamageTimerHandle);
+		//UE_LOG(LogTemp, Warning, TEXT("Player left dectection area."));
+	}
+}
+
+void AMBLBossCharacter::DamageTick()
+{
+	if (DamageTarget)
+	{
+		UGameplayStatics::ApplyDamage(DamageTarget, Attack, GetInstigatorController(), GetInstigator(), UDamageType::StaticClass());
+	}
+	else
+	{
+		GetWorldTimerManager().ClearTimer(DamageTimerHandle);
 	}
 }
