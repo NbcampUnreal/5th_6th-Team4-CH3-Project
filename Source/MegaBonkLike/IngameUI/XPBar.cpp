@@ -17,3 +17,13 @@ void UXPBar::UpdateXP(float CurrentXP, float MaxXP)
 		));
 	}
 }
+
+void UXPBar::UpdateLevel(int32 CurrentLevel)
+{
+	if (LevelText)
+	{
+		LevelText->SetText(FText::FromString(
+			FString::Printf(TEXT("LVL %d"), CurrentLevel)
+		));
+	}
+}

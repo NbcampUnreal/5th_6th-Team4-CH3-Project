@@ -16,6 +16,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateXP(float CurrentXP, float MaxXP);
 
+	UFUNCTION(BlueprintCallable)
+	void UpdateLevel(int32 CurrentLevel);
+
 protected:
 
 	UPROPERTY(meta = (BindWidget))
@@ -23,5 +26,8 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> XPText;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> LevelText;
 
 };
