@@ -11,4 +11,9 @@ class MEGABONKLIKE_API AMBLChestObject : public AMBLBaseInteractionObject
 public:
 	AMBLChestObject();
 	virtual void OnObjectActivated(AActor* Activator) override;
+
+	UPROPERTY(EditAnywhere, Category = "Item")
+	UDataTable* ItemTable;
+	UPROPERTY(EditAnywhere, Category = "Item")
+	UDataTable* ItemWeight;
 };

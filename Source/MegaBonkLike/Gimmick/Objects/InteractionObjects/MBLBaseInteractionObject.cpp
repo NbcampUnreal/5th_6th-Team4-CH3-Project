@@ -6,8 +6,7 @@
 #include "Gimmick/Objects/SpawnObjects/MBLBaseSpawnObject.h"
 #include "Components/WidgetComponent.h"
 #include "Components/TextBlock.h"
-#include "Item/ItemDataRow.h"
-// 가중치 테이블 추가
+
 
 AMBLBaseInteractionObject::AMBLBaseInteractionObject()
 {

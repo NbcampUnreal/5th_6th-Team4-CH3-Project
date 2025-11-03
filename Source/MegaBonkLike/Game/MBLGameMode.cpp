@@ -1,6 +1,8 @@
 #include "Game/MBLGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/MBLPlayerCharacter.h"
+#include "Character/MBLNonPlayerCharacter.h"
+#include "Character/MBLBossCharacter.h"
 #include "Player/MBLPlayerController.h"
 #include "Gimmick/Spawn/MBLSpawnVolume.h"
 #include "Gimmick/Data/InteractionObjectsRow.h"
@@ -8,15 +10,17 @@
 
 AMBLGameMode::AMBLGameMode()
     : SpawnVolume(nullptr)
+    , CurrentWave(0)
+    , WaveDuration(30.0f)
+    , MaxWave(3)
     , MaxSpawnObject(50)
     , Enemy(nullptr)
     , Boss(nullptr)
-    , SpawnInterval(0.5f)
-    , MaxSpawnEnemy(40)
-    , BossTime(10)
-    , GameTime(30.f)
+    , SpawnInterval(2.0f)
+    , MaxSpawnEnemy(10)
     , CurrentEnemy(0)
     , DropTable(nullptr)
+    , bSpawnBoss(false)
 {
     DefaultPawnClass = AMBLPlayerCharacter::StaticClass();
     PlayerControllerClass = AMBLPlayerController::StaticClass();
@@ -26,39 +30,22 @@ void AMBLGameMode::BeginPlay()
 {
     Super::BeginPlay();
 
-    TArray<AActor*> FoundVolumes;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMBLSpawnVolume::StaticClass(), FoundVolumes);
-
     SpawnVolume = Cast<AMBLSpawnVolume>(UGameplayStatics::GetActorOfClass(GetWorld(), AMBLSpawnVolume::StaticClass()));
 
-    if (!SpawnVolume) UE_LOG(LogTemp, Error, TEXT("SpawnVolume not found"));
-
-    GetWorldTimerManager().SetTimer(
-        GameOverTimerHandle,
-        this,
-        &AMBLGameMode::GameOver,
-        GameTime,
-        false
-    );
-
-    GetWorldTimerManager().SetTimer(
-        BossSpawnTimerHandle,
-        this,
-        &AMBLGameMode::SpawnBoss,
-        BossTime,
-        false
-    );
-
-    GetWorldTimerManager().SetTimer(
-        SpawnTimerHandle,
-        this,
-        &AMBLGameMode::SpawnManager,
-        SpawnInterval,
-        true
-    );
+    if (!IsValid(SpawnVolume))
+    {
+        UE_LOG(LogTemp, Error, TEXT("SpawnVolume not found"));
+    }
 
     StartWave();
 
+    GetWorldTimerManager().SetTimer(
+        NextWaveTimerHandle,
+        this,
+        &AMBLGameMode::StartWave,
+        WaveDuration,
+        true
+    );
 }
 
 FInteractionObjectsRow* AMBLGameMode::GetDropObject() const
@@ -98,21 +85,94 @@ FInteractionObjectsRow* AMBLGameMode::GetDropObject() const
 
 void AMBLGameMode::StartWave()
 {
-    for (int i = 0; i < MaxSpawnObject; ++i)
+    if (!IsValid(SpawnVolume)) return;
+
+    if (CurrentWave == 0)
     {
-        if (FInteractionObjectsRow* SelectedRow = GetDropObject())
+        for (int i = 0; i < MaxSpawnObject; ++i)
         {
-            if (UClass* ActualClass = SelectedRow->ObjectClass.Get())
+            if (FInteractionObjectsRow* SelectedRow = GetDropObject())
             {
-                SpawnVolume->SpawnObject(ActualClass);
+                if (UClass* ActualClass = SelectedRow->ObjectClass.Get())
+                {
+                    SpawnVolume->SpawnObject(ActualClass);
+                }
             }
         }
+
+        GetWorldTimerManager().SetTimer(
+            SpawnTimerHandle,
+            this,
+            &AMBLGameMode::SpawnManager,
+            SpawnInterval,
+            true
+        );
+
+        CurrentWave++;
+
+        return;
     }
+
+    if (CurrentWave == 1)
+    {
+        SpawnInterval = 1.0f;
+        MaxSpawnEnemy = 20;
+
+        GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
+        GetWorldTimerManager().SetTimer(
+            SpawnTimerHandle,
+            this,
+            &AMBLGameMode::SpawnManager,
+            SpawnInterval,
+            true
+        );
+
+        CurrentWave++;
+
+        return;
+    }
+
+    if (CurrentWave == 2)
+    {
+        SpawnInterval = 0.5f;
+        MaxSpawnEnemy = 30;
+
+        GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
+        GetWorldTimerManager().SetTimer(
+            SpawnTimerHandle,
+            this,
+            &AMBLGameMode::SpawnManager,
+            SpawnInterval,
+            true
+        );
+
+        CurrentWave++;
+        
+        return;
+    }
+
+    if (CurrentWave == MaxWave)
+    {
+        SpawnBoss();
+        UE_LOG(LogTemp, Warning, TEXT("BossSpawn"));
+        return;
+    }
+    
 }
 
 void AMBLGameMode::SpawnBoss()
 {
     SpawnVolume->SpawnEnemy(Boss);
+
+    GetWorldTimerManager().SetTimer(
+        GameOverTimerHandle,
+        this,
+        &AMBLGameMode::GameOver,
+        WaveDuration,
+        false
+    );
+
+    GetWorldTimerManager().ClearTimer(NextWaveTimerHandle);
 }
 
 void AMBLGameMode::SpawnManager()
@@ -130,14 +190,14 @@ void AMBLGameMode::SpawnManager()
 void AMBLGameMode::Dead(AActor* DeadActor)
 {
     if (!IsValid(DeadActor)) return;
-
-    if (DeadActor->ActorHasTag("Player"))
+    
+    if (AMBLPlayerCharacter* Player = Cast<AMBLPlayerCharacter>(DeadActor))
     {
         GameOver();
         return;
     }
 
-    if (DeadActor->ActorHasTag("Enemy"))
+    if (AMBLNonPlayerCharacter* NPC = Cast<AMBLNonPlayerCharacter>(DeadActor))
     {
         if (CurrentEnemy <= 0)
         {
@@ -146,7 +206,15 @@ void AMBLGameMode::Dead(AActor* DeadActor)
         }
 
         CurrentEnemy--;
+        return;
     }
+
+    if (AMBLBossCharacter* BossNPC = Cast<AMBLBossCharacter>(DeadActor))
+    {
+        GameOver();
+        return;
+    }
+
 }
 
 void AMBLGameMode::GameOver()
