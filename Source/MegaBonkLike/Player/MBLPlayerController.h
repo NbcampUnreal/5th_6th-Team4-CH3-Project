@@ -65,6 +65,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "HUD|XPBar")
 	void UpdateXP(float CurrentXP, float MaxXP);
+
+	UFUNCTION(BlueprintCallable, Category = "HUD|XPBar")
+	void UpdatePlayerLevel(int32 NewLevel);
+
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void ShowMainMenu(bool bIsRestart);
 

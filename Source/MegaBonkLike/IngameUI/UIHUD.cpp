@@ -53,3 +53,11 @@ void UUIHUD::UpdateXP(float CurrentXP, float MaxXP)
 		XPBarWidget->UpdateXP(CurrentXP, MaxXP);
 	}
 }
+
+void UUIHUD::UpdateLevel(int32 CurrentLevel)
+{
+	if (XPBarWidget)
+	{
+		XPBarWidget->UpdateLevel(CurrentLevel);
+	}
+}

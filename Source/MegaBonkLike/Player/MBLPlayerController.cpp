@@ -127,6 +127,14 @@ void AMBLPlayerController::UpdateXP(float CurrentXP, float MaxXP)
 	}
 }
 
+void AMBLPlayerController::UpdatePlayerLevel(int32 NewLevel)
+{
+	if (HUDWidgetInstance)
+	{
+		HUDWidgetInstance->UpdateLevel(NewLevel);
+	}
+}
+
 void AMBLPlayerController::TogglePauseMenu()
 {
 	if (IsPaused())
