@@ -4,6 +4,7 @@
 #include "Character/EnemyBase.h"
 #include "Gimmick/Objects/SpawnObjects/MBLMoneyObject.h"
 #include "Gimmick/Objects/SpawnObjects/MBLExpObject.h"
+#include "Character/MonsterStat.h"
 #include "FlyingEnemy.generated.h"
 
 UCLASS()
@@ -16,7 +17,7 @@ public:
 
 	void DeadHandle() override;
 
-	void SetSpeed(float NewSpeed) override;
+	void SetSpeed(EMBLWaveState Wave) override;
 
 	UFUNCTION()
 	void OnDamageColliderBeginOverlap(
@@ -65,6 +66,8 @@ private:
 
 	FVector CurrentDirection;
 	TWeakObjectPtr<AActor> Target;
+
+	TObjectPtr<UDataTable> StatTable;
 
 	/*테스트용 코드
 	void KillSelf();*/

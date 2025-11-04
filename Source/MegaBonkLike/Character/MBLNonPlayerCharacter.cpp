@@ -74,11 +74,10 @@ void AMBLNonPlayerCharacter::BeginPlay()
 
 void AMBLNonPlayerCharacter::DeadHandle()
 {
-	Super::DeadHandle();
-	// if(AMBLGameMode* GameMode = Cast<AMBLGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
-	//{
-	//	//GameMode->DeadEnemy(); // 적 사망시
-	//}
+	 if(AMBLGameMode* GameMode = Cast<AMBLGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
+	{
+		GameMode->DeadEnemy(); // 적 사망시
+	}
 
 	if (bIsDead) return;
 

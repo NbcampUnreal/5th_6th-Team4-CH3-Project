@@ -2,8 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "Character/MBLCharacterBase.h"
+#include "Gimmick/Data/MBLWaveEnums.h"
 #include "EnemyBase.generated.h"
-
 
 
 UCLASS()
@@ -29,13 +29,16 @@ protected:
 	UPROPERTY()
 	TArray<UMaterialInstanceDynamic*> DynamicMaterials;
 
+	TObjectPtr<UDataTable> StatTable;
+
 public:
 	UFUNCTION(BlueprintCallable)
-	void SetAttack(float NewAttack);
+	void SetAttack(EMBLWaveState Wave);
 	UFUNCTION(BlueprintCallable)
-	virtual void SetSpeed(float NewSpeed);
+	virtual void SetSpeed(EMBLWaveState Wave);
 	UFUNCTION(BlueprintCallable)
-	void SetColor(const FLinearColor& NewColor);
+	void SetColor(EMBLWaveState Wave);
+
 
 
 

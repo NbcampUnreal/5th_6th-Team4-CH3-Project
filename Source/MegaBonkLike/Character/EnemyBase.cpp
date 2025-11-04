@@ -1,5 +1,6 @@
 #include "Character/EnemyBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Character/MonsterStat.h"
 
 AEnemyBase::AEnemyBase()
 {
@@ -25,26 +26,33 @@ void AEnemyBase::BeginPlay()
 	}
 }
 
-void AEnemyBase::SetAttack(float NewAttack)
+void AEnemyBase::SetAttack(EMBLWaveState Wave)
 {
-	Attack = NewAttack;
-	//FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
+	FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
+	FMonsterStat* Monster = StatTable->FindRow<FMonsterStat>(RowName, TEXT(""));
+	Attack = Monster->Attack;
 }
 
-void AEnemyBase::SetSpeed(float NewSpeed)
+void AEnemyBase::SetSpeed(EMBLWaveState Wave)
 {
-	GetCharacterMovement()->MaxWalkSpeed = NewSpeed;
+	FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
+	FMonsterStat* Monster = StatTable->FindRow<FMonsterStat>(RowName, TEXT(""));
+	GetCharacterMovement()->MaxWalkSpeed = Monster->MoveSpeed;
 }
 
-void AEnemyBase::SetColor(const FLinearColor& NewColor)
+void AEnemyBase::SetColor(EMBLWaveState Wave)
 {
+	FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
+	FMonsterStat* Monster = StatTable->FindRow<FMonsterStat>(RowName, TEXT(""));
+
 	for (UMaterialInstanceDynamic* DynMat : DynamicMaterials)
 	{
 		if (DynMat)
 		{
-			DynMat->SetVectorParameterValue(FName("BaseColor"), NewColor);
+			DynMat->SetVectorParameterValue(FName("BaseColor"), Monster->BodyColor);
 		}
 	}
 }
+
 
 

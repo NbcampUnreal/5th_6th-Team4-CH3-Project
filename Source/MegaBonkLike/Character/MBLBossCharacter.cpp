@@ -75,10 +75,10 @@ void AMBLBossCharacter::DeadHandle()
 {
 	Super::DeadHandle();
 
-	//if (AMBLGameMode* GameMode = Cast<AMBLGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
-	//{
-	//	//GameMode->DeadBoss(); // º¸½º »ç¸Á½Ã
-	//}
+	if (AMBLGameMode* GameMode = Cast<AMBLGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
+	{
+		GameMode->DeadBoss(); // º¸½º »ç¸Á½Ã
+	}
 
 	if (bIsDead) return;
 

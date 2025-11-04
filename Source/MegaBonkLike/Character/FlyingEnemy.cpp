@@ -143,11 +143,10 @@ void AFlyingEnemy::DamageTick()
 
 void AFlyingEnemy::DeadHandle()
 {
-	Super::DeadHandle();
-	//if (AMBLGameMode* GameMode = Cast<AMBLGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
-	//{
-	//	//GameMode->DeadEnemy(); // Àû »ç¸Á½Ã
-	//}
+	if (AMBLGameMode* GameMode = Cast<AMBLGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
+	{
+		GameMode->DeadEnemy(); // Àû »ç¸Á½Ã
+	}
 
 	if (bIsDead) return;
 
@@ -191,7 +190,9 @@ void AFlyingEnemy::DeadHandle()
 	UE_LOG(LogTemp, Warning, TEXT("Died."));
 }
 
-void AFlyingEnemy::SetSpeed(float NewSpeed)
+void AFlyingEnemy::SetSpeed(EMBLWaveState Wave)
 {
-	GetCharacterMovement()->MaxFlySpeed = NewSpeed;
+	FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
+	FMonsterStat* Monster = StatTable->FindRow<FMonsterStat>(RowName, TEXT(""));
+	GetCharacterMovement()->MaxFlySpeed = Monster->MoveSpeed;
 }
