@@ -10,7 +10,7 @@ struct MEGABONKLIKE_API FMiscItemWeightDataRow : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EMiscItemRarity ItemRarity;
+	EItemRarity ItemRarity;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Weight;
 };

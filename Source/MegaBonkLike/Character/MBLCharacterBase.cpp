@@ -21,6 +21,7 @@ float AMBLCharacterBase::TakeDamage(float Damage, FDamageEvent const& DamageEven
 {
 	float NewDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 	UpdateCurrHP(CurrHP - NewDamage);
+	OnDamaged.Broadcast(NewDamage, DamageCauser);
 	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("%s HP: %f"), *GetClass()->GetName(), CurrHP));
 	if (CurrHP <= 0.0f)
 	{

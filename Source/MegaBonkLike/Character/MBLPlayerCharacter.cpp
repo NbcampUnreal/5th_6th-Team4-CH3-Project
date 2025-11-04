@@ -17,6 +17,10 @@
 #include "IngameUI/HPBar.h"
 #include "MegaBonkLike.h"
 #include "Player/MBLPlayerController.h"
+#include "Item/ItemSelectOption.h"
+#include "IngameUI/PopupItemSelect.h"
+#include "IngameUI/PopupTags.h"
+#include "IngameUI/PopupItemAcquire.h"
 
 AMBLPlayerCharacter::AMBLPlayerCharacter()
 {
@@ -62,6 +66,7 @@ AMBLPlayerCharacter::AMBLPlayerCharacter()
 	BaseMaxHP = 100.0f;
 	InteractRadius = 250.0f;
 	BaseAttractRadius = 300.0f;
+	BaseJumpVelocity = 560.0f;
 }
 
 void AMBLPlayerCharacter::BeginPlay()
@@ -79,24 +84,10 @@ void AMBLPlayerCharacter::BeginPlay()
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_GoldGain, 1.0f);
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_MaxHP, 1.0f);
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_PickupRange, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_JumpCount, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_JumpHeight, 1.0f);
 
-	AttributeComponent->AddAttributeChangedCallback(
-		TAG_Attribute_MoveSpeed,
-		this,
-		[WeakThis = TWeakObjectPtr<ThisClass>(this)](const TWeakObjectPtr<UAttribute> Attribute)
-		{
-			if (WeakThis.IsValid())
-				WeakThis->RecalculateSpeed();
-		});
-
-	AttributeComponent->AddAttributeChangedCallback(
-		TAG_Attribute_MaxHP,
-		this,
-		[WeakThis = TWeakObjectPtr<ThisClass>(this)](const TWeakObjectPtr<UAttribute> Attribute)
-		{
-			if (WeakThis.IsValid())
-				WeakThis->SetPlayerMaxHP();
-		});
+	SetPlayerAttributeCallbacks();
 
 	SetLevel(1);
 	if (AMBLPlayerController* PlayerController = Cast<AMBLPlayerController>(GetController()))
@@ -112,6 +103,9 @@ void AMBLPlayerCharacter::BeginPlay()
 		HPBar->UpdateHP(CurrHP, MaxHP);
 		OnHPChanged.AddDynamic(HPBar, &UHPBar::UpdateHP);
 	}
+
+	SetPlayerMaxJumpCount();
+	SetPlayerMaxJumpHeight();
 
 	GetWorldTimerManager().SetTimer(
 		AttractItemHandle,
@@ -170,16 +164,22 @@ void AMBLPlayerCharacter::AcquireExp(float Exp)
 	while (CurrExp >= MaxExp)
 	{
 		CurrExp -= MaxExp;
-		SetLevel(Level + 1);
+		LevelUp();
 	}
 	OnExpChanged.Broadcast(CurrExp, MaxExp);
+}
+
+void AMBLPlayerCharacter::LevelUp()
+{
+	SetLevel(Level + 1);
+	OnChangedLevel.Broadcast(Level);
+
+	AcquireRandomWeaponOrTomes();
 }
 
 void AMBLPlayerCharacter::SetLevel(int32 InLevel)
 {
 	Level = InLevel;
-	OnChangedLevel.Broadcast(Level);
-
 	SetMaxExp();
 }
 
@@ -238,12 +238,17 @@ void AMBLPlayerCharacter::Interact(const FInputActionValue& Value)
 
 void AMBLPlayerCharacter::InputTempAcquireItem()
 {
-	Inventory->AddOrUpgradeItem(100);
-	Inventory->AddOrUpgradeItem(101);
-	Inventory->AddOrUpgradeItem(102);
-	Inventory->AddOrUpgradeItem(103);
-	Inventory->AddOrUpgradeItem(200);
-	Inventory->AddOrUpgradeItem(300);
+	AcquireRandomWeaponOrTomes();
+
+	// 기타 아이템 랜덤 획득 호출
+	/*if (AMBLPlayerController* PlayerController = Cast<AMBLPlayerController>(GetController()))
+	{
+		if (UPopupItemAcquire* PopupItemAcquire = Cast<UPopupItemAcquire>(PlayerController->MakePopup(TAG_Popup_AcquireItem)))
+		{
+			PopupItemAcquire->SetInventory(Inventory);
+			PopupItemAcquire->SetOption();
+		}
+	}*/
 }
 
 void AMBLPlayerCharacter::RecalculateSpeed()
@@ -268,6 +273,45 @@ FCharacterLevelDataRow* AMBLPlayerCharacter::GetLevelData(int32 InLevel) const
 	return nullptr;
 }
 
+void AMBLPlayerCharacter::SetPlayerAttributeCallbacks()
+{
+	AddAttributeChangedCallback(
+		TAG_Attribute_MoveSpeed,
+		this,
+		[WeakThis = TWeakObjectPtr<ThisClass>(this)](const TWeakObjectPtr<UAttribute> Attribute)
+		{
+			if (WeakThis.IsValid())
+				WeakThis->RecalculateSpeed();
+		});
+
+	AddAttributeChangedCallback(
+		TAG_Attribute_MaxHP,
+		this,
+		[WeakThis = TWeakObjectPtr<ThisClass>(this)](const TWeakObjectPtr<UAttribute> Attribute)
+		{
+			if (WeakThis.IsValid())
+				WeakThis->SetPlayerMaxHP();
+		});
+
+	AddAttributeChangedCallback(
+		TAG_Attribute_JumpCount,
+		this,
+		[WeakThis = TWeakObjectPtr<ThisClass>(this)](const TWeakObjectPtr<UAttribute> Attribute)
+		{
+			if (WeakThis.IsValid())
+				WeakThis->SetPlayerMaxJumpCount();
+		});
+
+	AddAttributeChangedCallback(
+		TAG_Attribute_JumpHeight,
+		this,
+		[WeakThis = TWeakObjectPtr<ThisClass>(this)](const TWeakObjectPtr<UAttribute> Attribute)
+		{
+			if (WeakThis.IsValid())
+				WeakThis->SetPlayerMaxJumpHeight();
+		});
+}
+
 void AMBLPlayerCharacter::SetMaxExp()
 {
 	FCharacterLevelDataRow* Data = GetLevelData(Level);
@@ -281,6 +325,19 @@ void AMBLPlayerCharacter::SetMaxExp()
 void AMBLPlayerCharacter::SetPlayerMaxHP()
 {
 	SetMaxHP(BaseMaxHP * GetAttributeValue(TAG_Attribute_MaxHP));
+}
+
+void AMBLPlayerCharacter::SetPlayerMaxJumpCount()
+{
+	JumpMaxCount = GetAttributeValue(TAG_Attribute_JumpCount);
+}
+
+void AMBLPlayerCharacter::SetPlayerMaxJumpHeight()
+{
+	if (UCharacterMovementComponent* Movement = GetCharacterMovement())
+	{
+		Movement->JumpZVelocity = BaseJumpVelocity * GetAttributeValue(TAG_Attribute_JumpHeight);
+	}
 }
 
 void AMBLPlayerCharacter::AttractItems()
@@ -304,6 +361,18 @@ void AMBLPlayerCharacter::AttractItems()
 			{
 				AttractableObject->SetTarget(this);
 			}
+		}
+	}
+}
+
+void AMBLPlayerCharacter::AcquireRandomWeaponOrTomes()
+{
+	if (AMBLPlayerController* PlayerController = Cast<AMBLPlayerController>(GetController()))
+	{
+		if (UPopupItemSelect* PopupItemSelect = Cast<UPopupItemSelect>(PlayerController->MakePopup(TAG_Popup_SelectItem)))
+		{
+			PopupItemSelect->SetInventory(Inventory);
+			PopupItemSelect->SetOptions(3);
 		}
 	}
 }
