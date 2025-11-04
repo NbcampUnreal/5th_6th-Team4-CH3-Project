@@ -1,7 +1,6 @@
 ﻿#include "Skill/Skill.h"
-#include "Skill/SkillActionBase.h"
 #include "Item/WeaponItem.h"
-#include "Attribute/AttributeModifier.h"
+#include "Skill/WeaponSkillAction.h"
 
 void USkill::Activate(AActor* InInstigator)
 {
@@ -36,6 +35,9 @@ void USkill::SetOwnerWeapon(UWeaponItem* InOwnerWeapon)
 	OwnerWeapon = InOwnerWeapon;
 	for (auto& SkillAction : SkillActions)
 	{
-		SkillAction->SetOwnerWeapon(OwnerWeapon);
+		if (UWeaponSkillAction* WeaponSkillAction = (UWeaponSkillAction*)SkillAction)
+		{
+			WeaponSkillAction->SetOwnerWeapon(OwnerWeapon);
+		}
 	}
 }

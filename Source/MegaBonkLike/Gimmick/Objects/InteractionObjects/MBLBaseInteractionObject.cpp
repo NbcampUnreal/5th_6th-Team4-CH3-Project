@@ -7,6 +7,7 @@
 #include "Components/WidgetComponent.h"
 #include "Components/TextBlock.h"
 
+
 AMBLBaseInteractionObject::AMBLBaseInteractionObject()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -93,7 +94,13 @@ void AMBLBaseInteractionObject::CallOverlap(UPrimitiveComponent* CollisionCompon
 
 void AMBLBaseInteractionObject::OnObjectActivated(AActor* Activator)
 {
-
+	// 기타 아이템 테이블 변수에 넣고
+	// 테이블 2개
+	// 순회할 때 레어도 체크하고
+	// 기타 아이템 확률 테이블
+	// 가중치의 합을 구하고
+	// Activator->Cast()Player->FindComponentsByClass<UInventoryComponent>()
+	// UInventoryComponent ㅁㄴㅇ->AddOrUpgradeItem(Row->ItemId)
 }
 
 FName AMBLBaseInteractionObject::GetObejctType() const

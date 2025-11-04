@@ -1,13 +1,13 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Skill/SkillActionBase.h"
-#include "SA_UnderFootAttack.generated.h"
+#include "Skill/WeaponSkillAction.h"
+#include "WSA_UnderFootAttack.generated.h"
 
 class ADamageAreaActor;
 
 UCLASS()
-class MEGABONKLIKE_API USA_UnderFootAttack : public USkillActionBase
+class MEGABONKLIKE_API UWSA_UnderFootAttack : public UWeaponSkillAction
 {
 	GENERATED_BODY()
 	

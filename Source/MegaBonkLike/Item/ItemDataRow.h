@@ -68,7 +68,9 @@ struct MEGABONKLIKE_API FMiscItemDataRow : public FItemDataRow
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EMiscItemRarity ItemRarity;
+	EItemRarity ItemRarity;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<USkill> SkillClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<FGameplayTag, FAttributeModifier> AttributeModifiers;
 
