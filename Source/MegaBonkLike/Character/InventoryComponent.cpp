@@ -192,63 +192,63 @@ TArray<FItemSelectOption> UInventoryComponent::GetItemSelectOptionsInWeaponAndTo
 		Result.Rarity = Rarity->ItemRarity;
 		UItemBase* ExistItem = FindItem(Result.ItemId);
 		Result.bIsNewItem = ExistItem == nullptr;
-		if (TargetDatas[i]->ItemType == EItemType::Weapon)
+		if (ExistItem != nullptr)
 		{
-			const UWeaponItem* ExistWeapon = Cast<UWeaponItem>(ExistItem);
-			Result.Level = ExistWeapon != nullptr ? ExistWeapon->GetLevel() : 0;
+			if (TargetDatas[i]->ItemType == EItemType::Weapon)
+			{
+				const UWeaponItem* ExistWeapon = Cast<UWeaponItem>(ExistItem);
+				if (ExistWeapon == nullptr)
+					continue;
 
-			FWeaponItemDataRow* WeaponData = (FWeaponItemDataRow*)TargetDatas[i];
-			int EntryCount = WeaponData->WeaponAttributeEntry.Num();
-			TArray<int32> IdxArray;
-			IdxArray.SetNum(EntryCount);
-			for (int j = 0; j < EntryCount; ++j)
-			{
-				IdxArray[j] = j;
-			}
-			Algo::RandomShuffle(IdxArray);
-			int UpgradeEntryCount = FMath::Min(EntryCount, (Result.Rarity > EItemRarity::Common ? 2 : FMath::RandRange(1, 2)));
-			for (int j = 0; j < UpgradeEntryCount; ++j)
-			{
-				FAttributeComparison NewComparison;
-				const auto& UpgradeEntry = WeaponData->WeaponAttributeEntry[IdxArray[j]];
-				NewComparison.AttributeTag = UpgradeEntry.AttributeTag;
-				if (ExistWeapon != nullptr)
+				Result.Level = ExistWeapon->GetLevel();
+
+				FWeaponItemDataRow* WeaponData = (FWeaponItemDataRow*)TargetDatas[i];
+				int EntryCount = WeaponData->WeaponAttributeEntry.Num();
+				TArray<int32> IdxArray;
+				IdxArray.SetNum(EntryCount);
+				for (int j = 0; j < EntryCount; ++j)
 				{
+					IdxArray[j] = j;
+				}
+				Algo::RandomShuffle(IdxArray);
+				int UpgradeEntryCount = FMath::Min(EntryCount, (Result.Rarity > EItemRarity::Common ? 2 : FMath::RandRange(1, 2)));
+				for (int j = 0; j < UpgradeEntryCount; ++j)
+				{
+					FAttributeComparison NewComparison;
+					const auto& UpgradeEntry = WeaponData->WeaponAttributeEntry[IdxArray[j]];
+					NewComparison.AttributeTag = UpgradeEntry.AttributeTag;
 					NewComparison.CurrentValue = ExistWeapon->GetAttributeValue(UpgradeEntry.AttributeTag);
 					NewComparison.DeltaValue = UpgradeEntry.UpgradeModifier.Value * Rarity->Multiplier;
+					NewComparison.NewValue = NewComparison.CurrentValue + NewComparison.DeltaValue;
+					Result.AttributeChanges.Add(NewComparison);
+				}
+			}
+			else if (TargetDatas[i]->ItemType == EItemType::Tomes)
+			{
 
-				}
-				else
-				{
-					NewComparison.CurrentValue = 0.0f;
-					NewComparison.DeltaValue = WeaponData->WeaponAttributeEntry[IdxArray[j]].BaseValue;
-				}
+				FTomesItemDataRow* TomesData = (FTomesItemDataRow*)TargetDatas[i];
+				if (TomesData->AttributeModifiers.IsEmpty() == true)
+					continue;
+
+				const UTomesItem* ExistTomes = Cast<UTomesItem>(ExistItem);
+				if (ExistTomes == nullptr)
+					continue;
+
+				Result.Level = ExistTomes->GetLevel();
+
+				TArray<FGameplayTag> Keys;
+				TomesData->AttributeModifiers.GetKeys(Keys);
+				int32 RandomKeyIdx = FMath::RandRange(0, TomesData->AttributeModifiers.Num() - 1);
+				FGameplayTag Tag = Keys[RandomKeyIdx];
+				const auto& UpgradeModifier = TomesData->AttributeModifiers[Tag];
+				FAttributeComparison NewComparison;
+				NewComparison.AttributeTag = Tag;
+				NewComparison.CurrentValue = ExistTomes->GetModifierValue(Tag);
+				NewComparison.DeltaValue = UpgradeModifier.Value;
 				NewComparison.NewValue = NewComparison.CurrentValue + NewComparison.DeltaValue;
 				Result.AttributeChanges.Add(NewComparison);
 			}
-		}
-		else if (TargetDatas[i]->ItemType == EItemType::Tomes)
-		{
-
-			FTomesItemDataRow* TomesData = (FTomesItemDataRow*)TargetDatas[i];
-			if (TomesData->AttributeModifiers.IsEmpty() == true)
-				continue;
-
-			const UTomesItem* ExistTomes = Cast<UTomesItem>(ExistItem);
-			Result.Level = ExistTomes != nullptr ? ExistTomes->GetLevel() : 0;
-
-			TArray<FGameplayTag> Keys;
-			TomesData->AttributeModifiers.GetKeys(Keys);		
-			int32 RandomKeyIdx = FMath::RandRange(0, TomesData->AttributeModifiers.Num() - 1);
-			FGameplayTag Tag = Keys[RandomKeyIdx];
-			const auto& UpgradeModifier = TomesData->AttributeModifiers[Tag];
-			FAttributeComparison NewComparison;
-			NewComparison.AttributeTag = Tag;
-			NewComparison.CurrentValue = ExistTomes != nullptr ? ExistTomes->GetModifierValue(Tag) : 0.0f;
-			NewComparison.DeltaValue = UpgradeModifier.Value;
-			NewComparison.NewValue = NewComparison.CurrentValue + NewComparison.DeltaValue;
-			Result.AttributeChanges.Add(NewComparison);
-		}
+		}		
 
 		Results.Add(Result);
 	}

@@ -45,6 +45,19 @@ void ADamageAreaActor::SetLifeTime(float InLifeTime)
         true);
 }
 
+void ADamageAreaActor::SetHitTimer(float Interval)
+{
+    CheckHitOnNextFrame();
+
+    GetWorldTimerManager().ClearTimer(HitTimerHandle);    
+    GetWorldTimerManager().SetTimer(
+        HitTimerHandle,
+        this,
+        &ThisClass::CheckHitOnNextFrame,
+        Interval,
+        false);
+}
+
 void ADamageAreaActor::CheckHitOnNextFrame()
 {
     SetOverlapEnable(true);

@@ -18,6 +18,7 @@ public:
 	void SetAttackData(const FAttackData& InAttackData);
 	void SetSize(float InSize);
 	void SetLifeTime(float InLifeTime);
+	void SetHitTimer(float Interval);
 
 	void CheckHitOnNextFrame();
 	void ApplyDamage(AActor* TargetActor);
