@@ -1,13 +1,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/MBLCharacterBase.h"
+#include "Character/EnemyBase.h"
 #include "MBLBossCharacter.generated.h"
 
 class UCapsuleComponent;
 
 UCLASS()
-class MEGABONKLIKE_API AMBLBossCharacter : public AMBLCharacterBase
+class MEGABONKLIKE_API AMBLBossCharacter : public AEnemyBase
 {
 	GENERATED_BODY()
 
@@ -39,26 +39,13 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	UCapsuleComponent* DamageCollider;
 
-protected:
-	virtual void BeginPlay() override;
-
-
-#pragma region NPC Stat 
-
-public:
-	void SetMovementSpeed(float NewSpeed);
-
-	UPROPERTY(EditAnywhere, Category = "Stats")
-	float WalkSpeed = 300.f;
-	UPROPERTY(EditAnywhere, Category = "Stats")
-	float RunSpeed = 600.f;
-
 	TObjectPtr<AActor> DamageTarget;
 
-private:
-	UPROPERTY(VisibleAnywhere, Category = "Stats")
-	int32 Attack;
-#pragma endregion 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UDataTable> StatDataTable;
+
+protected:
+	virtual void BeginPlay() override;
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category="Skill")
