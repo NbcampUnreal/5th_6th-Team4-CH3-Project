@@ -6,21 +6,19 @@
 #include "Player/MBLPlayerController.h"
 #include "Gimmick/Spawn/MBLSpawnVolume.h"
 #include "Gimmick/Data/InteractionObjectsRow.h"
-#include "Character/MBLBossCharacter.h"
 
 AMBLGameMode::AMBLGameMode()
     : SpawnVolume(nullptr)
-    , CurrentWave(0)
-    , WaveDuration(30.0f)
-    , MaxWave(3)
-    , MaxSpawnObject(50)
     , Enemy(nullptr)
     , Boss(nullptr)
+    , DropTable(nullptr)
+    , CurrentWave(EMBLWaveState::Wave1)
+    , WaveDuration(30.0f)
+    , MaxSpawnObject(50)
     , SpawnInterval(2.0f)
     , MaxSpawnEnemy(10)
     , CurrentEnemy(0)
-    , DropTable(nullptr)
-    , bSpawnBoss(false)
+
 {
     DefaultPawnClass = AMBLPlayerCharacter::StaticClass();
     PlayerControllerClass = AMBLPlayerController::StaticClass();
@@ -45,6 +43,31 @@ void AMBLGameMode::BeginPlay()
         &AMBLGameMode::StartWave,
         WaveDuration,
         true
+    );
+}
+
+void AMBLGameMode::SpawnManager()
+{
+    if (!SpawnVolume) return;
+
+    if (MaxSpawnEnemy > CurrentEnemy)
+    {
+        SpawnVolume->SpawnEnemy(Enemy);
+        CurrentEnemy++;
+    }
+
+}
+
+void AMBLGameMode::SpawnBoss()
+{
+    SpawnVolume->SpawnEnemy(Boss);
+
+    GetWorldTimerManager().SetTimer(
+        GameOverTimerHandle,
+        this,
+        &AMBLGameMode::GameOver,
+        WaveDuration,
+        false
     );
 }
 
@@ -83,12 +106,46 @@ FInteractionObjectsRow* AMBLGameMode::GetDropObject() const
     return nullptr;
 }
 
+void AMBLGameMode::DeadPlayer()
+{
+    GameOver();
+}
+
+void AMBLGameMode::DeadEnemy()
+{
+    if (CurrentEnemy <= 0)
+    {
+        CurrentEnemy = 0;
+        return;
+    }
+
+    CurrentEnemy--;
+}
+
+void AMBLGameMode::DeadBoss()
+{
+    GameOver();
+}
+
+void AMBLGameMode::GameOver()
+{
+    if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+    {
+        if (AMBLPlayerController* MBLPlayerController = Cast<AMBLPlayerController>(PlayerController))
+        {
+            MBLPlayerController->SetPause(true);
+            MBLPlayerController->ShowEndGameScreen(true);
+        }
+    }
+}
+
 void AMBLGameMode::StartWave()
 {
     if (!IsValid(SpawnVolume)) return;
 
-    if (CurrentWave == 0)
+    switch (CurrentWave)
     {
+    case EMBLWaveState::Wave1:
         for (int i = 0; i < MaxSpawnObject; ++i)
         {
             if (FInteractionObjectsRow* SelectedRow = GetDropObject())
@@ -100,44 +157,47 @@ void AMBLGameMode::StartWave()
             }
         }
 
-        GetWorldTimerManager().SetTimer(
-            SpawnTimerHandle,
-            this,
-            &AMBLGameMode::SpawnManager,
-            SpawnInterval,
-            true
-        );
+        NextWave(CurrentWave);
 
-        CurrentWave++;
+        break;
 
-        return;
-    }
-
-    if (CurrentWave == 1)
-    {
+    case EMBLWaveState::Wave2:
         SpawnInterval = 1.0f;
         MaxSpawnEnemy = 20;
 
-        GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
-        GetWorldTimerManager().SetTimer(
-            SpawnTimerHandle,
-            this,
-            &AMBLGameMode::SpawnManager,
-            SpawnInterval,
-            true
-        );
+        NextWave(CurrentWave);
 
-        CurrentWave++;
+        break;
 
-        return;
-    }
-
-    if (CurrentWave == 2)
-    {
+    case EMBLWaveState::Wave3:
         SpawnInterval = 0.5f;
         MaxSpawnEnemy = 30;
 
-        GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
+        NextWave(CurrentWave);
+
+        break;
+
+    case EMBLWaveState::FinalWave:
+        SpawnBoss();
+        UE_LOG(LogTemp, Warning, TEXT("BossSpawn"));
+
+        CurrentWave = GetNextWave(CurrentWave);
+
+        break;
+
+    default:
+        return;
+    }
+}
+
+void AMBLGameMode::NextWave(EMBLWaveState& Wave)
+{
+    if (Wave == EMBLWaveState::Finished) return;
+
+    GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
+
+    if (Wave != EMBLWaveState::FinalWave)
+    {
         GetWorldTimerManager().SetTimer(
             SpawnTimerHandle,
             this,
@@ -145,48 +205,12 @@ void AMBLGameMode::StartWave()
             SpawnInterval,
             true
         );
-
-        CurrentWave++;
-        
-        return;
     }
 
-    if (CurrentWave == MaxWave)
-    {
-        SpawnBoss();
-        UE_LOG(LogTemp, Warning, TEXT("BossSpawn"));
-        return;
-    }
-    
+    Wave = GetNextWave(Wave);
 }
 
-void AMBLGameMode::SpawnBoss()
-{
-    SpawnVolume->SpawnEnemy(Boss);
-
-    GetWorldTimerManager().SetTimer(
-        GameOverTimerHandle,
-        this,
-        &AMBLGameMode::GameOver,
-        WaveDuration,
-        false
-    );
-
-    GetWorldTimerManager().ClearTimer(NextWaveTimerHandle);
-}
-
-void AMBLGameMode::SpawnManager()
-{
-    if (!SpawnVolume) return;
-
-    if (MaxSpawnEnemy > CurrentEnemy)
-    {
-        SpawnVolume->SpawnEnemy(Enemy);
-        CurrentEnemy++;
-    }
-    
-}
-
+// 제거 예정 함수
 void AMBLGameMode::Dead(AActor* DeadActor)
 {
     if (!IsValid(DeadActor)) return;
@@ -217,14 +241,9 @@ void AMBLGameMode::Dead(AActor* DeadActor)
 
 }
 
-void AMBLGameMode::GameOver()
-{
-    if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
-    {
-        if (AMBLPlayerController* MBLPlayerController = Cast<AMBLPlayerController>(PlayerController))
-        {
-            MBLPlayerController->SetPause(true);
-            MBLPlayerController->ShowEndGameScreen(true);
-        }
-    }
-}
+
+
+
+
+
+
