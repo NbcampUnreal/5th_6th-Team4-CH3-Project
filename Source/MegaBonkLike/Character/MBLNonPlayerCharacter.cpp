@@ -5,6 +5,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
+#include "Game/MBLGameMode.h"
 #include "MegaBonkLike.h"
 
 
@@ -37,6 +38,7 @@ AMBLNonPlayerCharacter::AMBLNonPlayerCharacter()
 	DamageCollider->OnComponentEndOverlap.AddDynamic(this, &AMBLNonPlayerCharacter::OnDamageColliderEndOverlap);
 
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->AirControl = 0.5f;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
@@ -70,18 +72,13 @@ void AMBLNonPlayerCharacter::BeginPlay()
 }
 
 
-void AMBLNonPlayerCharacter::SetMovementSpeed(float NewSpeed)
-{
-	if (UCharacterMovementComponent* Movement = GetCharacterMovement())
-	{
-		Movement->MaxWalkSpeed = NewSpeed;
-		UE_LOG(LogTemp, Warning, TEXT("Speed changed: %.1f"), NewSpeed);
-	}
-}
-
 void AMBLNonPlayerCharacter::DeadHandle()
 {
 	Super::DeadHandle();
+	// if(AMBLGameMode* GameMode = Cast<AMBLGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
+	//{
+	//	//GameMode->DeadEnemy(); // 적 사망시
+	//}
 
 	if (bIsDead) return;
 

@@ -2,19 +2,21 @@
 
 #include "CoreMinimal.h"
 #include "Character/EnemyBase.h"
-#include "MBLBossCharacter.generated.h"
-
-class UCapsuleComponent;
+#include "Gimmick/Objects/SpawnObjects/MBLMoneyObject.h"
+#include "Gimmick/Objects/SpawnObjects/MBLExpObject.h"
+#include "FlyingEnemy.generated.h"
 
 UCLASS()
-class MEGABONKLIKE_API AMBLBossCharacter : public AEnemyBase
+class MEGABONKLIKE_API AFlyingEnemy : public AEnemyBase
 {
 	GENERATED_BODY()
 
 public:
-	AMBLBossCharacter();
+	AFlyingEnemy();
 
-	void GroundAttack();
+	void DeadHandle() override;
+
+	void SetSpeed(float NewSpeed) override;
 
 	UFUNCTION()
 	void OnDamageColliderBeginOverlap(
@@ -35,33 +37,35 @@ public:
 
 	void DamageTick();
 
+	void UpdateTrack();
+	void MoveStep();
+
+protected:
+	virtual void BeginPlay() override;
+
+
 public:
+
 	UPROPERTY(VisibleAnywhere)
 	UCapsuleComponent* DamageCollider;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Drop")
+	TSubclassOf<class AMBLMoneyObject> GoldCoin;
+	UPROPERTY(EditDefaultsOnly, Category = "Drop")
+	TSubclassOf<class AMBLExpObject> ExpCoin;
 
 	TObjectPtr<AActor> DamageTarget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UDataTable> StatDataTable;
 
-protected:
-	virtual void BeginPlay() override;
-
-private:
-	UPROPERTY(EditDefaultsOnly, Category="Skill")
-	TSubclassOf<class AGroundAttack> GroundAttackClass;
-	UPROPERTY(EditDefaultsOnly, Category = "Skill")
-	float AttackInterval = 0.8f;
-	UPROPERTY(EditDefaultsOnly, Category = "Skill")
-	int32 AttackRepeatCount = 5;
-
-	int32 CurrentAttackCount = 0;
-
 private:
 	bool bIsDead;
-	void DeadHandle() override;
-	void SpawnGroundAttack();
+	FTimerHandle DamageTimerHandle;
 
-	FTimerHandle AttackTimerHandle;   //스킬공격
-	FTimerHandle DamageTimerHandle;   //근접피격
+	FVector CurrentDirection;
+	TWeakObjectPtr<AActor> Target;
+
+	/*테스트용 코드
+	void KillSelf();*/
 };
