@@ -17,7 +17,7 @@ public:
 	virtual void Deactivate() override;
 
 private:
-	void SetDamage();
+	void SetAttackData();
 	void SetSize();
 
 	void CheckHit();

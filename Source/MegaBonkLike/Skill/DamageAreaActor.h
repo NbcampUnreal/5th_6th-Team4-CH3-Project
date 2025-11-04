@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Attack/AttackData.h"
 #include "DamageAreaActor.generated.h"
 
 UCLASS(Abstract)
@@ -14,7 +15,7 @@ public:
 
 	virtual void BeginPlay() override;
 
-	void SetDamage(float InDamage);
+	void SetAttackData(const FAttackData& InAttackData);
 	void SetSize(float InSize);
 	void SetLifeTime(float InLifeTime);
 
@@ -31,7 +32,7 @@ protected:
 	TObjectPtr<class USphereComponent> CollisionComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	float Damage;
+	FAttackData AttackData;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float Size = 1.0f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)

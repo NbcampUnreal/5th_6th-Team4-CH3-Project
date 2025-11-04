@@ -2,6 +2,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/SphereComponent.h"
 #include "MegaBonkLike.h"
+#include "Attack/AttackHandleComponent.h"
 
 ADamageAreaActor::ADamageAreaActor()
 {
@@ -22,9 +23,9 @@ void ADamageAreaActor::BeginPlay()
     SetOverlapEnable(false);
 }
 
-void ADamageAreaActor::SetDamage(float InDamage)
+void ADamageAreaActor::SetAttackData(const FAttackData& InAttackData)
 {
-	Damage = InDamage;
+	AttackData = InAttackData;
 }
 
 void ADamageAreaActor::SetSize(float InSize)
@@ -55,7 +56,16 @@ void ADamageAreaActor::CheckHitOnNextFrame()
 
 void ADamageAreaActor::ApplyDamage(AActor* TargetActor)
 {
-    UGameplayStatics::ApplyDamage(TargetActor, Damage, GetInstigatorController(), GetInstigator(), nullptr);
+    if (AttackData.Causer.IsValid() == false)
+        return;
+
+    AActor* Causer = AttackData.Causer.Get();
+    AttackData.KnockbackDirection = (TargetActor->GetActorLocation() - Causer->GetActorLocation()).GetSafeNormal();
+    UAttackHandleComponent* AttackHandleComponent = Causer->FindComponentByClass<UAttackHandleComponent>();
+    if (IsValid(AttackHandleComponent) == true)
+    {
+        AttackHandleComponent->ExecuteAttack(TargetActor, AttackData);
+    }
 }
 
 void ADamageAreaActor::Shrink()

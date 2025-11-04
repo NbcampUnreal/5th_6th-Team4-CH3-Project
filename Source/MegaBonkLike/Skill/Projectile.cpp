@@ -6,6 +6,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "MegaBonkLike.h"
+#include "Attack/AttackHandleComponent.h"
 
 AProjectile::AProjectile()
 {
@@ -54,9 +55,9 @@ void AProjectile::SetDirectionAndSpeed(const FVector& InDirection, float InSpeed
     ProjectileMovement->Velocity = InDirection * InSpeed;
 }
 
-void AProjectile::SetDamage(float InDamage)
+void AProjectile::SetAttackData(const FAttackData& InAttackData)
 {
-    Damage = InDamage;
+    AttackData = InAttackData;
 }
 
 void AProjectile::SetSize(float InSize)
@@ -80,7 +81,7 @@ void AProjectile::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherAc
     if (IsValid(OtherActor) == false || OtherActor == GetOwner() || OtherActor == GetInstigator())
         return;
 
-    UGameplayStatics::ApplyDamage(OtherActor, Damage, GetInstigatorController(), this, nullptr);
+    ApplyDamage(OtherActor);
 
     if (bPenetrate == false)
     {
@@ -97,4 +98,25 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
     Destroy();
 }
 
+void AProjectile::ApplyDamage(AActor* TargetActor)
+{
+    if (AttackData.Causer.IsValid() == false)
+        return;
 
+    AActor* Causer = AttackData.Causer.Get();
+    if (IsValid(ProjectileMovement) == true && ProjectileMovement->Velocity.IsNearlyZero() == false)
+    {
+        AttackData.KnockbackDirection = ProjectileMovement->Velocity.GetSafeNormal();
+    }
+    else
+    {
+        AttackData.KnockbackDirection = (TargetActor->GetActorLocation() - Causer->GetActorLocation()).GetSafeNormal();
+    }
+
+    UAttackHandleComponent* AttackHandleComponent = Causer->FindComponentByClass<UAttackHandleComponent>();
+    if (IsValid(AttackHandleComponent) == true)
+    {
+        AttackHandleComponent->ExecuteAttack(TargetActor, AttackData);
+    }
+
+}

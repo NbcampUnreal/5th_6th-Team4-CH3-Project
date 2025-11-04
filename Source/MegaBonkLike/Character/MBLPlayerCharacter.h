@@ -12,11 +12,12 @@ class UInventoryComponent;
 class USkillComponent;
 class UAttributeComponent;
 class UWidgetComponent;
+class UAttackHandleComponent;
 
 struct FInputActionValue;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnChangedLevel, int32);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnChangedGold, int32);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnChangedLevel, int32, Level);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnChangedGold, int32, Gold);
 
 UCLASS()
 class MEGABONKLIKE_API AMBLPlayerCharacter : public AMBLCharacterBase
@@ -42,10 +43,6 @@ public:
 	void SetLevel(int32 InLevel);
 
 	void AcquireGold(float InGold);
-	
-	FOnChangedProgressValue OnExpChanged;
-	FOnChangedLevel OnChangedLevel;
-	FOnChangedGold OnChangedGold;
 
 protected:
 	void Input_Move(const FInputActionValue& InputValue);
@@ -67,6 +64,11 @@ protected:
 
 	void AcquireRandomWeaponOrTomes();
 
+public:
+	FOnChangedProgressValue OnExpChanged;
+	FOnChangedLevel OnChangedLevel;
+	FOnChangedGold OnChangedGold;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USpringArmComponent> SpringArm;
@@ -78,6 +80,8 @@ protected:
 	TObjectPtr<UInventoryComponent> Inventory;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USkillComponent> SkillComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAttackHandleComponent> AttackHandleComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UWidgetComponent> HPBarWidget;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)

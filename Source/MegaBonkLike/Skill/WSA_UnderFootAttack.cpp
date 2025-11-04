@@ -38,10 +38,9 @@ void UWSA_UnderFootAttack::SpawnUnderFootAttackActor()
 
             if (SpawnActor)
             {
-                float Damage = GetValue(TAG_Attribute_Damage);
                 float Size = GetValue(TAG_Attribute_Size);
                 float LifeTime = GetValue(TAG_Attribute_Duration);
-                SpawnActor->SetDamage(Damage);
+                SpawnActor->SetAttackData(CreateAttackDataBase());
                 SpawnActor->SetSize(Size);
                 SpawnActor->SetLifeTime(LifeTime);
             }
