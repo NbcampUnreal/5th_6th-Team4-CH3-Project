@@ -188,11 +188,15 @@ TArray<FItemSelectOption> UInventoryComponent::GetItemSelectOptionsInWeaponAndTo
 		FItemSelectOption Result;
 		FItemUpgradeContext UpgradeContext;
 		Result.ItemId = TargetDatas[i]->ItemId;
+		Result.ItemType = TargetDatas[i]->ItemType;
 		Result.Rarity = Rarity->ItemRarity;
 		UItemBase* ExistItem = FindItem(Result.ItemId);
 		Result.bIsNewItem = ExistItem == nullptr;
 		if (TargetDatas[i]->ItemType == EItemType::Weapon)
 		{
+			const UWeaponItem* ExistWeapon = Cast<UWeaponItem>(ExistItem);
+			Result.Level = ExistWeapon != nullptr ? ExistWeapon->GetLevel() : 0;
+
 			FWeaponItemDataRow* WeaponData = (FWeaponItemDataRow*)TargetDatas[i];
 			int EntryCount = WeaponData->WeaponAttributeEntry.Num();
 			TArray<int32> IdxArray;
@@ -208,7 +212,6 @@ TArray<FItemSelectOption> UInventoryComponent::GetItemSelectOptionsInWeaponAndTo
 				FAttributeComparison NewComparison;
 				const auto& UpgradeEntry = WeaponData->WeaponAttributeEntry[IdxArray[j]];
 				NewComparison.AttributeTag = UpgradeEntry.AttributeTag;
-				const UWeaponItem* ExistWeapon = Cast<UWeaponItem>(ExistItem);
 				if (ExistWeapon != nullptr)
 				{
 					NewComparison.CurrentValue = ExistWeapon->GetAttributeValue(UpgradeEntry.AttributeTag);
@@ -226,9 +229,13 @@ TArray<FItemSelectOption> UInventoryComponent::GetItemSelectOptionsInWeaponAndTo
 		}
 		else if (TargetDatas[i]->ItemType == EItemType::Tomes)
 		{
+
 			FTomesItemDataRow* TomesData = (FTomesItemDataRow*)TargetDatas[i];
 			if (TomesData->AttributeModifiers.IsEmpty() == true)
 				continue;
+
+			const UTomesItem* ExistTomes = Cast<UTomesItem>(ExistItem);
+			Result.Level = ExistTomes != nullptr ? ExistTomes->GetLevel() : 0;
 
 			TArray<FGameplayTag> Keys;
 			TomesData->AttributeModifiers.GetKeys(Keys);		
@@ -237,7 +244,6 @@ TArray<FItemSelectOption> UInventoryComponent::GetItemSelectOptionsInWeaponAndTo
 			const auto& UpgradeModifier = TomesData->AttributeModifiers[Tag];
 			FAttributeComparison NewComparison;
 			NewComparison.AttributeTag = Tag;
-			const UTomesItem* ExistTomes = Cast<UTomesItem>(ExistItem);
 			NewComparison.CurrentValue = ExistTomes != nullptr ? ExistTomes->GetModifierValue(Tag) : 0.0f;
 			NewComparison.DeltaValue = UpgradeModifier.Value;
 			NewComparison.NewValue = NewComparison.CurrentValue + NewComparison.DeltaValue;
@@ -290,6 +296,7 @@ TArray<FItemSelectOption> UInventoryComponent::GetItemSelectOptionsInMisc(int Co
 
 		FItemSelectOption Result;
 		Result.ItemId = SelectedId;
+		Result.ItemType = EItemType::Misc;
 		Result.bIsNewItem = FindItem(SelectedId) == nullptr;
 		// FItemSelectOption의 나머지 요소 안 씀.
 		Results.Add(Result);

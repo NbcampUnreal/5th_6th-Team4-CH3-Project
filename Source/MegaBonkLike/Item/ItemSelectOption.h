@@ -33,6 +33,10 @@ struct MEGABONKLIKE_API FItemSelectOption
     UPROPERTY()
 	int32 ItemId;
     UPROPERTY()
+    int32 Level;
+    UPROPERTY()
+    EItemType ItemType;
+    UPROPERTY()
 	EItemRarity Rarity;
     UPROPERTY()
 	TArray<FAttributeComparison> AttributeChanges;

@@ -19,9 +19,9 @@ ENUM_RANGE_BY_COUNT(EItemType, EItemType::MAX);
 UENUM()
 enum class EItemRarity : uint8
 {
-	Common,
-	Uncommon,
-	Rare,
-	Epic,
-	Legendary
+	Common					UMETA(DisplayName = "Common"),
+	Uncommon				UMETA(DisplayName = "Uncommon"),
+	Rare					UMETA(DisplayName = "Rare"),
+	Epic					UMETA(DisplayName = "Epic"),
+	Legendary				UMETA(DisplayName = "Legendary")
 };

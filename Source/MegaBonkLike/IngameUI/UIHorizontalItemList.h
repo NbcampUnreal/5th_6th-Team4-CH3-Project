@@ -14,10 +14,11 @@ class MEGABONKLIKE_API UUIHorizontalItemList : public UUserWidget
 
 public:
 	void SetItems(const TArray<TWeakObjectPtr<UItemBase>>& Items);
+	void SetHorizontalAlignment(EHorizontalAlignment Alignment);
 
 protected:
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UPanelWidget> ParentPanel;
+	TObjectPtr<class UWrapBox> ParentPanel;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<UUIItemSlot> ItemSlotClass;
 };

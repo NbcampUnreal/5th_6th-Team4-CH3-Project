@@ -57,12 +57,15 @@ protected:
 
 	struct FCharacterLevelDataRow* GetLevelData(int32 InLevel) const;
 
+	void SetPlayerAttributeCallbacks();
 	void SetMaxExp();
 	void SetPlayerMaxHP();
 	void SetPlayerMaxJumpCount();
 	void SetPlayerMaxJumpHeight();
 
 	void AttractItems();
+
+	void AcquireRandomWeaponOrTomes();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)

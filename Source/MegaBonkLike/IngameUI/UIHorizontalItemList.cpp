@@ -1,6 +1,6 @@
 ﻿#include "IngameUI/UIHorizontalItemList.h"
 #include "IngameUI/UIItemSlot.h"
-#include "Components/PanelWidget.h"
+#include "Components/WrapBox.h"
 
 void UUIHorizontalItemList::SetItems(const TArray<TWeakObjectPtr<UItemBase>>& Items)
 {
@@ -19,4 +19,8 @@ void UUIHorizontalItemList::SetItems(const TArray<TWeakObjectPtr<UItemBase>>& It
 			NewItemSlot->SetItem(Item);
 		}
 	}
+}
+void UUIHorizontalItemList::SetHorizontalAlignment(EHorizontalAlignment Alignment)
+{
+	ParentPanel->SetHorizontalAlignment(Alignment);
 }

@@ -14,3 +14,8 @@ UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Attribute_MaxHP);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Attribute_PickupRange);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Attribute_JumpCount);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Attribute_JumpHeight);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Attribute_CriticalChance);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Attribute_CriticalMultiplier);
+
+const TArray<FGameplayTag>& GetAttributeTags();
+FString GetTagName(const FGameplayTag& Tag);

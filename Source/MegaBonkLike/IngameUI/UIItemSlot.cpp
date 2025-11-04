@@ -42,7 +42,7 @@ void UUIItemSlot::SetItem(TWeakObjectPtr<UItemBase> InItem)
 		}
 		else if (const UMiscItem* Misc = Cast<const UMiscItem>(Item))
 		{
-			TextItemLevel->SetText(FText::FromString(FString::Printf(TEXT("%d"), Misc->GetStackCount())));
+			TextItemLevel->SetText(FText::FromString(FString::Printf(TEXT("x%d"), Misc->GetStackCount())));
 		}
 	}
 }
