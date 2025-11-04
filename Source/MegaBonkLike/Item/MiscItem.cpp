@@ -1,52 +1,47 @@
 ﻿#include "Item/MiscItem.h"
 #include "Item/ItemDataRow.h"
-#include "Character/AttributeComponent.h"
+#include "Character/SkillComponent.h"
+#include "Skill/Skill.h"
 
-void UMiscItem::AddAttributeModifiers(UAttributeComponent* AttributeComponent, EItemRarity)
+void UMiscItem::Init(AActor* InOwner, const FItemDataRow* InData)
 {
-	if (IsValid(AttributeComponent) == false)
+	Super::Init(InOwner, InData);
+	
+	AddSkill();
+}
+
+void UMiscItem::Upgrade(const FItemUpgradeContext&)
+{
+	AddSkill();
+}
+
+void UMiscItem::OnDestroy()
+{
+	if (Owner.IsValid() == false)
 		return;
 
-	const FMiscItemDataRow* MiscData = (FMiscItemDataRow*)Data;
-	if (MiscData == nullptr)
-		return;
-
-	for (const auto& [AttributeTag, Modifier] : MiscData->AttributeModifiers)
+	if (USkillComponent* SkillComponent = Owner->FindComponentByClass<USkillComponent>())
 	{
-		float AdditionalValue = Modifier.Value;
-		FAttributeModifier* ThisModifier = Modifiers.Find(AttributeTag);
-		if (ThisModifier == nullptr)
+		for (const auto& SkillId : SkillIds)
 		{
-			FAttributeModifier NewModifier;
-			NewModifier.Type = Modifier.Type;
-			NewModifier.Value = 0.0f;
-			Modifiers.Add(AttributeTag, NewModifier);
-
-			ThisModifier = Modifiers.Find(AttributeTag);
-		}
-		ThisModifier->Value += AdditionalValue;
-
-		if (const int32* ExistModifierId = ModifierIds.Find(AttributeTag))
-		{
-			AttributeComponent->ChangeModifier(EAttributeSourceType::Player, AttributeTag, *ExistModifierId, *ThisModifier);
-		}
-		else
-		{
-			int32 NewId = AttributeComponent->AddModifer(EAttributeSourceType::Player, AttributeTag, *ThisModifier);
-			ModifierIds.Add(AttributeTag, NewId);
+			SkillComponent->RemoveSkill(SkillId);
 		}
 	}
 }
 
-void UMiscItem::RemoveAttributeModifiers(UAttributeComponent* AttributeComponent)
+void UMiscItem::AddSkill()
 {
-	if (IsValid(AttributeComponent) == false)
+	const FMiscItemDataRow* MiscData = (FMiscItemDataRow*)Data;
+	if (MiscData == nullptr)
 		return;
 
-	for (const auto& [AttributeTag, ModifierId] : ModifierIds)
+	if (Owner.IsValid() == false)
+		return;
+
+	if (USkillComponent* SkillComponent = Owner->FindComponentByClass<USkillComponent>())
 	{
-		AttributeComponent->RemoveModifier(EAttributeSourceType::Player, AttributeTag, ModifierId);
+		USkill* CDO = MiscData->SkillClass->GetDefaultObject<USkill>();
+		USkill* NewSkill = DuplicateObject<USkill>(CDO, SkillComponent);
+		SkillIds.Add(SkillComponent->AddSkill(NewSkill));
 	}
-	ModifierIds.Empty();
-	Modifiers.Empty();
 }

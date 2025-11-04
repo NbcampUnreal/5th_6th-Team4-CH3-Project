@@ -4,11 +4,14 @@
 #include "GameFramework/PlayerController.h"
 #include "InputAction.h"
 #include "InputMappingContext.h"
+#include "IngameUI/PopupTags.h"
 #include "MBLPlayerController.generated.h"
 
 class UInputMappingContext;
 //class UXPBar;
 class UUIHUD;
+class UPopupItemSelect;
+class UPopupBase;
 
 UCLASS()
 class MEGABONKLIKE_API AMBLPlayerController : public APlayerController
@@ -19,6 +22,12 @@ class MEGABONKLIKE_API AMBLPlayerController : public APlayerController
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
+
+public:
+	UPopupBase* MakePopup(const FGameplayTag& PopupTag);
+	UFUNCTION()
+	void OnDestroyPopup();
+	void RemoveAllWidgets();
 
 public:
 
@@ -36,6 +45,11 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu")
 	TSubclassOf<UUserWidget> PauseMenuClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TMap<FGameplayTag, TSubclassOf<UPopupBase>> PopupClassMap;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UPopupBase> PopupInstance;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu")
 	TSubclassOf<UUserWidget> EndGameScreenWidgetClass;

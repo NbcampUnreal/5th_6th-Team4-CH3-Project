@@ -5,6 +5,7 @@
 #include "MBLCharacterBase.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnChangedProgressValue, float, CurrValue, float, MaxValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDamaged, float, Damage, AActor*, DamageCauser);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDead);
 
 UCLASS()
@@ -33,6 +34,7 @@ private:
 
 public:
 	FOnChangedProgressValue OnHPChanged;
+	FOnDamaged OnDamaged;
 	FOnDead OnDead;
 
 protected:

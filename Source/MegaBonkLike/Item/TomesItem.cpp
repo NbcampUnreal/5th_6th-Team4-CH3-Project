@@ -2,18 +2,43 @@
 #include "Item/ItemDataRow.h"
 #include "Character/AttributeComponent.h"
 
-void UTomesItem::AddAttributeModifiers(UAttributeComponent* AttributeComponent, EItemRarity InRarity)
+void UTomesItem::Init(AActor* InOwner, const FItemDataRow* InData)
 {
-	if (IsValid(AttributeComponent) == false)
-		return;
+	Super::Init(InOwner, InData);
+
+	Level = 1;
 
 	const FTomesItemDataRow* TomesData = (FTomesItemDataRow*)Data;
 	if (TomesData == nullptr)
 		return;
+	
+	AddAttributeModifiers(TomesData->AttributeModifiers);
+}
 
-	for (const auto& [AttributeTag, Modifier] : TomesData->AttributeModifiers)
+void UTomesItem::Upgrade(const FItemUpgradeContext& UpgradeContext)
+{
+	++Level;
+	AddAttributeModifiers(UpgradeContext.AttributeChanges);
+}
+
+void UTomesItem::OnDestroy()
+{
+	RemoveAttributeModifiers();
+}
+
+int32 UTomesItem::GetLevel() const
+{
+	return Level;
+}
+
+void UTomesItem::AddAttributeModifiers(const TMap<FGameplayTag, FAttributeModifier>& InModifiers)
+{
+	UAttributeComponent* AttributeComponent = GetOwnerAttributeComponent();
+	if (AttributeComponent == nullptr)
+		return;
+
+	for (const auto& [AttributeTag, Modifier] : InModifiers)
 	{
-		float AdditionalValue = Modifier.Value * GetRarityMultiplier(InRarity);
 		FAttributeModifier* ThisModifier = Modifiers.Find(AttributeTag);
 		if (ThisModifier == nullptr)
 		{
@@ -24,7 +49,7 @@ void UTomesItem::AddAttributeModifiers(UAttributeComponent* AttributeComponent, 
 
 			ThisModifier = Modifiers.Find(AttributeTag);
 		}
-		ThisModifier->Value += AdditionalValue;
+		ThisModifier->Value += Modifier.Value;
 
 		if (const int32* ExistModifierId = ModifierIds.Find(AttributeTag))
 		{
@@ -38,9 +63,10 @@ void UTomesItem::AddAttributeModifiers(UAttributeComponent* AttributeComponent, 
 	}
 }
 
-void UTomesItem::RemoveAttributeModifiers(UAttributeComponent* AttributeComponent)
+void UTomesItem::RemoveAttributeModifiers()
 {
-	if (IsValid(AttributeComponent) == false)
+	UAttributeComponent* AttributeComponent = GetOwnerAttributeComponent();
+	if (AttributeComponent == nullptr)
 		return;
 
 	for (const auto& [AttributeTag, ModifierId] : ModifierIds)
@@ -49,4 +75,10 @@ void UTomesItem::RemoveAttributeModifiers(UAttributeComponent* AttributeComponen
 	}
 	ModifierIds.Empty();
 	Modifiers.Empty();
+}
+
+float UTomesItem::GetModifierValue(const FGameplayTag& AttributeTag) const
+{
+	auto* Modifier = Modifiers.Find(AttributeTag);
+	return Modifier != nullptr ? Modifier->Value : 0.0f;
 }

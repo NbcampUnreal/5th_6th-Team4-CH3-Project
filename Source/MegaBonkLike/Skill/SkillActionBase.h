@@ -19,13 +19,11 @@ public:
 	virtual void Tick(float DeltaTime) {}
 	virtual void Deactivate() {}
 
-	void SetOwnerWeapon(TWeakObjectPtr<UWeaponItem> InOwnerWeapon);
 	bool GetUseTick() const { return bUseTick; }
 
 protected:
 	void SetIntervalTimer();
-	float GetAttributeValue(const FGameplayTag& AttributeTag);
-	float GetWeaponValue(const FGameplayTag& AttributeTag);
+	virtual float GetValue(const struct FGameplayTag& AttributeTag) const;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadonly)
@@ -35,8 +33,6 @@ protected:
 
 	UPROPERTY()
 	TWeakObjectPtr<AActor> Instigator;
-	UPROPERTY()
-	TWeakObjectPtr<UWeaponItem> OwnerWeapon;
 
 	FTimerHandle TimerHandle;
 	FTimerDelegate TimerDelegate;

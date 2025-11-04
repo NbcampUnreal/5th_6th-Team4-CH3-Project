@@ -7,7 +7,7 @@ bool FAttributeSet::HasAttribute(const FGameplayTag& Tag) const
 
 float FAttributeSet::GetAttributeValue(const FGameplayTag& Tag) const
 {
-    if (const auto& Attribute = Attributes.Find(Tag))
+    if (const auto* Attribute = Attributes.Find(Tag))
     {
         return (*Attribute)->GetValue();
     }

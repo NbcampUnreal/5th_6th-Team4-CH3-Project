@@ -8,6 +8,7 @@
 #include "Character/MBLPlayerCharacter.h"
 #include "Character/InventoryComponent.h"
 #include "IngameUI/UIHorizontalItemList.h"
+#include "Item/ItemEnums.h"
 
 void UUIHUD::NativeConstruct()
 {
@@ -44,6 +45,7 @@ void UUIHUD::UpdateItems()
 
 		if (IsValid(TomesList) == true)
 		{
+			MiscList->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
 			MiscList->SetItems(Inventory->GetCachedItems(EItemType::Misc));
 		}
 	}

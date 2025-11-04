@@ -1,11 +1,11 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Skill/SkillActionBase.h"
-#include "SA_AreaAttack.generated.h"
+#include "Skill/WeaponSkillAction.h"
+#include "WSA_AreaAttack.generated.h"
 
 UCLASS(BlueprintType)
-class MEGABONKLIKE_API USA_AreaAttack : public USkillActionBase
+class MEGABONKLIKE_API UWSA_AreaAttack : public UWeaponSkillAction
 {
 	GENERATED_BODY()
 

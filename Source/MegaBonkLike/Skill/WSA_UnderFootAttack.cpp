@@ -1,10 +1,10 @@
-﻿#include "Skill/SA_UnderFootAttack.h"
+﻿#include "Skill/WSA_UnderFootAttack.h"
 #include "Skill/DamageAreaActor.h"
 #include "Character/MBLPlayerCharacter.h"
 #include "Engine/HitResult.h"
 #include "MegaBonkLike.h"
 
-void USA_UnderFootAttack::Activate(TWeakObjectPtr<AActor> InInstigator)
+void UWSA_UnderFootAttack::Activate(TWeakObjectPtr<AActor> InInstigator)
 {
 	Super::Activate(InInstigator);
 
@@ -12,7 +12,7 @@ void USA_UnderFootAttack::Activate(TWeakObjectPtr<AActor> InInstigator)
     SetIntervalTimer();
 }
 
-void USA_UnderFootAttack::SpawnUnderFootAttackActor()
+void UWSA_UnderFootAttack::SpawnUnderFootAttackActor()
 {
 	AMBLPlayerCharacter* Character = Cast<AMBLPlayerCharacter>(Instigator);
     if (IsValid(Character) == true && IsValid(SpawnActorClass) == true)
@@ -38,9 +38,9 @@ void USA_UnderFootAttack::SpawnUnderFootAttackActor()
 
             if (SpawnActor)
             {
-                float Damage = GetWeaponValue(TAG_Attribute_Damage) * GetAttributeValue(TAG_Attribute_Damage);
-                float Size = GetWeaponValue(TAG_Attribute_Size) * GetAttributeValue(TAG_Attribute_Size);
-                float LifeTime = GetWeaponValue(TAG_Attribute_Duration) * GetAttributeValue(TAG_Attribute_Duration);
+                float Damage = GetValue(TAG_Attribute_Damage);
+                float Size = GetValue(TAG_Attribute_Size);
+                float LifeTime = GetValue(TAG_Attribute_Duration);
                 SpawnActor->SetDamage(Damage);
                 SpawnActor->SetSize(Size);
                 SpawnActor->SetLifeTime(LifeTime);
