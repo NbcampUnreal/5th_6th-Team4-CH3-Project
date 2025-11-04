@@ -16,7 +16,7 @@ public:
 	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
 
-	void SetItem(const UItemBase* InItem);
+	void SetItem(TWeakObjectPtr<UItemBase> InItem);
 
 protected:
 	UPROPERTY(meta = (BindWidget))

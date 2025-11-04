@@ -8,6 +8,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Game/MBLGameInstance.h"
 #include "Components/TextBlock.h"
+#include "IngameUI/PopupBase.h"
 
 void AMBLPlayerController::BeginPlay()
 {
@@ -38,6 +39,57 @@ void AMBLPlayerController::SetupInputComponent()
 		{
 			EnhancedInput->BindAction(IA_Pause, ETriggerEvent::Started, this, &AMBLPlayerController::TogglePauseMenu);
 		}
+	}
+}
+
+UPopupBase* AMBLPlayerController::MakePopup(const FGameplayTag& PopupTag)
+{
+	if (const auto* PopupClass = PopupClassMap.Find(PopupTag))
+	{
+		PopupInstance = CreateWidget<UPopupBase>(this, *PopupClass);
+		if (PopupInstance)
+		{
+			PopupInstance->AddToViewport();
+			PopupInstance->OnDestroy.AddDynamic(this, &ThisClass::OnDestroyPopup);
+
+			bShowMouseCursor = true;
+			SetInputMode(FInputModeUIOnly());
+			SetPause(true);
+		}
+	}
+	return PopupInstance;
+}
+
+void AMBLPlayerController::OnDestroyPopup()
+{
+	if (PopupInstance)
+	{
+		PopupInstance = nullptr;
+
+		bShowMouseCursor = false;
+		SetInputMode(FInputModeGameOnly());
+		SetPause(false);
+	}
+}
+
+void AMBLPlayerController::RemoveAllWidgets()
+{
+	if (HUDWidgetInstance)
+	{
+		HUDWidgetInstance->RemoveFromParent();
+		HUDWidgetInstance = nullptr;
+	}
+
+	if (MainMenuWidgetInstance)
+	{
+		MainMenuWidgetInstance->RemoveFromParent();
+		MainMenuWidgetInstance = nullptr;
+	}
+
+	if (EndGameScreenWidgetInstance)
+	{
+		EndGameScreenWidgetInstance->RemoveFromParent();
+		EndGameScreenWidgetInstance = nullptr;
 	}
 }
 
@@ -72,6 +124,14 @@ void AMBLPlayerController::UpdateXP(float CurrentXP, float MaxXP)
 	if (HUDWidgetInstance)
 	{
 		HUDWidgetInstance->UpdateXP(CurrentXP, MaxXP);
+	}
+}
+
+void AMBLPlayerController::UpdatePlayerLevel(int32 NewLevel)
+{
+	if (HUDWidgetInstance)
+	{
+		HUDWidgetInstance->UpdateLevel(NewLevel);
 	}
 }
 

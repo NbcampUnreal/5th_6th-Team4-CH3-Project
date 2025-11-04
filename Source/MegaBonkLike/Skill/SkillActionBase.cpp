@@ -1,16 +1,10 @@
 ﻿#include "Skill/SkillActionBase.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Character/MBLPlayerCharacter.h"
-#include "Item/WeaponItem.h"
 
 void USkillActionBase::Activate(TWeakObjectPtr<AActor> InInstigator)
 {
 	Instigator = InInstigator;
-}
-
-void USkillActionBase::SetOwnerWeapon(TWeakObjectPtr<UWeaponItem> InOwnerWeapon)
-{
-    OwnerWeapon = InOwnerWeapon;
 }
 
 void USkillActionBase::SetIntervalTimer()
@@ -27,7 +21,7 @@ void USkillActionBase::SetIntervalTimer()
     // FTimerHandle도 안쓰게 돼서 바꿀까 고민중.
     TimerDelegate.Execute();
     Instigator->GetWorld()->GetTimerManager().ClearTimer(TimerHandle);    
-    float Interval = BaseTimerInterval / GetWeaponValue(TAG_Attribute_AttackSpeed) * GetAttributeValue(TAG_Attribute_AttackSpeed);
+    float Interval = BaseTimerInterval / GetValue(TAG_Attribute_AttackSpeed);
     World->GetTimerManager().SetTimer(
         TimerHandle,
         this,
@@ -36,13 +30,8 @@ void USkillActionBase::SetIntervalTimer()
         false);
 }
 
-float USkillActionBase::GetAttributeValue(const FGameplayTag& AttributeTag)
+float USkillActionBase::GetValue(const FGameplayTag& AttributeTag) const
 {
     auto* Entity = Cast<AMBLPlayerCharacter>(Instigator);
     return Entity == nullptr ? 0.0f : Entity->GetAttributeValue(AttributeTag);
-}
-
-float USkillActionBase::GetWeaponValue(const FGameplayTag& AttributeTag)
-{
-    return OwnerWeapon.IsValid() == false ? 1.0f : OwnerWeapon->GetAttributeValue(AttributeTag);
 }

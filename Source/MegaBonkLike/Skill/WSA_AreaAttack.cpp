@@ -1,10 +1,10 @@
-﻿#include "Skill/SA_AreaAttack.h"
+﻿#include "Skill/WSA_AreaAttack.h"
 #include "Engine/OverlapResult.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "MegaBonkLike.h"
 
-void USA_AreaAttack::Activate(TWeakObjectPtr<AActor> InInstigator)
+void UWSA_AreaAttack::Activate(TWeakObjectPtr<AActor> InInstigator)
 {
 	Super::Activate(InInstigator);
 
@@ -12,13 +12,13 @@ void USA_AreaAttack::Activate(TWeakObjectPtr<AActor> InInstigator)
     SetIntervalTimer();
 }
 
-void USA_AreaAttack::CheckHit()
+void UWSA_AreaAttack::CheckHit()
 {
     if (Instigator.IsValid() == false)
         return;
 
     FVector Origin = Instigator->GetActorLocation();
-    float Radius = GetWeaponValue(TAG_Attribute_Size) * GetAttributeValue(TAG_Attribute_Size);
+    float Radius = GetValue(TAG_Attribute_Size);
     TArray<FOverlapResult> Overlaps;
     FCollisionShape CollisionShape;
     CollisionShape.SetSphere(Radius);
@@ -38,7 +38,7 @@ void USA_AreaAttack::CheckHit()
             if (IsValid(HitActor) == false || HitActor == Instigator)
                 continue;
 
-            float Damage = GetWeaponValue(TAG_Attribute_Damage) * GetAttributeValue(TAG_Attribute_Damage);
+            float Damage = GetValue(TAG_Attribute_Damage);
             UGameplayStatics::ApplyDamage(HitActor, Damage, Instigator->GetInstigatorController(), Instigator.Get(), nullptr);
         }
     }

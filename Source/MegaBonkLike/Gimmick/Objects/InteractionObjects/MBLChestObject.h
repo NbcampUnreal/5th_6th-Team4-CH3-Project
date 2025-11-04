@@ -11,4 +11,5 @@ class MEGABONKLIKE_API AMBLChestObject : public AMBLBaseInteractionObject
 public:
 	AMBLChestObject();
 	virtual void OnObjectActivated(AActor* Activator) override;
+	
 };

@@ -6,10 +6,10 @@ AActor* UMBLSpawnSubsystem::SpawnActorAtLocation(
 	const FRotator& Rotation
 )
 {
-	if (!ActorClass) return nullptr;
+	if (!IsValid(ActorClass)) return nullptr;
 
 	UWorld* World = GetWorld();
-	if (!World) return nullptr;
+	if (!IsValid(World)) return nullptr;
 
 	return World->SpawnActor<AActor>(ActorClass, Location, Rotation);
 }

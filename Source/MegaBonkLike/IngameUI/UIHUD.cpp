@@ -3,6 +3,7 @@
 #include "Character/MBLPlayerCharacter.h"
 #include "Character/InventoryComponent.h"
 #include "IngameUI/UIHorizontalItemList.h"
+#include "Item/ItemEnums.h"
 
 void UUIHUD::NativeConstruct()
 {
@@ -39,6 +40,7 @@ void UUIHUD::UpdateItems()
 
 		if (IsValid(TomesList) == true)
 		{
+			MiscList->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
 			MiscList->SetItems(Inventory->GetCachedItems(EItemType::Misc));
 		}
 	}
@@ -49,5 +51,13 @@ void UUIHUD::UpdateXP(float CurrentXP, float MaxXP)
 	if (XPBarWidget)
 	{
 		XPBarWidget->UpdateXP(CurrentXP, MaxXP);
+	}
+}
+
+void UUIHUD::UpdateLevel(int32 CurrentLevel)
+{
+	if (XPBarWidget)
+	{
+		XPBarWidget->UpdateLevel(CurrentLevel);
 	}
 }
