@@ -83,6 +83,39 @@ void AMBLPlayerController::UpdatePlayerLevel(int32 NewLevel)
 	}
 }
 
+void AMBLPlayerController::UpdateKillCount(int32 KillCount)
+{
+	if (HUDWidgetInstance)
+	{
+		HUDWidgetInstance->UpdateKillCount(KillCount);
+	}
+}
+
+void AMBLPlayerController::UpdateCoinCount(int32 CoinCount)
+{
+	if (HUDWidgetInstance)
+	{
+		HUDWidgetInstance->UpdateCoinCount(CoinCount);
+	}
+}
+
+void AMBLPlayerController::UpdateTimer(float RemainingTime)
+{
+	if (HUDWidgetInstance)
+	{
+		HUDWidgetInstance->UpdateTimer(RemainingTime);
+	}
+}
+
+void AMBLPlayerController::UpdateWave(int32 CurrentWave)
+{
+	if (HUDWidgetInstance)
+	{
+		HUDWidgetInstance->UpdateWave(CurrentWave);
+	}
+}
+
+
 void AMBLPlayerController::TogglePauseMenu()
 {
 	if (IsPaused())
