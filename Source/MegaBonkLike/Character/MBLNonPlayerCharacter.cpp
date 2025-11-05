@@ -173,7 +173,7 @@ void AMBLNonPlayerCharacter::DamageTick()
 		if (Player)
 		{
 			FVector KnockbackDir = Player->GetActorLocation() - GetActorLocation();
-			KnockbackDir.Z = 20.f;
+			KnockbackDir.Z = 0.f;
 			KnockbackDir.Normalize();
 
 			const float KnockbackStrength = 700.f;

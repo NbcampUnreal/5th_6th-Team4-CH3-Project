@@ -69,7 +69,7 @@ void AGroundAttack::OnTimelineFinished()
 				KnockbackDir.Z = 2000.f;
 				KnockbackDir.Normalize();
 
-				const float KnockbackStrength = 700.f;
+				const float KnockbackStrength = 1000.f;
 				Player->LaunchCharacter(KnockbackDir * KnockbackStrength, true, true);
 
 				UCharacterMovementComponent* MoveComp = Player->GetCharacterMovement();

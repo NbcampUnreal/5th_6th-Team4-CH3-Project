@@ -122,17 +122,36 @@ void AMBLBossCharacter::SpawnGroundAttack()
 	if (!PlayerPawn) return;
 
 	FVector SpawnLocation = PlayerPawn->GetActorLocation();
+	FVector Start = SpawnLocation + FVector(0.f, 0.f, 200.f);
+	FVector End = SpawnLocation - FVector(0.f, 0.f, 10000.f);
+
+	FHitResult Hit;
+	FCollisionQueryParams TraceParams;
+	TraceParams.AddIgnoredActor(PlayerPawn);
+
+	if (GetWorld()->LineTraceSingleByChannel(
+		Hit,
+		Start,
+		End,
+		ECC_Visibility,
+		TraceParams))
+	{
+		SpawnLocation.Z = Hit.Location.Z;
+	}
+
 	FRotator SpawnRotation = FRotator::ZeroRotator;
 
-	FActorSpawnParameters Params;
-	Params.Owner = this;
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = GetInstigator();
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
 
 	AGroundAttack* SkillArea = GetWorld()->SpawnActor<AGroundAttack>(
 		GroundAttackClass,
 		SpawnLocation,
 		SpawnRotation,
-		Params
+		SpawnParams
 	);
 
 	if (SkillArea)
@@ -196,7 +215,7 @@ void AMBLBossCharacter::DamageTick()
 		if (Player)
 		{
 			FVector KnockbackDir = Player->GetActorLocation() - GetActorLocation();
-			KnockbackDir.Z = 20.f;
+			KnockbackDir.Z = 0.f;
 			KnockbackDir.Normalize();
 
 			const float KnockbackStrength = 700.f;
