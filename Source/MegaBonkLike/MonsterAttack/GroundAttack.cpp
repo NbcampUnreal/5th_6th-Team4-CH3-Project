@@ -3,6 +3,7 @@
 #include "TimerManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/MBLPlayerCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/OverlapResult.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "MegaBonkLike.h"
@@ -49,7 +50,7 @@ void AGroundAttack::OnTimelineFinished()
 		GetActorLocation(),
 		FQuat::Identity,
 		ECC_MBL_PLAYER,
-		FCollisionShape::MakeSphere(100.f * MaxScale)
+		FCollisionShape::MakeSphere(110 * MaxScale)
 	);
 
 	if (bHit)
@@ -58,7 +59,24 @@ void AGroundAttack::OnTimelineFinished()
 		{
 			if (AMBLPlayerCharacter* Player = Cast<AMBLPlayerCharacter>(Result.GetActor()))
 			{
+				//데미지적용
 				UGameplayStatics::ApplyDamage(Player, Damage, nullptr, SkillOwner, UDamageType::StaticClass());
+
+				//넉백적용
+				FVector KnockbackDir = Player->GetActorLocation() - GetActorLocation();
+				KnockbackDir.X = 0.f;
+				KnockbackDir.Y = 0.f;
+				KnockbackDir.Z = 2000.f;
+				KnockbackDir.Normalize();
+
+				const float KnockbackStrength = 700.f;
+				Player->LaunchCharacter(KnockbackDir * KnockbackStrength, true, true);
+
+				UCharacterMovementComponent* MoveComp = Player->GetCharacterMovement();
+				if (MoveComp)
+				{
+					MoveComp->StopMovementImmediately();
+				}
 			}
 		}
 	}

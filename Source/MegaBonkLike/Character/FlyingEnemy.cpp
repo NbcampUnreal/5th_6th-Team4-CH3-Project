@@ -133,7 +133,27 @@ void AFlyingEnemy::DamageTick()
 {
 	if (DamageTarget)
 	{
+		//데미지 적용
 		UGameplayStatics::ApplyDamage(DamageTarget, Attack, GetInstigatorController(), GetInstigator(), UDamageType::StaticClass());
+
+		//넉백 적용
+		AMBLCharacterBase* Player = Cast<AMBLCharacterBase>(DamageTarget);
+		if (Player)
+		{
+			FVector KnockbackDir = Player->GetActorLocation() - GetActorLocation();
+			KnockbackDir.Z = 20.f;
+			KnockbackDir.Normalize();
+
+			const float KnockbackStrength = 700.f;
+			Player->LaunchCharacter(KnockbackDir * KnockbackStrength, true, true);
+
+			UCharacterMovementComponent* MoveComp = Player->GetCharacterMovement();
+			if (MoveComp)
+			{
+				MoveComp->StopMovementImmediately();
+			}
+
+		}
 	}
 	else
 	{
