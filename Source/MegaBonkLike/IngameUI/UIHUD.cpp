@@ -91,11 +91,10 @@ void UUIHUD::UpdateCoinCount(int32 CoinCount)
 	}
 }
 
-void UUIHUD::UpdateWave(int32 CurrentWave)
+void UUIHUD::UpdateWave(int32 CurrentWave, int32 MaxWave)
 {
 	if (WaveWidget)
 	{
-		WaveWidget->UpdateWaveText(CurrentWave);
-
+		WaveWidget->UpdateWaveText(CurrentWave, MaxWave);
 	}
 }

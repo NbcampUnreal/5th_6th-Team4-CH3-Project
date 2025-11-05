@@ -159,11 +159,11 @@ void AMBLPlayerController::UpdateTimer(float RemainingTime)
 	}
 }
 
-void AMBLPlayerController::UpdateWave(int32 CurrentWave)
+void AMBLPlayerController::UpdateWave(int32 CurrentWave, int32 MaxWave)
 {
 	if (HUDWidgetInstance)
 	{
-		HUDWidgetInstance->UpdateWave(CurrentWave);
+		HUDWidgetInstance->UpdateWave(CurrentWave, MaxWave);
 	}
 }
 

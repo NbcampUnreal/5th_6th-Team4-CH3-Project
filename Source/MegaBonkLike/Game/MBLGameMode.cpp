@@ -1,4 +1,5 @@
 #include "Game/MBLGameMode.h"
+#include "Game/MBLGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/MBLPlayerCharacter.h"
 #include "Character/MBLNonPlayerCharacter.h"
@@ -22,6 +23,7 @@ AMBLGameMode::AMBLGameMode()
 {
     DefaultPawnClass = AMBLPlayerCharacter::StaticClass();
     PlayerControllerClass = AMBLPlayerController::StaticClass();
+    GameStateClass = AMBLGameState::StaticClass(); 
 }
 
 void AMBLGameMode::BeginPlay()
@@ -142,6 +144,13 @@ void AMBLGameMode::GameOver()
 void AMBLGameMode::StartWave()
 {
     if (!IsValid(SpawnVolume)) return;
+
+    //IngameUI
+    if (AMBLGameState* CurrentGameState = GetGameState<AMBLGameState>())
+    {
+        CurrentGameState->StartWave();
+    }
+    //IngameUI
 
     switch (CurrentWave)
     {

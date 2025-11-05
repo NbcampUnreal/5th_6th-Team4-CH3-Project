@@ -79,7 +79,7 @@ public:
 	void UpdateCoinCount(int32 CoinCount);
 	
 	UFUNCTION(BlueprintCallable, Category = "HUD|Wave")
-	void UpdateWave(int32 CurrentWave);
+	void UpdateWave(int32 CurrentWave, int32 MaxWave);
 
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void ShowMainMenu(bool bIsRestart);

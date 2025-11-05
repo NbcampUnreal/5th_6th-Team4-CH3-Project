@@ -13,7 +13,7 @@ class MEGABONKLIKE_API UWave : public UUserWidget
 public:
 
 	UFUNCTION(BlueprintCallable)
-	void UpdateWaveText(int32 CurrentWave);
+	void UpdateWaveText(int32 CurrentWave, int32 MaxWave);
 
 protected:
 

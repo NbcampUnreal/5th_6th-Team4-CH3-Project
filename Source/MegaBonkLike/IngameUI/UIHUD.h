@@ -42,7 +42,7 @@ public:
 
 	//Wave
 	UFUNCTION(BlueprintCallable)
-	void UpdateWave(int32 CurrentWave);
+	void UpdateWave(int32 CurrentWave, int32 MaxWave);
 
 	UFUNCTION()
 	void UpdateItems();
