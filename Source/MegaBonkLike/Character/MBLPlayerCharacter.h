@@ -41,6 +41,7 @@ public:
 	void AcquireExp(float Exp);
 	void LevelUp();
 	void SetLevel(int32 InLevel);
+	int32 GetLevel() const { return Level; }
 
 	void AcquireGold(float InGold);
 
@@ -63,6 +64,7 @@ protected:
 	void AttractItems();
 
 	void AcquireRandomWeaponOrTomes();
+	virtual void DeadHandle() override;
 
 public:
 	FOnChangedProgressValue OnExpChanged;

@@ -22,6 +22,7 @@
 #include "IngameUI/PopupTags.h"
 #include "IngameUI/PopupItemAcquire.h"
 #include "Attack/AttackHandleComponent.h"
+#include "Game/MBLGameMode.h"
 
 AMBLPlayerCharacter::AMBLPlayerCharacter()
 {
@@ -381,5 +382,13 @@ void AMBLPlayerCharacter::AcquireRandomWeaponOrTomes()
 			PopupItemSelect->SetInventory(Inventory);
 			PopupItemSelect->SetOptions(3);
 		}
+	}
+}
+
+void AMBLPlayerCharacter::DeadHandle()
+{
+	if (AMBLGameMode* GameMode = Cast<AMBLGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		GameMode->DeadPlayer();
 	}
 }

@@ -27,7 +27,7 @@ protected:
 	void SetMaxHP(float InMaxHP);
 	void UpdateCurrHP(float InCurrHP);
 	UFUNCTION()
-	virtual void DeadHandle();
+	virtual void DeadHandle() {}
 
 private:
 	void SetCameraCollisionIgnore();
