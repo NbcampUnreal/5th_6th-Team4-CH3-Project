@@ -4,6 +4,7 @@
 #include "NavigationSystem.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Gimmick/Spawn/MBLSpawnSubsystem.h"
+#include "Character/EnemyBase.h"
 
 AMBLSpawnVolume::AMBLSpawnVolume()
 {
@@ -51,12 +52,12 @@ FVector AMBLSpawnVolume::GetRandomObjectSpawnLocation() const
 	return GetValidNavMeshLocation(RandomPoint, SearchRadius);
 }
 
-void AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AActor> EnemyClass)
+AEnemyBase* AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AEnemyBase> EnemyClass)
 {
-	if (!IsValid(EnemyClass)) return;
+	if (!IsValid(EnemyClass)) return nullptr;
 
 	UWorld* World = GetWorld();
-	if (!IsValid(World)) return;
+	if (!IsValid(World)) return nullptr;
 
 	FVector SpawnLocation = GetRandomEnemySpawnLocation();
 	//if (SpawnLocation.IsNearlyZero())
@@ -70,15 +71,23 @@ void AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AActor> EnemyClass)
 	if (!IsValid(Player))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No player actor found"));
-		return;
+		return nullptr;
 	}
 
 	FRotator SpawnRotation = (Player->GetActorLocation() - SpawnLocation).Rotation();
 
-	if (UMBLSpawnSubsystem* Subsystem = World->GetSubsystem<UMBLSpawnSubsystem>())
-	{
-		Subsystem->SpawnActorAtLocation(EnemyClass, SpawnLocation, SpawnRotation);
-	}
+	return World->SpawnActor<AEnemyBase>(EnemyClass, SpawnLocation, SpawnRotation);
+
+	//FTransform SpawnTransform;
+	//SpawnTransform.SetLocation(SpawnLocation);
+	//SpawnTransform.SetRotation(SpawnRotation.Quaternion());
+
+	//return World->SpawnActorDeferred<AEnemyBase>(EnemyClass, SpawnTransform);
+
+	//if (UMBLSpawnSubsystem* Subsystem = World->GetSubsystem<UMBLSpawnSubsystem>())
+	//{
+	//	Subsystem->SpawnActorAtLocation(EnemyClass, SpawnLocation, SpawnRotation);
+	//}
 }
 
 void AMBLSpawnVolume::SpawnObject(TSubclassOf<AActor> ObjectClass)
@@ -98,10 +107,11 @@ void AMBLSpawnVolume::SpawnObject(TSubclassOf<AActor> ObjectClass)
 
 	FRotator SpawnRotation = FRotator(0.f, FMath::FRandRange(0.f, 360.f), 0.f);
 
-	if (UMBLSpawnSubsystem* Subsystem = World->GetSubsystem<UMBLSpawnSubsystem>())
-	{
-		Subsystem->SpawnActorAtLocation(ObjectClass, SpawnLocation, SpawnRotation);
-	}
+	World->SpawnActor<AActor>(ObjectClass, SpawnLocation, SpawnRotation);
+	//if (UMBLSpawnSubsystem* Subsystem = World->GetSubsystem<UMBLSpawnSubsystem>())
+	//{
+	//	Subsystem->SpawnActorAtLocation(ObjectClass, SpawnLocation, SpawnRotation);
+	//}
 }
 
 AActor* AMBLSpawnVolume::GetPlayerInBox() const

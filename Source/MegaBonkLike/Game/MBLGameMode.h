@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
 #include "Gimmick/Data/MBLWaveEnums.h"
+#include "Character/EnemyBase.h"
 #include "MBLGameMode.generated.h"
 
 class AMBLSpawnVolume;
@@ -31,16 +32,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test|ItemObjects")
 	int32 MaxSpawnObject;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test|EnemyClass")
-	TArray<TSubclassOf<AActor>> Enemy; //MonsterBase 로 받게 수정
+	TArray<TSubclassOf<AEnemyBase>> Enemy;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnemyTable")
 	UDataTable* EnemyTable;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test|BossClass")
-	TSubclassOf<AActor> Boss;
+	TSubclassOf<AEnemyBase> Boss;
 	float SpawnInterval;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test")
-	uint8 MaxSpawnEnemy;
+	int32 MaxSpawnEnemy;
 	int32 CurrentEnemy;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DropTable")
 	UDataTable* DropTable;
@@ -48,14 +49,11 @@ public:
 	void SpawnManager();
 	void SpawnBoss();
 	FInteractionObjectsRow* GetDropObject() const;
-	TSubclassOf<AActor> GetEnemyClass(EMBLWaveState Wave) const;
+	TSubclassOf<AEnemyBase> GetEnemyClass(EMBLWaveState Wave) const;
 
 	void DeadPlayer(); // 플레이어 사망시
 	void DeadEnemy(); // 적 사망시
 	void DeadBoss(); // 보스 사망시
-	// 제거 예정
-	void Dead(AActor* DeadActor);
-
 	void GameOver();
 
 private:
