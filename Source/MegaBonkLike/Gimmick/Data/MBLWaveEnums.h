@@ -6,6 +6,7 @@
 UENUM()
 enum class EMBLWaveState : uint8
 {
+	SetWave,
 	Wave1,
 	Wave2,
 	Wave3,

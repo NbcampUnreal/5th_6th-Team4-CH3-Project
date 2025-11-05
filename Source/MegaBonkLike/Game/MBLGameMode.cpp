@@ -7,20 +7,21 @@
 #include "Player/MBLPlayerController.h"
 #include "Gimmick/Spawn/MBLSpawnVolume.h"
 #include "Gimmick/Data/InteractionObjectsRow.h"
-#include "Game/MBLGameState.h"  //Ãß°¡
+#include "Gimmick/Data/SpawnEnemiesWeight.h"
+#include "Game/MBLGameState.h"
 
 AMBLGameMode::AMBLGameMode()
     : SpawnVolume(nullptr)
-    , Enemy(nullptr)
+    , Enemy()
+    , EnemyTable(nullptr)
     , Boss(nullptr)
     , DropTable(nullptr)
-    , CurrentWave(EMBLWaveState::Wave1)
-    , WaveDuration(30.0f)
+    , CurrentWave(EMBLWaveState::SetWave)
+    , WaveDuration(10.0f)
     , MaxSpawnObject(500)
     , SpawnInterval(2.0f)
     , MaxSpawnEnemy(10)
     , CurrentEnemy(0)
-
 {
     DefaultPawnClass = AMBLPlayerCharacter::StaticClass();
     PlayerControllerClass = AMBLPlayerController::StaticClass();
@@ -51,11 +52,12 @@ void AMBLGameMode::BeginPlay()
 
 void AMBLGameMode::SpawnManager()
 {
-    if (!SpawnVolume) return;
+    if (!IsValid(SpawnVolume)) return;
 
     if (MaxSpawnEnemy > CurrentEnemy)
     {
-        SpawnVolume->SpawnEnemy(Enemy);
+        SpawnVolume->SpawnEnemy(GetEnemyClass(CurrentWave));
+        //SpawnVolume->SpawnEnemy(Enemy[0]);
         CurrentEnemy++;
     }
 
@@ -76,7 +78,7 @@ void AMBLGameMode::SpawnBoss()
 
 FInteractionObjectsRow* AMBLGameMode::GetDropObject() const
 {
-    if (!DropTable) return nullptr;
+    if (!IsValid(DropTable)) return nullptr;
 
     TArray<FInteractionObjectsRow*> AllRows;
     static const FString ContextString(TEXT("InteractionObjectContext"));
@@ -103,6 +105,43 @@ FInteractionObjectsRow* AMBLGameMode::GetDropObject() const
         if (RandValue <= AccumulateChance)
         {
             return Row;
+        }
+    }
+
+    return nullptr;
+}
+
+TSubclassOf<AActor> AMBLGameMode::GetEnemyClass(EMBLWaveState Wave) const
+{
+    if (!IsValid(EnemyTable)) return nullptr;
+
+    if (Wave == EMBLWaveState::SetWave) return nullptr;
+
+    if (Wave >= EMBLWaveState::Wave3) Wave = EMBLWaveState::Wave3;
+
+    FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
+    FSpawnEnemyList* EnemyInfo = EnemyTable->FindRow<FSpawnEnemyList>(RowName, TEXT(""));
+
+    if (!EnemyInfo) return nullptr;
+
+    const TArray<FSpawnEnemiesWeight>& EnemyList = EnemyInfo->Enemies;
+
+    float TotalWeight = 0.0f;
+
+    for (const auto& Info : EnemyList)
+    {
+        TotalWeight += Info.Weight;
+    }
+
+    float RandValue = FMath::FRandRange(0.0f, TotalWeight);
+    float Drawing = 0.0f;
+
+    for (const auto& Info : EnemyList)
+    {
+        Drawing += Info.Weight;
+        if (RandValue <= Drawing)
+        {
+            return Info.Enemy;
         }
     }
 
@@ -165,7 +204,7 @@ void AMBLGameMode::StartWave()
 
     switch (CurrentWave)
     {
-    case EMBLWaveState::Wave1:
+    case EMBLWaveState::SetWave:
         for (int i = 0; i < MaxSpawnObject; ++i)
         {
             if (FInteractionObjectsRow* SelectedRow = GetDropObject())
@@ -181,9 +220,17 @@ void AMBLGameMode::StartWave()
 
         break;
 
-    case EMBLWaveState::Wave2:
+    case EMBLWaveState::Wave1:
         SpawnInterval = 1.0f;
         MaxSpawnEnemy = 20;
+
+        NextWave(CurrentWave);
+
+        break;
+
+    case EMBLWaveState::Wave2:
+        SpawnInterval = 0.5f;
+        MaxSpawnEnemy = 30;
 
         NextWave(CurrentWave);
 
@@ -201,7 +248,7 @@ void AMBLGameMode::StartWave()
         SpawnBoss();
         UE_LOG(LogTemp, Warning, TEXT("BossSpawn"));
 
-        CurrentWave = GetNextWave(CurrentWave);
+        NextWave(CurrentWave);
 
         break;
 
@@ -212,20 +259,17 @@ void AMBLGameMode::StartWave()
 
 void AMBLGameMode::NextWave(EMBLWaveState& Wave)
 {
+    UE_LOG(LogTemp, Warning, TEXT("Wave %d"), Wave);
     if (Wave == EMBLWaveState::Finished) return;
 
     GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
-
-    if (Wave != EMBLWaveState::FinalWave)
-    {
-        GetWorldTimerManager().SetTimer(
-            SpawnTimerHandle,
-            this,
-            &AMBLGameMode::SpawnManager,
-            SpawnInterval,
-            true
-        );
-    }
+    GetWorldTimerManager().SetTimer(
+        SpawnTimerHandle,
+        this,
+        &AMBLGameMode::SpawnManager,
+        SpawnInterval,
+        true
+    );
 
     Wave = GetNextWave(Wave);
 }
