@@ -1,19 +1,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/MBLCharacterBase.h"
+#include "Character/EnemyBase.h"
 #include "Gimmick/Objects/SpawnObjects/MBLMoneyObject.h"
 #include "Gimmick/Objects/SpawnObjects/MBLExpObject.h"
 #include "MBLNonPlayerCharacter.generated.h"
 
 UCLASS()
-class MEGABONKLIKE_API AMBLNonPlayerCharacter : public AMBLCharacterBase
+class MEGABONKLIKE_API AMBLNonPlayerCharacter : public AEnemyBase
 {
 	GENERATED_BODY()
 
 public:
 	AMBLNonPlayerCharacter();
+
 	void DeadHandle() override;
+
 	UFUNCTION()
 	void OnDamageColliderBeginOverlap(
 		UPrimitiveComponent* OverlappedComp, 
@@ -36,30 +38,21 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-#pragma region NPC Stat 
 
 public:
-	void SetMovementSpeed(float NewSpeed);
 
 	UPROPERTY(VisibleAnywhere)
 	UCapsuleComponent* DamageCollider;
-	UPROPERTY(EditAnywhere, Category = "Stats")
-	float WalkSpeed = 300.f;
-	UPROPERTY(EditAnywhere, Category = "Stats")
-	float RunSpeed = 600.f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Drop")
 	TSubclassOf<class AMBLMoneyObject> GoldCoin;
 	UPROPERTY(EditDefaultsOnly, Category = "Drop")
 	TSubclassOf<class AMBLExpObject> ExpCoin;
+
 	TObjectPtr<AActor> DamageTarget;
 
-private:
-	UPROPERTY(VisibleAnywhere, Category = "Stats")
-	float Attack;
-
-#pragma endregion 
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UDataTable> StatDataTable;
 
 private:
 	bool bIsDead;

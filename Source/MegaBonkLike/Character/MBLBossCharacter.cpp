@@ -4,6 +4,7 @@
 #include "Components/CapsuleComponent.h"
 #include "MonsterAttack/GroundAttack.h"
 #include "Kismet/GameplayStatics.h"
+#include "Game/MBLGameMode.h"
 #include "MegaBonkLike.h"
 
 AMBLBossCharacter::AMBLBossCharacter()
@@ -69,18 +70,15 @@ void AMBLBossCharacter::BeginPlay()
 	//GroundAttack();
 }
 
-void AMBLBossCharacter::SetMovementSpeed(float NewSpeed)
-{
-	if (UCharacterMovementComponent* Movement = GetCharacterMovement())
-	{
-		Movement->MaxWalkSpeed = NewSpeed;
-		UE_LOG(LogTemp, Warning, TEXT("Speed changed: %.1f"), NewSpeed);
-	}
-}
 
 void AMBLBossCharacter::DeadHandle()
 {
 	Super::DeadHandle();
+
+	if (AMBLGameMode* GameMode = Cast<AMBLGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
+	{
+		GameMode->DeadBoss(); // º¸½º »ç¸Á½Ã
+	}
 
 	if (bIsDead) return;
 

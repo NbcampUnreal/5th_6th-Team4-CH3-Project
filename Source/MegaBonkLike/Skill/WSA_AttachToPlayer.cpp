@@ -21,16 +21,16 @@ void UWSA_AttachToPlayer::Activate(TWeakObjectPtr<AActor> InInstigator)
             FAttachmentTransformRules AttachRules(EAttachmentRule::KeepWorld, true);
             AttachedActor->AttachToComponent(Instigator->GetRootComponent(), AttachRules);
 
-            SetDamage();
+            SetAttackData();
             SetSize();
         }
     }
 
-    OwnerWeapon->AddAttributeChangedCallback(TAG_Attribute_Damage, this, [this](const TWeakObjectPtr<UAttribute>) { SetDamage(); });
+    OwnerWeapon->AddAttributeChangedCallback(TAG_Attribute_Damage, this, [this](const TWeakObjectPtr<UAttribute>) { SetAttackData(); });
     OwnerWeapon->AddAttributeChangedCallback(TAG_Attribute_Size, this, [this](const TWeakObjectPtr<UAttribute>) { SetSize(); });
     if (AMBLPlayerCharacter* Character = Cast<AMBLPlayerCharacter>(Instigator))
     {
-        Character->AddAttributeChangedCallback(TAG_Attribute_Damage, this, [this](const TWeakObjectPtr<UAttribute>) { SetDamage(); });
+        Character->AddAttributeChangedCallback(TAG_Attribute_Damage, this, [this](const TWeakObjectPtr<UAttribute>) { SetAttackData(); });
         Character->AddAttributeChangedCallback(TAG_Attribute_Size, this, [this](const TWeakObjectPtr<UAttribute>) { SetSize(); });
     }
     
@@ -56,13 +56,12 @@ void UWSA_AttachToPlayer::Deactivate()
     }
 }
 
-void UWSA_AttachToPlayer::SetDamage()
+void UWSA_AttachToPlayer::SetAttackData()
 {
     if (IsValid(AttachedActor) == false)
         return;
 
-    float Damage = GetValue(TAG_Attribute_Damage);
-    AttachedActor->SetDamage(Damage);
+    AttachedActor->SetAttackData(CreateAttackDataBase());
 }
 
 void UWSA_AttachToPlayer::SetSize()

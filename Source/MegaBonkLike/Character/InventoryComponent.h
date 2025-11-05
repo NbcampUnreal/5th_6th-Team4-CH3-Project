@@ -41,6 +41,8 @@ public:
 	const TArray<TWeakObjectPtr<UItemBase>>& GetCachedItems(EItemType InItemType) const { return CachedItemsByType[InItemType].Items; }
 
 	bool CanAddItem(EItemType InType) const;
+	int GetMaxWeaponCount() const { return MaxWeaponCount; }
+	int GetMaxTomesCount() const { return MaxTomesCount; }
 
 private:
 	const FItemDataRow* GetItemData(EItemType InItemType, int32 InItemId) const;

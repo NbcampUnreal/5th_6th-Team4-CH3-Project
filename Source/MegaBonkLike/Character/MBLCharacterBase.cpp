@@ -48,14 +48,6 @@ void AMBLCharacterBase::UpdateCurrHP(float InCurrHP)
 	OnHPChanged.Broadcast(CurrHP, MaxHP);
 }
 
-void AMBLCharacterBase::DeadHandle()
-{
-	if (AMBLGameMode* GameMode = Cast<AMBLGameMode>(GetWorld()->GetAuthGameMode()))
-	{
-		GameMode->Dead(this);
-	}
-}
-
 void AMBLCharacterBase::SetCameraCollisionIgnore()
 {
 	TArray<UPrimitiveComponent*> PrimitiveComponents;
