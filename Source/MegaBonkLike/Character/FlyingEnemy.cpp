@@ -193,6 +193,6 @@ void AFlyingEnemy::DeadHandle()
 void AFlyingEnemy::SetSpeed(EMBLWaveState Wave)
 {
 	FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
-	FMonsterStat* Monster = StatTable->FindRow<FMonsterStat>(RowName, TEXT(""));
+	FMonsterStat* Monster = StatDataTable->FindRow<FMonsterStat>(RowName, TEXT(""));
 	GetCharacterMovement()->MaxFlySpeed = Monster->MoveSpeed;
 }

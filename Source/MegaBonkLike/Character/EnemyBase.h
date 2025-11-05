@@ -29,7 +29,8 @@ protected:
 	UPROPERTY()
 	TArray<UMaterialInstanceDynamic*> DynamicMaterials;
 
-	TObjectPtr<UDataTable> StatTable;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	TObjectPtr<UDataTable> StatDataTable;
 
 public:
 	UFUNCTION(BlueprintCallable)

@@ -13,7 +13,7 @@ class MEGABONKLIKE_API UUIHorizontalItemList : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void SetItems(const TArray<TWeakObjectPtr<UItemBase>>& Items);
+	void SetItems(const TArray<TWeakObjectPtr<UItemBase>>& Items, int32 DefaultSlotCount = 0);
 	void SetHorizontalAlignment(EHorizontalAlignment Alignment);
 
 protected:

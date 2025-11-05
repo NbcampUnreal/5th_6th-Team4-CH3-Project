@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Attack/AttackData.h"
 #include "Projectile.generated.h"
 
 class USphereComponent;
@@ -23,9 +24,11 @@ protected:
 
 public:
     void SetDirectionAndSpeed(const FVector& InDirection, float InSpeed);
-    void SetDamage(float InDamage);
+    void SetAttackData(const FAttackData& InAttackData);
     void SetSize(float InSize);
     void SetPenetrate(bool bInPenetrate);
+
+    void ApplyDamage(AActor* TargetActor);
 
 protected:
     UFUNCTION()
@@ -47,7 +50,7 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     TObjectPtr<UNiagaraSystem> TrailEffect;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-    float Damage;
+    FAttackData AttackData;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     float Speed;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)

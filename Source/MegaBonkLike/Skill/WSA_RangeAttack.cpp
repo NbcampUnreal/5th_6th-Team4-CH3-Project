@@ -162,7 +162,7 @@ void UWSA_RangeAttack::ShootSingle(const FVector& TargetDir)
 		Projectile->SetActorEnableCollision(false);
 		Projectile->SetDirectionAndSpeed(TargetDir, GetValue(TAG_Attribute_ProjectileSpeed));
 		Projectile->SetSize(GetValue(TAG_Attribute_Size));
-		Projectile->SetDamage(GetValue(TAG_Attribute_Damage));
+		Projectile->SetAttackData(CreateAttackDataBase());
 		Projectile->SetPenetrate(bPenetrate);
 		Projectile->SetActorEnableCollision(true);
 	}

@@ -17,12 +17,12 @@ void UUIInventory::UpdateItems()
 
 	if (IsValid(WeaponList) == true)
 	{
-		WeaponList->SetItems(Inventory->GetCachedItems(EItemType::Weapon));
+		WeaponList->SetItems(Inventory->GetCachedItems(EItemType::Weapon), Inventory->GetMaxWeaponCount());
 	}
 
 	if (IsValid(TomesList) == true)
 	{
-		TomesList->SetItems(Inventory->GetCachedItems(EItemType::Tomes));
+		TomesList->SetItems(Inventory->GetCachedItems(EItemType::Tomes), Inventory->GetMaxTomesCount());
 	}
 
 	if (IsValid(TomesList) == true)

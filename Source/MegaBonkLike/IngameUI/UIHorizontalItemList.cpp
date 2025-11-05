@@ -2,21 +2,25 @@
 #include "IngameUI/UIItemSlot.h"
 #include "Components/WrapBox.h"
 
-void UUIHorizontalItemList::SetItems(const TArray<TWeakObjectPtr<UItemBase>>& Items)
+void UUIHorizontalItemList::SetItems(const TArray<TWeakObjectPtr<UItemBase>>& Items, int32 DefaultSlotCount)
 {
 	if (IsValid(ParentPanel) == false)
 		return;
 
 	ParentPanel->ClearChildren();
 
-	for (const auto& Item : Items)
+	int32 SlotCount = FMath::Max(Items.Num(), DefaultSlotCount);
+	for (int32 i = 0; i < SlotCount; ++i)
 	{
 		UUIItemSlot* NewItemSlot = CreateWidget<UUIItemSlot>(GetWorld(), ItemSlotClass);
 		if (NewItemSlot)
 		{
 			ParentPanel->AddChild(NewItemSlot);
 
-			NewItemSlot->SetItem(Item);
+			if (i < Items.Num())
+			{
+				NewItemSlot->SetItem(Items[i]);
+			}
 		}
 	}
 }

@@ -8,6 +8,7 @@
 #include "Gimmick/Spawn/MBLSpawnVolume.h"
 #include "Gimmick/Data/InteractionObjectsRow.h"
 #include "Gimmick/Data/SpawnEnemiesWeight.h"
+#include "Game/MBLGameState.h"
 
 AMBLGameMode::AMBLGameMode()
     : SpawnVolume(nullptr)
@@ -161,10 +162,20 @@ void AMBLGameMode::DeadEnemy()
     }
 
     CurrentEnemy--;
+
+    if (AMBLGameState* GS = GetGameState<AMBLGameState>())  //추가
+    {
+        GS->Addkill();
+    }
 }
 
 void AMBLGameMode::DeadBoss()
 {
+    if (AMBLGameState* GS = GetGameState<AMBLGameState>())  //추가
+    {
+        GS->Addkill();
+    }
+
     GameOver();
 }
 

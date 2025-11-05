@@ -65,11 +65,18 @@ void UUIItemSelectOption::SetOption(const FItemSelectOption& InOption)
 
 	if (IsValid(TextRarity) == true)
 	{
-		const UEnum* RarityEnum = StaticEnum<EItemRarity>();
-		if (RarityEnum)
+		if (InOption.bIsNewItem)
 		{
-			FText Text = RarityEnum->GetDisplayNameTextByValue(static_cast<int64>(InOption.Rarity));
-			TextRarity->SetText(Text);
+			TextRarity->SetText(FText::FromString(TEXT("New")));
+		}
+		else
+		{
+			const UEnum* RarityEnum = StaticEnum<EItemRarity>();
+			if (RarityEnum)
+			{
+				FText Text = RarityEnum->GetDisplayNameTextByValue(static_cast<int64>(InOption.Rarity));
+				TextRarity->SetText(Text);
+			}
 		}
 	}
 	

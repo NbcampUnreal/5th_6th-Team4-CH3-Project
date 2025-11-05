@@ -15,6 +15,9 @@ public:
 	void SetOwnerWeapon(TWeakObjectPtr<UWeaponItem> InOwnerWeapon);
 
 protected:
+	struct FAttackData CreateAttackDataBase();
+
+protected:
 	UPROPERTY()
 	TWeakObjectPtr<UWeaponItem> OwnerWeapon;
 };

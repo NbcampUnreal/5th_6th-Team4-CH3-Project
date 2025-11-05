@@ -21,6 +21,8 @@
 #include "IngameUI/PopupItemSelect.h"
 #include "IngameUI/PopupTags.h"
 #include "IngameUI/PopupItemAcquire.h"
+#include "Attack/AttackHandleComponent.h"
+#include "Game/MBLGameMode.h"
 
 AMBLPlayerCharacter::AMBLPlayerCharacter()
 {
@@ -50,6 +52,7 @@ AMBLPlayerCharacter::AMBLPlayerCharacter()
 	Inventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
 	SkillComponent = CreateDefaultSubobject<USkillComponent>(TEXT("SkillComponent"));
 	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComponent"));
+	AttackHandleComponent = CreateDefaultSubobject<UAttackHandleComponent>(TEXT("AttackHandleComponent"));
 
 	HPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPBarWidget"));
 	HPBarWidget->SetupAttachment(GetMesh());
@@ -86,12 +89,17 @@ void AMBLPlayerCharacter::BeginPlay()
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_PickupRange, 1.0f);
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_JumpCount, 1.0f);
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_JumpHeight, 1.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_CriticalChance, 0.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_CriticalMultiplier, 1.5f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_Knockback, 200.0f);
 
 	SetPlayerAttributeCallbacks();
 
 	SetLevel(1);
 	if (AMBLPlayerController* PlayerController = Cast<AMBLPlayerController>(GetController()))
 	{
+		PlayerController->UpdatePlayerLevel(Level);
+		OnChangedLevel.AddDynamic(PlayerController, &AMBLPlayerController::UpdatePlayerLevel);
 		PlayerController->UpdateXP(CurrExp, MaxExp);
 		OnExpChanged.AddDynamic(PlayerController, &AMBLPlayerController::UpdateXP);
 	}
@@ -374,5 +382,13 @@ void AMBLPlayerCharacter::AcquireRandomWeaponOrTomes()
 			PopupItemSelect->SetInventory(Inventory);
 			PopupItemSelect->SetOptions(3);
 		}
+	}
+}
+
+void AMBLPlayerCharacter::DeadHandle()
+{
+	if (AMBLGameMode* GameMode = Cast<AMBLGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		GameMode->DeadPlayer();
 	}
 }
