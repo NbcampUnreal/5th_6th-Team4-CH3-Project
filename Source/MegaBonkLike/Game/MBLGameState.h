@@ -45,6 +45,7 @@ public:
 	void AddCoin(int32 Amount);
 
 	int32 GetKills() const;
+	float GetRemainingTime() const;  //Ãß°¡
 
 	void UpdateHUD();
 };

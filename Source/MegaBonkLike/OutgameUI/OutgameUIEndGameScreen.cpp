@@ -5,7 +5,7 @@
 #include "Character/InventoryComponent.h"
 #include "IngameUI/UIHorizontalItemList.h"
 #include "Item/ItemEnums.h"
-#include "Game/MBLGameState.h"  //Ãß°¡
+#include "Game/MBLGameState.h"
 #include "Game/MBLGameMode.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -30,12 +30,20 @@ void UOutgameUIEndGameScreen::SetOutgameUIScore()
 	}
 
 	AMBLGameState* GameState = Cast<AMBLGameState>(UGameplayStatics::GetGameState(GetWorld()));
+	AMBLPlayerCharacter* PlayerCharacter = Cast<AMBLPlayerCharacter>(Player.Get());
 	int32 Kills = 0;
 	float TimeSurvived = 0.f;
+	int32 Level = 1;
 
 	if (GameState)
 	{
 		Kills = GameState->GetKills();
+		TimeSurvived = GameState->GetRemainingTime();
+	}
+
+	if (PlayerCharacter)
+	{
+		Level = PlayerCharacter->GetLevel();
 	}
 
 	if (KillsText)
@@ -48,6 +56,11 @@ void UOutgameUIEndGameScreen::SetOutgameUIScore()
 		int32 Minutes = FMath::FloorToInt(TimeSurvived / 60.f);
 		int32 Seconds = FMath::FloorToInt(FMath::Fmod(TimeSurvived, 60.f));
 		TimeText->SetText(FText::FromString(FString::Printf(TEXT("TimeSurvived: %02d:%02d"), Minutes, Seconds)));
+	}
+
+	if (LevelText)
+	{
+		LevelText->SetText(FText::FromString(FString::Printf(TEXT("Level: %d"), Level))); 
 	}
 
 }

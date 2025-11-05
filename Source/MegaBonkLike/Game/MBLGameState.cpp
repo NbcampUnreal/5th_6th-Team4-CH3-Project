@@ -101,3 +101,8 @@ int32 AMBLGameState::GetKills() const
 {
 	return KillCount;
 }
+
+float AMBLGameState::GetRemainingTime() const
+{
+	return RemainingTime;
+}
