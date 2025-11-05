@@ -53,21 +53,21 @@ FVector AMBLSpawnVolume::GetRandomObjectSpawnLocation() const
 
 void AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AActor> EnemyClass)
 {
-	if (!EnemyClass) return;
+	if (!IsValid(EnemyClass)) return;
 
 	UWorld* World = GetWorld();
-	if (!World) return;
+	if (!IsValid(World)) return;
 
 	FVector SpawnLocation = GetRandomEnemySpawnLocation();
-	if (SpawnLocation.IsNearlyZero())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Player not found in spawn box"));
-		return;
-	}
+	//if (SpawnLocation.IsNearlyZero())
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("Player not found in spawn box"));
+	//	return;
+	//}
 
 	AActor* Player = GetPlayerInBox();
 
-	if (!Player)
+	if (!IsValid(Player))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No player actor found"));
 		return;
@@ -142,8 +142,8 @@ FVector AMBLSpawnVolume::GetValidNavMeshLocation(const FVector& Location, float 
 	UNavigationSystemV1* NaviSystem = UNavigationSystemV1::GetCurrent(World);
 	if (!NaviSystem)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Navigation system not found"))
-			return FVector::ZeroVector;
+		UE_LOG(LogTemp, Error, TEXT("Navigation system not found"));
+		return FVector::ZeroVector;
 	}
 
 	FNavLocation ValidLocation;
@@ -156,6 +156,6 @@ FVector AMBLSpawnVolume::GetValidNavMeshLocation(const FVector& Location, float 
 
 	if (bFound) return ValidLocation.Location;
 
-	UE_LOG(LogTemp, Warning, TEXT("Navigation system not found"));
+	UE_LOG(LogTemp, Warning, TEXT("GetValidNavMeshLocation is not valid"));
 	return FVector::ZeroVector;
 }

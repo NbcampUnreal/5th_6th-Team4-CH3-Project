@@ -1,63 +1,76 @@
 #include "Game/MBLGameMode.h"
+#include "Game/MBLGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/MBLPlayerCharacter.h"
+#include "Character/MBLNonPlayerCharacter.h"
+#include "Character/MBLBossCharacter.h"
 #include "Player/MBLPlayerController.h"
 #include "Gimmick/Spawn/MBLSpawnVolume.h"
 #include "Gimmick/Data/InteractionObjectsRow.h"
-#include "Character/MBLBossCharacter.h"
 
 AMBLGameMode::AMBLGameMode()
     : SpawnVolume(nullptr)
     , Enemy(nullptr)
     , Boss(nullptr)
-    , SpawnInterval(0.5f)
-    , MaxSpawnEnemy(40)
-    , BossTime(10)
-    , GameTime(30.f)
-    , CurrentEnemy(0)
     , DropTable(nullptr)
+    , CurrentWave(EMBLWaveState::Wave1)
+    , WaveDuration(30.0f)
+    , MaxSpawnObject(500)
+    , SpawnInterval(2.0f)
+    , MaxSpawnEnemy(10)
+    , CurrentEnemy(0)
+
 {
     DefaultPawnClass = AMBLPlayerCharacter::StaticClass();
     PlayerControllerClass = AMBLPlayerController::StaticClass();
+    GameStateClass = AMBLGameState::StaticClass(); 
 }
 
 void AMBLGameMode::BeginPlay()
 {
     Super::BeginPlay();
 
-    TArray<AActor*> FoundVolumes;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMBLSpawnVolume::StaticClass(), FoundVolumes);
-
     SpawnVolume = Cast<AMBLSpawnVolume>(UGameplayStatics::GetActorOfClass(GetWorld(), AMBLSpawnVolume::StaticClass()));
 
-    if (!SpawnVolume) UE_LOG(LogTemp, Error, TEXT("SpawnVolume not found"));
+    if (!IsValid(SpawnVolume))
+    {
+        UE_LOG(LogTemp, Error, TEXT("SpawnVolume not found"));
+    }
+
+    StartWave();
+
+    GetWorldTimerManager().SetTimer(
+        NextWaveTimerHandle,
+        this,
+        &AMBLGameMode::StartWave,
+        WaveDuration,
+        true
+    );
+}
+
+void AMBLGameMode::SpawnManager()
+{
+    if (!SpawnVolume) return;
+
+    if (MaxSpawnEnemy > CurrentEnemy)
+    {
+        SpawnVolume->SpawnEnemy(Enemy);
+        CurrentEnemy++;
+    }
+
+}
+
+void AMBLGameMode::SpawnBoss()
+{
+    SpawnVolume->SpawnEnemy(Boss);
 
     GetWorldTimerManager().SetTimer(
         GameOverTimerHandle,
         this,
         &AMBLGameMode::GameOver,
-        GameTime,
+        WaveDuration,
         false
     );
-
-    GetWorldTimerManager().SetTimer(
-        BossSpawnTimerHandle,
-        this,
-        &AMBLGameMode::SpawnBoss,
-        BossTime,
-        false
-    );
-
-    GetWorldTimerManager().SetTimer(
-        SpawnTimerHandle,
-        this,
-        &AMBLGameMode::SpawnManager,
-        SpawnInterval,
-        true
-    );
-
-    StartWave();
-
 }
 
 FInteractionObjectsRow* AMBLGameMode::GetDropObject() const
@@ -95,57 +108,25 @@ FInteractionObjectsRow* AMBLGameMode::GetDropObject() const
     return nullptr;
 }
 
-void AMBLGameMode::StartWave()
+void AMBLGameMode::DeadPlayer()
 {
-    for (int i = 0; i < 20; ++i)
-    {
-        if (FInteractionObjectsRow* SelectedRow = GetDropObject())
-        {
-            if (UClass* ActualClass = SelectedRow->ObjectClass.Get())
-            {
-                SpawnVolume->SpawnObject(ActualClass);
-            }
-        }
-    }
+    GameOver();
 }
 
-void AMBLGameMode::SpawnBoss()
+void AMBLGameMode::DeadEnemy()
 {
-    SpawnVolume->SpawnEnemy(Boss);
-}
-
-void AMBLGameMode::SpawnManager()
-{
-    if (!SpawnVolume) return;
-
-    if (MaxSpawnEnemy > CurrentEnemy)
+    if (CurrentEnemy <= 0)
     {
-        SpawnVolume->SpawnEnemy(Enemy);
-        CurrentEnemy++;
-    }
-    
-}
-
-void AMBLGameMode::Dead(AActor* DeadActor)
-{
-    if (!IsValid(DeadActor)) return;
-
-    if (DeadActor->ActorHasTag("Player"))
-    {
-        GameOver();
+        CurrentEnemy = 0;
         return;
     }
 
-    if (DeadActor->ActorHasTag("Enemy"))
-    {
-        if (CurrentEnemy <= 0)
-        {
-            CurrentEnemy = 0;
-            return;
-        }
+    CurrentEnemy--;
+}
 
-        CurrentEnemy--;
-    }
+void AMBLGameMode::DeadBoss()
+{
+    GameOver();
 }
 
 void AMBLGameMode::GameOver()
@@ -159,3 +140,119 @@ void AMBLGameMode::GameOver()
         }
     }
 }
+
+void AMBLGameMode::StartWave()
+{
+    if (!IsValid(SpawnVolume)) return;
+
+    //IngameUI
+    if (AMBLGameState* CurrentGameState = GetGameState<AMBLGameState>())
+    {
+        CurrentGameState->StartWave();
+    }
+    //IngameUI
+
+    switch (CurrentWave)
+    {
+    case EMBLWaveState::Wave1:
+        for (int i = 0; i < MaxSpawnObject; ++i)
+        {
+            if (FInteractionObjectsRow* SelectedRow = GetDropObject())
+            {
+                if (UClass* ActualClass = SelectedRow->ObjectClass.Get())
+                {
+                    SpawnVolume->SpawnObject(ActualClass);
+                }
+            }
+        }
+
+        NextWave(CurrentWave);
+
+        break;
+
+    case EMBLWaveState::Wave2:
+        SpawnInterval = 1.0f;
+        MaxSpawnEnemy = 20;
+
+        NextWave(CurrentWave);
+
+        break;
+
+    case EMBLWaveState::Wave3:
+        SpawnInterval = 0.5f;
+        MaxSpawnEnemy = 30;
+
+        NextWave(CurrentWave);
+
+        break;
+
+    case EMBLWaveState::FinalWave:
+        SpawnBoss();
+        UE_LOG(LogTemp, Warning, TEXT("BossSpawn"));
+
+        CurrentWave = GetNextWave(CurrentWave);
+
+        break;
+
+    default:
+        return;
+    }
+}
+
+void AMBLGameMode::NextWave(EMBLWaveState& Wave)
+{
+    if (Wave == EMBLWaveState::Finished) return;
+
+    GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
+
+    if (Wave != EMBLWaveState::FinalWave)
+    {
+        GetWorldTimerManager().SetTimer(
+            SpawnTimerHandle,
+            this,
+            &AMBLGameMode::SpawnManager,
+            SpawnInterval,
+            true
+        );
+    }
+
+    Wave = GetNextWave(Wave);
+}
+
+// 제거 예정 함수
+void AMBLGameMode::Dead(AActor* DeadActor)
+{
+    if (!IsValid(DeadActor)) return;
+    
+    if (AMBLPlayerCharacter* Player = Cast<AMBLPlayerCharacter>(DeadActor))
+    {
+        GameOver();
+        return;
+    }
+
+    if (AMBLNonPlayerCharacter* NPC = Cast<AMBLNonPlayerCharacter>(DeadActor))
+    {
+        if (CurrentEnemy <= 0)
+        {
+            CurrentEnemy = 0;
+            return;
+        }
+
+        CurrentEnemy--;
+        return;
+    }
+
+    if (AMBLBossCharacter* BossNPC = Cast<AMBLBossCharacter>(DeadActor))
+    {
+        GameOver();
+        return;
+    }
+
+}
+
+
+
+
+
+
+

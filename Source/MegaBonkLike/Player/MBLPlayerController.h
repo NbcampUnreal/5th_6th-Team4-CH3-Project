@@ -69,6 +69,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HUD|XPBar")
 	void UpdatePlayerLevel(int32 NewLevel);
 
+	UFUNCTION(BlueprintCallable, Category = "HUD|KillCounter")
+	void UpdateKillCount(int32 KillCount);
+
+	UFUNCTION(BlueprintCallable, Category = "HUD|Timer")
+	void UpdateTimer(float RemainingTime);
+
+	UFUNCTION(BlueprintCallable, Category = "HUD|CoinCounter")
+	void UpdateCoinCount(int32 CoinCount);
+	
+	UFUNCTION(BlueprintCallable, Category = "HUD|Wave")
+	void UpdateWave(int32 CurrentWave, int32 MaxWave);
+
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void ShowMainMenu(bool bIsRestart);
 

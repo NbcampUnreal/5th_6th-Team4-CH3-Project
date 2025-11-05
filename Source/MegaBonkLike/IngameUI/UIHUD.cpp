@@ -1,5 +1,10 @@
 ﻿#include "IngameUI/UIHUD.h"
 #include "IngameUI/XPBar.h"
+#include "IngameUI/HPBar.h"
+#include "IngameUI/Timer.h"
+#include "IngameUI/KillCounter.h"
+#include "IngameUI/CoinCounter.h"
+#include "IngameUI/Wave.h"
 #include "Character/MBLPlayerCharacter.h"
 #include "Character/InventoryComponent.h"
 #include "IngameUI/UIHorizontalItemList.h"
@@ -59,5 +64,37 @@ void UUIHUD::UpdateLevel(int32 CurrentLevel)
 	if (XPBarWidget)
 	{
 		XPBarWidget->UpdateLevel(CurrentLevel);
+	}
+}
+
+void UUIHUD::UpdateKillCount(int32 KillCount)
+{
+	if (KillCounterWidget)
+	{
+		KillCounterWidget->UpdateKillCounter(KillCount);
+	}
+}
+
+void UUIHUD::UpdateTimer(float RemainingTime)
+{
+	if (TimerWidget)
+	{
+		TimerWidget->UpdateTimer(RemainingTime);
+	}
+}
+
+void UUIHUD::UpdateCoinCount(int32 CoinCount)
+{
+	if (CoinCounterWidget)
+	{
+		CoinCounterWidget->UpdateCoinCount(CoinCount);
+	}
+}
+
+void UUIHUD::UpdateWave(int32 CurrentWave, int32 MaxWave)
+{
+	if (WaveWidget)
+	{
+		WaveWidget->UpdateWaveText(CurrentWave, MaxWave);
 	}
 }

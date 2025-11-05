@@ -4,25 +4,28 @@
 #include "Character/EnemyBase.h"
 #include "Gimmick/Objects/SpawnObjects/MBLMoneyObject.h"
 #include "Gimmick/Objects/SpawnObjects/MBLExpObject.h"
-#include "MBLNonPlayerCharacter.generated.h"
+#include "Character/MonsterStat.h"
+#include "FlyingEnemy.generated.h"
 
 UCLASS()
-class MEGABONKLIKE_API AMBLNonPlayerCharacter : public AEnemyBase
+class MEGABONKLIKE_API AFlyingEnemy : public AEnemyBase
 {
 	GENERATED_BODY()
 
 public:
-	AMBLNonPlayerCharacter();
+	AFlyingEnemy();
 
 	void DeadHandle() override;
 
+	void SetSpeed(EMBLWaveState Wave) override;
+
 	UFUNCTION()
 	void OnDamageColliderBeginOverlap(
-		UPrimitiveComponent* OverlappedComp, 
-		AActor* OtherActor, 
-		UPrimitiveComponent* OtherComp, 
-		int32 TherBodyIndex, 
-		bool bFromSweep, 
+		UPrimitiveComponent* OverlappedComp,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 TherBodyIndex,
+		bool bFromSweep,
 		const FHitResult& SweepResult
 	);
 	UFUNCTION()
@@ -32,8 +35,11 @@ public:
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex
 	);
-	
+
 	void DamageTick();
+
+	void UpdateTrack();
+	void MoveStep();
 
 protected:
 	virtual void BeginPlay() override;
@@ -57,6 +63,11 @@ public:
 private:
 	bool bIsDead;
 	FTimerHandle DamageTimerHandle;
+
+	FVector CurrentDirection;
+	TWeakObjectPtr<AActor> Target;
+
+	TObjectPtr<UDataTable> StatTable;
 
 	/*테스트용 코드
 	void KillSelf();*/
