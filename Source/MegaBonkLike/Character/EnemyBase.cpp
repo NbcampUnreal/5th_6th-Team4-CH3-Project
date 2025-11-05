@@ -29,21 +29,21 @@ void AEnemyBase::BeginPlay()
 void AEnemyBase::SetAttack(EMBLWaveState Wave)
 {
 	FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
-	FMonsterStat* Monster = StatTable->FindRow<FMonsterStat>(RowName, TEXT(""));
+	FMonsterStat* Monster = StatDataTable->FindRow<FMonsterStat>(RowName, TEXT(""));
 	Attack = Monster->Attack;
 }
 
 void AEnemyBase::SetSpeed(EMBLWaveState Wave)
 {
 	FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
-	FMonsterStat* Monster = StatTable->FindRow<FMonsterStat>(RowName, TEXT(""));
+	FMonsterStat* Monster = StatDataTable->FindRow<FMonsterStat>(RowName, TEXT(""));
 	GetCharacterMovement()->MaxWalkSpeed = Monster->MoveSpeed;
 }
 
 void AEnemyBase::SetColor(EMBLWaveState Wave)
 {
 	FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
-	FMonsterStat* Monster = StatTable->FindRow<FMonsterStat>(RowName, TEXT(""));
+	FMonsterStat* Monster = StatDataTable->FindRow<FMonsterStat>(RowName, TEXT(""));
 
 	for (UMaterialInstanceDynamic* DynMat : DynamicMaterials)
 	{

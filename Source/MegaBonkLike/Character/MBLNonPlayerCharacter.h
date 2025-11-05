@@ -51,9 +51,6 @@ public:
 
 	TObjectPtr<AActor> DamageTarget;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UDataTable> StatDataTable;
-
 private:
 	bool bIsDead;
 	FTimerHandle DamageTimerHandle;
