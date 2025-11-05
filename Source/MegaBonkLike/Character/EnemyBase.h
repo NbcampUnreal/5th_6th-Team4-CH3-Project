@@ -31,7 +31,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	TObjectPtr<UDataTable> StatDataTable;
-
 public:
 	UFUNCTION(BlueprintCallable)
 	void SetAttack(EMBLWaveState Wave);

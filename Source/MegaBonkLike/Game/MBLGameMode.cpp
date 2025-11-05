@@ -8,7 +8,6 @@
 #include "Gimmick/Spawn/MBLSpawnVolume.h"
 #include "Gimmick/Data/InteractionObjectsRow.h"
 #include "Gimmick/Data/SpawnEnemiesWeight.h"
-#include "Game/MBLGameState.h"
 
 AMBLGameMode::AMBLGameMode()
     : SpawnVolume(nullptr)
@@ -56,17 +55,32 @@ void AMBLGameMode::SpawnManager()
 
     if (MaxSpawnEnemy > CurrentEnemy)
     {
-        SpawnVolume->SpawnEnemy(GetEnemyClass(CurrentWave));
-        //SpawnVolume->SpawnEnemy(Enemy[0]);
+        AEnemyBase* NewEnemy = SpawnVolume->SpawnEnemy(GetEnemyClass(CurrentWave));
+        if (!IsValid(NewEnemy)) return;
+        //NewEnemy->SetCurrentWave(CurrentWave);
+        NewEnemy->SetAttack(CurrentWave);
+        NewEnemy->SetSpeed(CurrentWave);
+        NewEnemy->SetColor(CurrentWave);
+
+        //FTransform SpawnTransform;
+        //SpawnTransform.SetLocation(NewEnemy->GetActorLocation());
+        //SpawnTransform.SetRotation(NewEnemy->GetActorRotation().Quaternion());
+
+        //UGameplayStatics::FinishSpawningActor(NewEnemy, SpawnTransform);
         CurrentEnemy++;
     }
-
 }
 
 void AMBLGameMode::SpawnBoss()
 {
-    SpawnVolume->SpawnEnemy(Boss);
+    AEnemyBase* NewEnemy = SpawnVolume->SpawnEnemy(Boss);
+    if (!IsValid(NewEnemy)) return;
 
+    //FTransform SpawnTransform;
+    //SpawnTransform.SetLocation(NewEnemy->GetActorLocation());
+    //SpawnTransform.SetRotation(NewEnemy->GetActorRotation().Quaternion());
+
+    //UGameplayStatics::FinishSpawningActor(NewEnemy, SpawnTransform);
     GetWorldTimerManager().SetTimer(
         GameOverTimerHandle,
         this,
@@ -111,7 +125,7 @@ FInteractionObjectsRow* AMBLGameMode::GetDropObject() const
     return nullptr;
 }
 
-TSubclassOf<AActor> AMBLGameMode::GetEnemyClass(EMBLWaveState Wave) const
+TSubclassOf<AEnemyBase> AMBLGameMode::GetEnemyClass(EMBLWaveState Wave) const
 {
     if (!IsValid(EnemyTable)) return nullptr;
 
@@ -222,7 +236,7 @@ void AMBLGameMode::StartWave()
 
     case EMBLWaveState::Wave1:
         SpawnInterval = 1.0f;
-        MaxSpawnEnemy = 20;
+        MaxSpawnEnemy = 10;
 
         NextWave(CurrentWave);
 
@@ -230,7 +244,7 @@ void AMBLGameMode::StartWave()
 
     case EMBLWaveState::Wave2:
         SpawnInterval = 0.5f;
-        MaxSpawnEnemy = 30;
+        MaxSpawnEnemy = 10;
 
         NextWave(CurrentWave);
 
@@ -238,7 +252,7 @@ void AMBLGameMode::StartWave()
 
     case EMBLWaveState::Wave3:
         SpawnInterval = 0.5f;
-        MaxSpawnEnemy = 30;
+        MaxSpawnEnemy = 10;
 
         NextWave(CurrentWave);
 
@@ -273,41 +287,3 @@ void AMBLGameMode::NextWave(EMBLWaveState& Wave)
 
     Wave = GetNextWave(Wave);
 }
-
-// 제거 예정 함수
-void AMBLGameMode::Dead(AActor* DeadActor)
-{
-    if (!IsValid(DeadActor)) return;
-    
-    if (AMBLPlayerCharacter* Player = Cast<AMBLPlayerCharacter>(DeadActor))
-    {
-        GameOver();
-        return;
-    }
-
-    if (AMBLNonPlayerCharacter* NPC = Cast<AMBLNonPlayerCharacter>(DeadActor))
-    {
-        if (CurrentEnemy <= 0)
-        {
-            CurrentEnemy = 0;
-            return;
-        }
-
-        CurrentEnemy--;
-        return;
-    }
-
-    if (AMBLBossCharacter* BossNPC = Cast<AMBLBossCharacter>(DeadActor))
-    {
-        GameOver();
-        return;
-    }
-
-}
-
-
-
-
-
-
-

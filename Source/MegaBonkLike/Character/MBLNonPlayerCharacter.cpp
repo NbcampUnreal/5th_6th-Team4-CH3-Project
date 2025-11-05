@@ -56,7 +56,7 @@ AMBLNonPlayerCharacter::AMBLNonPlayerCharacter()
 void AMBLNonPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	if (false == IsPlayerControlled())
 	{
 		bUseControllerRotationYaw = false;
@@ -65,9 +65,10 @@ void AMBLNonPlayerCharacter::BeginPlay()
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
 		GetCharacterMovement()->RotationRate = FRotator(0.f, 480.f, 0.f);
 
-		GetCharacterMovement()->MaxWalkSpeed = 300.f;
+		//GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	}
-
+	UE_LOG(LogTemp, Warning, TEXT("%.1f"), Attack);
+	UE_LOG(LogTemp, Warning, TEXT("%.f"), GetCharacterMovement()->MaxWalkSpeed);
 	//KillSelf();       몬스터죽음 테스트용
 }
 
