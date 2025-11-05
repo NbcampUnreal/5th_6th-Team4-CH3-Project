@@ -2,6 +2,7 @@
 #include "Player/MBLPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Game/MBLGameMode.h"
+#include "Game/MBLGameState.h"  //Ãß°¡
 
 AMBLGameState::AMBLGameState()
 {
@@ -94,4 +95,9 @@ void AMBLGameState::UpdateHUD()
 			GameController->UpdateWave(CurrentWaveIndex + 1, MaxWaves);
 		}
 	}
+}
+
+int32 AMBLGameState::GetKills() const
+{
+	return KillCount;
 }

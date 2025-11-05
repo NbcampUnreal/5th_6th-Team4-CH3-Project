@@ -36,10 +36,7 @@ void UOutgameUIEndGameScreen::SetOutgameUIScore()
 	if (GameState)
 	{
 		Kills = GameState->GetKills();
-		TimeSurvived = GameState->GetTimeSurvived();
 	}
-
-	int32 Level = Player->GetPlayerLevel();
 
 	if (KillsText)
 	{
@@ -53,10 +50,6 @@ void UOutgameUIEndGameScreen::SetOutgameUIScore()
 		TimeText->SetText(FText::FromString(FString::Printf(TEXT("TimeSurvived: %02d:%02d"), Minutes, Seconds)));
 	}
 
-	if (LevelText)
-	{
-		LevelText->SetText(FText::FromString(FString::Printf(TEXT("Level: %d"), Level)));
-	}
 }
 
 void UOutgameUIEndGameScreen::SetOutgameUIInventory()
