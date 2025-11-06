@@ -44,9 +44,7 @@ void UWSA_UnderFootAttack::SpawnUnderFootAttackActor()
 
                 float Size = GetValue(TAG_Attribute_Size);
                 float LifeTime = GetValue(TAG_Attribute_Duration);
-                FAttackData AttackData = CreateAttackDataBase();
-                AttackData.Knockback = 0.0f;
-                SpawnActor->SetAttackData(AttackData);
+                SpawnActor->SetAttackData(CreateAttackDataBase());
                 SpawnActor->SetSize(Size);
                 SpawnActor->SetLifeTime(LifeTime);
                 SpawnActor->SetHitTimer(LifeTime / GetValue(TAG_Attribute_AttackProjectiles));
