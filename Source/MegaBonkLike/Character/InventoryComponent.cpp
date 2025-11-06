@@ -192,63 +192,53 @@ TArray<FItemSelectOption> UInventoryComponent::GetItemSelectOptionsInWeaponAndTo
 		Result.Rarity = Rarity->ItemRarity;
 		UItemBase* ExistItem = FindItem(Result.ItemId);
 		Result.bIsNewItem = ExistItem == nullptr;
-		if (ExistItem != nullptr)
+		if (TargetDatas[i]->ItemType == EItemType::Weapon)
 		{
-			if (TargetDatas[i]->ItemType == EItemType::Weapon)
+			const UWeaponItem* ExistWeapon = Cast<UWeaponItem>(ExistItem);
+			Result.Level = ExistWeapon == nullptr ? 0 : ExistWeapon->GetLevel();
+
+			FWeaponItemDataRow* WeaponData = (FWeaponItemDataRow*)TargetDatas[i];
+			int EntryCount = WeaponData->WeaponAttributeEntry.Num();
+			TArray<int32> IdxArray;
+			IdxArray.SetNum(EntryCount);
+			for (int j = 0; j < EntryCount; ++j)
 			{
-				const UWeaponItem* ExistWeapon = Cast<UWeaponItem>(ExistItem);
-				if (ExistWeapon == nullptr)
-					continue;
-
-				Result.Level = ExistWeapon->GetLevel();
-
-				FWeaponItemDataRow* WeaponData = (FWeaponItemDataRow*)TargetDatas[i];
-				int EntryCount = WeaponData->WeaponAttributeEntry.Num();
-				TArray<int32> IdxArray;
-				IdxArray.SetNum(EntryCount);
-				for (int j = 0; j < EntryCount; ++j)
-				{
-					IdxArray[j] = j;
-				}
-				Algo::RandomShuffle(IdxArray);
-				int UpgradeEntryCount = FMath::Min(EntryCount, (Result.Rarity > EItemRarity::Common ? 2 : FMath::RandRange(1, 2)));
-				for (int j = 0; j < UpgradeEntryCount; ++j)
-				{
-					FAttributeComparison NewComparison;
-					const auto& UpgradeEntry = WeaponData->WeaponAttributeEntry[IdxArray[j]];
-					NewComparison.AttributeTag = UpgradeEntry.AttributeTag;
-					NewComparison.CurrentValue = ExistWeapon->GetAttributeValue(UpgradeEntry.AttributeTag);
-					NewComparison.DeltaValue = UpgradeEntry.UpgradeModifier.Value * Rarity->Multiplier;
-					NewComparison.NewValue = NewComparison.CurrentValue + NewComparison.DeltaValue;
-					Result.AttributeChanges.Add(NewComparison);
-				}
+				IdxArray[j] = j;
 			}
-			else if (TargetDatas[i]->ItemType == EItemType::Tomes)
+			Algo::RandomShuffle(IdxArray);
+			int UpgradeEntryCount = FMath::Min(EntryCount, (Result.Rarity > EItemRarity::Common ? 2 : FMath::RandRange(1, 2)));
+			for (int j = 0; j < UpgradeEntryCount; ++j)
 			{
-
-				FTomesItemDataRow* TomesData = (FTomesItemDataRow*)TargetDatas[i];
-				if (TomesData->AttributeModifiers.IsEmpty() == true)
-					continue;
-
-				const UTomesItem* ExistTomes = Cast<UTomesItem>(ExistItem);
-				if (ExistTomes == nullptr)
-					continue;
-
-				Result.Level = ExistTomes->GetLevel();
-
-				TArray<FGameplayTag> Keys;
-				TomesData->AttributeModifiers.GetKeys(Keys);
-				int32 RandomKeyIdx = FMath::RandRange(0, TomesData->AttributeModifiers.Num() - 1);
-				FGameplayTag Tag = Keys[RandomKeyIdx];
-				const auto& UpgradeModifier = TomesData->AttributeModifiers[Tag];
 				FAttributeComparison NewComparison;
-				NewComparison.AttributeTag = Tag;
-				NewComparison.CurrentValue = ExistTomes->GetModifierValue(Tag);
-				NewComparison.DeltaValue = UpgradeModifier.Value;
+				const auto& UpgradeEntry = WeaponData->WeaponAttributeEntry[IdxArray[j]];
+				NewComparison.AttributeTag = UpgradeEntry.AttributeTag;
+				NewComparison.CurrentValue = ExistWeapon == nullptr ? 0.0f : ExistWeapon->GetAttributeValue(UpgradeEntry.AttributeTag);
+				NewComparison.DeltaValue = ExistWeapon == nullptr ? UpgradeEntry.BaseValue : (UpgradeEntry.UpgradeModifier.Value * Rarity->Multiplier);
 				NewComparison.NewValue = NewComparison.CurrentValue + NewComparison.DeltaValue;
 				Result.AttributeChanges.Add(NewComparison);
 			}
-		}		
+		}
+		else if (TargetDatas[i]->ItemType == EItemType::Tomes)
+		{
+			FTomesItemDataRow* TomesData = (FTomesItemDataRow*)TargetDatas[i];
+			if (TomesData->AttributeModifiers.IsEmpty() == true)
+				continue;
+
+			const UTomesItem* ExistTomes = Cast<UTomesItem>(ExistItem);
+			Result.Level = ExistTomes == nullptr ? 0 : ExistTomes->GetLevel();
+
+			TArray<FGameplayTag> Keys;
+			TomesData->AttributeModifiers.GetKeys(Keys);
+			int32 RandomKeyIdx = FMath::RandRange(0, TomesData->AttributeModifiers.Num() - 1);
+			FGameplayTag Tag = Keys[RandomKeyIdx];
+			const auto& UpgradeModifier = TomesData->AttributeModifiers[Tag];
+			FAttributeComparison NewComparison;
+			NewComparison.AttributeTag = Tag;
+			NewComparison.CurrentValue = ExistTomes == nullptr ? 0.0f : ExistTomes->GetModifierValue(Tag);
+			NewComparison.DeltaValue = UpgradeModifier.Value * (ExistTomes == nullptr ? 1.0f : Rarity->Multiplier);
+			NewComparison.NewValue = NewComparison.CurrentValue + NewComparison.DeltaValue;
+			Result.AttributeChanges.Add(NewComparison);
+		}
 
 		Results.Add(Result);
 	}
@@ -270,23 +260,23 @@ TArray<FItemSelectOption> UInventoryComponent::GetItemSelectOptionsInMisc(int Co
 
 	const auto& MiscTable = ItemDataTables[EItemType::Misc]->GetRowMap();
 	float TotalMiscWeight = 0.0f;
-	TMap<int32, float> ItemWeights;
+	TMap<int32, EItemRarity> ItemRarities;
 	for (const auto& Row : MiscTable)
 	{
 		FMiscItemDataRow* Data = (FMiscItemDataRow*)Row.Value;
+		ItemRarities.Add(Data->ItemId, Data->ItemRarity);
 		float ItemWeight = MiscWeightMap[Data->ItemRarity];
-		ItemWeights.Add(Data->ItemId, ItemWeight);
 		TotalMiscWeight += ItemWeight;
 	}
 
-	int32 MaxItemCount = FMath::Min(Count, ItemWeights.Num());
+	int32 MaxItemCount = FMath::Min(Count, ItemRarities.Num());
 	for (int i = 0; i < MaxItemCount; ++i)
 	{
 		float RandomWeight = FMath::RandRange(0.0f, TotalMiscWeight);
-		int32 SelectedId = ItemWeights.begin()->Key;
-		for (const auto& [ItemId, Weight] : ItemWeights)
+		int32 SelectedId = ItemRarities.begin()->Key;
+		for (const auto& [ItemId, ItemRarity] : ItemRarities)
 		{
-			RandomWeight -= Weight;
+			RandomWeight -= MiscWeightMap[ItemRarity];
 			if (RandomWeight <= 0.0f)
 			{
 				SelectedId = ItemId;
@@ -297,12 +287,13 @@ TArray<FItemSelectOption> UInventoryComponent::GetItemSelectOptionsInMisc(int Co
 		FItemSelectOption Result;
 		Result.ItemId = SelectedId;
 		Result.ItemType = EItemType::Misc;
+		Result.Rarity = ItemRarities[SelectedId];
 		Result.bIsNewItem = FindItem(SelectedId) == nullptr;
 		// FItemSelectOption의 나머지 요소 안 씀.
 		Results.Add(Result);
 
-		TotalMiscWeight -= ItemWeights[SelectedId];
-		ItemWeights.Remove(SelectedId);
+		TotalMiscWeight -= MiscWeightMap[ItemRarities[SelectedId]];
+		ItemRarities.Remove(SelectedId);
 	}
 
 	return Results;

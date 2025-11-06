@@ -7,6 +7,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "MegaBonkLike.h"
 #include "Attack/AttackHandleComponent.h"
+#include "Common/PoolSubsystem.h"
+
+const float AProjectile::LifeTime = 5.0f;
 
 AProjectile::AProjectile()
 {
@@ -45,6 +48,8 @@ void AProjectile::BeginPlay()
         Trail->SetAsset(TrailEffect);
         Trail->Activate();
     }
+
+    SetLifeTimer();
 }
 
 void AProjectile::SetDirectionAndSpeed(const FVector& InDirection, float InSpeed)
@@ -76,6 +81,16 @@ void AProjectile::SetPenetrate(bool bInPenetrate)
     bPenetrate = bInPenetrate;
 }
 
+void AProjectile::SetLifeTimer()
+{
+    GetWorldTimerManager().SetTimer(
+        DestroyTimerHandle,
+        this,
+        &ThisClass::ReturnToPool,
+        LifeTime,
+        false);
+}
+
 void AProjectile::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 BodyIndex, bool bFromSweep, const FHitResult& Hit)
 {
     if (IsValid(OtherActor) == false || OtherActor == GetOwner() || OtherActor == GetInstigator())
@@ -89,13 +104,67 @@ void AProjectile::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherAc
         {
             Trail->Deactivate();
         }
-        Destroy();
+        ReturnToPool();
     }
 }
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-    Destroy();
+    ReturnToPool();
+}
+
+void AProjectile::Activate()
+{
+    if (IsValid(ProjectileMovement) == true)
+    {
+        ProjectileMovement->StopMovementImmediately();
+        ProjectileMovement->Activate();
+    }
+
+    if (IsValid(Collision) == true)
+    {
+        Collision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    }
+
+    if (IsValid(StaticMesh) == true)
+    {
+        StaticMesh->SetHiddenInGame(false);
+    }
+    
+    if (IsValid(Trail) == true)
+    {
+        Trail->DeactivateImmediate();
+        Trail->Activate(true);
+    }
+
+    SetLifeTimer();
+}
+
+void AProjectile::Deactivate()
+{
+    if (IsValid(ProjectileMovement) == true)
+    {
+        ProjectileMovement->StopMovementImmediately();
+        ProjectileMovement->Velocity = FVector::ZeroVector;
+        ProjectileMovement->Deactivate();
+    }
+
+    if (IsValid(Collision) == true)
+    {
+        Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    }
+
+    if (IsValid(StaticMesh) == true)
+    {
+        StaticMesh->SetHiddenInGame(true);
+    }
+
+    if (IsValid(Trail) == true)
+    {
+        Trail->Deactivate();
+    }
+
+    GetWorldTimerManager().ClearTimer(DestroyTimerHandle);
 }
 
 void AProjectile::ApplyDamage(AActor* TargetActor)
@@ -119,4 +188,15 @@ void AProjectile::ApplyDamage(AActor* TargetActor)
         AttackHandleComponent->ExecuteAttack(TargetActor, AttackData);
     }
 
+}
+
+void AProjectile::ReturnToPool()
+{
+    if (UWorld* World = GetWorld())
+    {
+        if (UPoolSubsystem* PoolSubSystem = World->GetSubsystem<UPoolSubsystem>())
+        {
+            PoolSubSystem->ReturnToPool(this);
+        }
+    }
 }

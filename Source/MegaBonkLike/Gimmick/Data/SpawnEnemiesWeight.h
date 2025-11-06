@@ -26,5 +26,5 @@ struct MEGABONKLIKE_API FSpawnEnemyList : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float SpawnInterval;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	uint8 MaxSpawnEnemy;
+	int32 MaxSpawnEnemy;
 };

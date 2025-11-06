@@ -24,6 +24,9 @@ public:
 	UFUNCTION()
 	void TakeItem();
 
+private:
+	void LoadIcon(const TSoftObjectPtr<UTexture2D>& IconTexture);
+
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> TextRarity;
@@ -34,12 +37,14 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UImage> ImgIcon;
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UButton> BtnBanish;
+	TObjectPtr<UButton> BtnSkip;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> BtnTake;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UUIInventory> UIInventory;
 
+	UPROPERTY(EditAnywhere)
+	TMap<EItemRarity, FLinearColor> ColorTextRarity;
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UDataTable> MiscTable;
 	UPROPERTY()

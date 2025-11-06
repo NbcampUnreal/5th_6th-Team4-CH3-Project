@@ -68,7 +68,7 @@ AMBLPlayerCharacter::AMBLPlayerCharacter()
 	Gold = 0.0f;
 	BaseMaxHP = 100.0f;
 	InteractRadius = 250.0f;
-	BaseAttractRadius = 300.0f;
+	BaseAttractRadius = 600.0f;
 	BaseJumpVelocity = 560.0f;
 }
 
@@ -352,7 +352,7 @@ void AMBLPlayerCharacter::AttractItems()
 {
 	float Radius = BaseAttractRadius * GetAttributeValue(TAG_Attribute_PickupRange);
 	TArray<FOverlapResult> Overlaps;
-	FCollisionShape Sphere = FCollisionShape::MakeSphere(InteractRadius);
+	FCollisionShape Sphere = FCollisionShape::MakeSphere(Radius);
 	bool bHit = GetWorld()->OverlapMultiByObjectType(
 		Overlaps,
 		GetActorLocation(),

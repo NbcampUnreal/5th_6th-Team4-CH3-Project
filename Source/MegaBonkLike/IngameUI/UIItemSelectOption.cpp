@@ -5,6 +5,9 @@
 #include "Item/ItemEnums.h"
 #include "UObject/EnumProperty.h"
 #include "Attribute/AttributeTags.h"
+#include "Components/Image.h"
+#include "Engine/StreamableManager.h"
+#include "Engine/AssetManager.h"
 
 bool UUIItemSelectOption::Initialize()
 {
@@ -45,7 +48,7 @@ void UUIItemSelectOption::SetOption(const FItemSelectOption& InOption)
 
 	if (IsValid(TextDesc) == true)
 	{
-		if (InOption.bIsNewItem)
+		if (InOption.bIsNewItem && InOption.ItemType != EItemType::Tomes)
 		{
 			TextDesc->SetText(OptionItemData->ItemDesc);
 		}
@@ -54,8 +57,7 @@ void UUIItemSelectOption::SetOption(const FItemSelectOption& InOption)
 			FString String;
 			for (const auto& Change : InOption.AttributeChanges)
 			{
-				String += FString::Printf(TEXT("Gain +%.2f  "), Change.DeltaValue);
-				String += GetTagName(Change.AttributeTag);
+				String += FString::Printf(TEXT("%s: %.2f ➔ %.2f"), *GetTagName(Change.AttributeTag), Change.CurrentValue, Change.NewValue);
 				String += TEXT("\n");
 			}
 			FString Result = String.TrimEnd();
@@ -77,6 +79,8 @@ void UUIItemSelectOption::SetOption(const FItemSelectOption& InOption)
 				FText Text = RarityEnum->GetDisplayNameTextByValue(static_cast<int64>(InOption.Rarity));
 				TextRarity->SetText(Text);
 			}
+			TextRarity->SetColorAndOpacity(FSlateColor(ColorTextRarity[InOption.Rarity]));
+			ImgBackground->SetColorAndOpacity(ColorImgBackground[InOption.Rarity]);
 		}
 	}
 	
@@ -87,6 +91,31 @@ void UUIItemSelectOption::SetOption(const FItemSelectOption& InOption)
 			FText::FromString(FString::Printf(TEXT("LVL %d"), InOption.Level));
 		TextLevel->SetText(Text);
 	}
+
+	if (IsValid(ImgIcon) == true)
+	{
+		LoadIcon(OptionItemData->ItemIcon);
+	}
+}
+
+void UUIItemSelectOption::LoadIcon(const TSoftObjectPtr<UTexture2D>& IconTexture)
+{
+	if (IconTexture.IsNull())
+	{
+		ImgIcon->SetVisibility(ESlateVisibility::Collapsed);
+		ImgIcon->SetBrushFromTexture(nullptr);
+		return;
+	}
+
+	ImgIcon->SetVisibility(ESlateVisibility::Visible);
+	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+	Streamable.RequestAsyncLoad(IconTexture.ToSoftObjectPath(), [this, IconTexture]()
+		{
+			if (UTexture2D* LoadedIcon = IconTexture.Get())
+			{
+				ImgIcon->SetBrushFromTexture(LoadedIcon);
+			}
+		});
 }
 
 void UUIItemSelectOption::OnItemButtonClicked()

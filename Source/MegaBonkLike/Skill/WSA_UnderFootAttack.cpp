@@ -3,6 +3,7 @@
 #include "Character/MBLPlayerCharacter.h"
 #include "Engine/HitResult.h"
 #include "MegaBonkLike.h"
+#include "Common/PoolSubsystem.h"
 
 void UWSA_UnderFootAttack::Activate(TWeakObjectPtr<AActor> InInstigator)
 {
@@ -24,25 +25,26 @@ void UWSA_UnderFootAttack::SpawnUnderFootAttackActor()
         ObjectParams.AddObjectTypesToQuery(ECC_WorldStatic);
         if (Character->GetWorld()->LineTraceSingleByObjectType(Hit, StartLocation, EndLocation, ObjectParams))
         {
+            UPoolSubsystem* PoolSubsystem = GetWorld()->GetSubsystem<UPoolSubsystem>();
+            if (IsValid(PoolSubsystem) == false)
+                return;
+
             FVector SpawnLocation = Hit.Location + FVector::UpVector;
             FVector NormalVector = Hit.ImpactNormal;
             FRotator SpawnRotation = FRotationMatrix::MakeFromZ(NormalVector).Rotator();
-            FActorSpawnParameters SpawnParams;
-            SpawnParams.Owner = Character;
-            SpawnParams.Instigator = Character;
-            ADamageAreaActor* SpawnActor = Instigator->GetWorld()->SpawnActor<ADamageAreaActor>(
+            ADamageAreaActor* SpawnActor = PoolSubsystem->GetFromPool<ADamageAreaActor>(
                 SpawnActorClass, 
                 SpawnLocation,
-                SpawnRotation, 
-                SpawnParams);
+                SpawnRotation);
 
-            if (SpawnActor)
+            if (IsValid(SpawnActor) == true)
             {
+                SpawnActor->SetOwner(Character);
+                SpawnActor->SetInstigator(Character);
+
                 float Size = GetValue(TAG_Attribute_Size);
                 float LifeTime = GetValue(TAG_Attribute_Duration);
-                FAttackData AttackData = CreateAttackDataBase();
-                AttackData.Knockback = 0.0f;
-                SpawnActor->SetAttackData(AttackData);
+                SpawnActor->SetAttackData(CreateAttackDataBase());
                 SpawnActor->SetSize(Size);
                 SpawnActor->SetLifeTime(LifeTime);
                 SpawnActor->SetHitTimer(LifeTime / GetValue(TAG_Attribute_AttackProjectiles));

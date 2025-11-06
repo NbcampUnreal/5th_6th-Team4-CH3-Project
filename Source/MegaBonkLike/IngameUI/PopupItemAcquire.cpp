@@ -6,15 +6,17 @@
 #include "Item/ItemDataRow.h"
 #include "Attribute/AttributeTags.h"
 #include "IngameUI/UIInventory.h"
+#include "Engine/StreamableManager.h"
+#include "Engine/AssetManager.h"
 
 bool UPopupItemAcquire::Initialize()
 {
 	if (Super::Initialize() == false)
 		return false;
 
-	if (BtnBanish)
+	if (BtnSkip)
 	{
-
+		BtnSkip->OnClicked.AddDynamic(this, &ThisClass::RemoveFromParent);
 	}
 
 	if (BtnTake)
@@ -68,6 +70,7 @@ void UPopupItemAcquire::SetOption()
 			FText Text = RarityEnum->GetDisplayNameTextByValue(static_cast<int64>(Option.Rarity));
 			TextRarity->SetText(Text);
 		}
+		TextRarity->SetColorAndOpacity(FSlateColor(ColorTextRarity[Option.Rarity]));
 	}
 
 	if (IsValid(TextName) == true)
@@ -79,6 +82,11 @@ void UPopupItemAcquire::SetOption()
 	{
 		TextDesc->SetText(OptionItemData->ItemDesc);
 	}
+
+	if (IsValid(ImgIcon) == true)
+	{
+		LoadIcon(OptionItemData->ItemIcon);
+	}
 }
 
 void UPopupItemAcquire::TakeItem()
@@ -88,4 +96,25 @@ void UPopupItemAcquire::TakeItem()
 
 	Inventory->AddOrUpgradeItem(Option);
 	RemoveFromParent();
+}
+
+void UPopupItemAcquire::LoadIcon(const TSoftObjectPtr<UTexture2D>& IconTexture)
+{
+	if (IconTexture.IsNull())
+	{
+		ImgIcon->SetVisibility(ESlateVisibility::Collapsed);
+		ImgIcon->SetBrushFromTexture(nullptr);
+		return;
+	}
+
+	ImgIcon->SetVisibility(ESlateVisibility::Visible);
+	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+	Streamable.RequestAsyncLoad(IconTexture.ToSoftObjectPath(),
+		[this, IconTexture]()
+		{
+			if (UTexture2D* LoadedIcon = IconTexture.Get())
+			{
+				ImgIcon->SetBrushFromTexture(LoadedIcon);
+			}
+		});
 }

@@ -12,8 +12,13 @@ class MEGABONKLIKE_API UPopupBase : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 	
 public:
 	FOnDestroy OnDestroy;
+
+protected:
+	UPROPERTY(meta = (BindWidgetAnimOptional), Transient)
+	TObjectPtr<class UWidgetAnimation> OpenAnimation;
 };

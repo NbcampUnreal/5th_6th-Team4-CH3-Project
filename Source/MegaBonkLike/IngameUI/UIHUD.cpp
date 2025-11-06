@@ -5,6 +5,7 @@
 #include "IngameUI/KillCounter.h"
 #include "IngameUI/CoinCounter.h"
 #include "IngameUI/Wave.h"
+#include "IngameUI/BossHPBar.h"
 #include "Character/MBLPlayerCharacter.h"
 #include "Character/InventoryComponent.h"
 #include "IngameUI/UIHorizontalItemList.h"
@@ -96,5 +97,47 @@ void UUIHUD::UpdateWave(int32 CurrentWave, int32 MaxWave)
 	if (WaveWidget)
 	{
 		WaveWidget->UpdateWaveText(CurrentWave, MaxWave);
+	}
+}
+
+void UUIHUD::UpdateBossWaveText()
+{
+	if (WaveWidget)
+	{
+		WaveWidget->UpdateBossWaveText();
+	}
+}
+
+void UUIHUD::ShowBossHPBar(bool bShow)
+{
+	if (bShow)
+	{
+		if (!BossHPBarWidget && BossHPBarClass)
+		{
+			BossHPBarWidget = CreateWidget<UBossHPBar>(GetWorld(), BossHPBarClass);
+			if (BossHPBarWidget)
+			{
+				BossHPBarWidget->AddToViewport(100);
+			}
+		}
+		else if (BossHPBarWidget)
+		{
+			BossHPBarWidget->SetVisibility(ESlateVisibility::Visible);
+		}
+	}
+	else
+	{
+		if (BossHPBarWidget)
+		{
+			BossHPBarWidget->SetVisibility(ESlateVisibility::Collapsed);
+		}
+	}
+}
+
+void UUIHUD::UpdateBossHP(float CurrentHP, float MaxHP)
+{
+	if (BossHPBarWidget)
+	{
+		BossHPBarWidget->UpdateBossHP(CurrentHP, MaxHP);
 	}
 }

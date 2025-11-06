@@ -5,6 +5,7 @@
 #include "EngineUtils.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/MBLNonPlayerCharacter.h"
+#include "Character/FlyingEnemy.h"
 #include "Character/MBLBossCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -36,11 +37,18 @@ void AMBLAIController::OnPossess(APawn* InPawn)
 			UseBlackboard(BossBlackboardAsset, BlackboardComp);
 			RunBehaviorTree(BossBehaviorTreeAsset);
 		}
-		else
+
+		else if (AMBLNonPlayerCharacter* Walk = Cast<AMBLNonPlayerCharacter>(InPawn))
 		{
 			//일반몬스터 BB/BT 실행
 			StartBehaviorTree();
 		}
+
+		if (AFlyingEnemy* Enemy = Cast<AFlyingEnemy>(InPawn))
+		{
+			Enemy->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
+		}
+
 	}
 
 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
