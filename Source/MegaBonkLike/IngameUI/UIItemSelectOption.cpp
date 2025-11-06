@@ -6,6 +6,8 @@
 #include "UObject/EnumProperty.h"
 #include "Attribute/AttributeTags.h"
 #include "Components/Image.h"
+#include "Engine/StreamableManager.h"
+#include "Engine/AssetManager.h"
 
 bool UUIItemSelectOption::Initialize()
 {
@@ -89,6 +91,31 @@ void UUIItemSelectOption::SetOption(const FItemSelectOption& InOption)
 			FText::FromString(FString::Printf(TEXT("LVL %d"), InOption.Level));
 		TextLevel->SetText(Text);
 	}
+
+	if (IsValid(ImgIcon) == true)
+	{
+		LoadIcon(OptionItemData->ItemIcon);
+	}
+}
+
+void UUIItemSelectOption::LoadIcon(const TSoftObjectPtr<UTexture2D>& IconTexture)
+{
+	if (IconTexture.IsNull())
+	{
+		ImgIcon->SetVisibility(ESlateVisibility::Collapsed);
+		ImgIcon->SetBrushFromTexture(nullptr);
+		return;
+	}
+
+	ImgIcon->SetVisibility(ESlateVisibility::Visible);
+	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+	Streamable.RequestAsyncLoad(IconTexture.ToSoftObjectPath(), [this, IconTexture]()
+		{
+			if (UTexture2D* LoadedIcon = IconTexture.Get())
+			{
+				ImgIcon->SetBrushFromTexture(LoadedIcon);
+			}
+		});
 }
 
 void UUIItemSelectOption::OnItemButtonClicked()

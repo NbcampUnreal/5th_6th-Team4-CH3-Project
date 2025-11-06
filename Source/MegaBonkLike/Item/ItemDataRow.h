@@ -36,6 +36,8 @@ struct MEGABONKLIKE_API FItemDataRow : public FTableRowBase
 	FText ItemName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText ItemDesc;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<UTexture2D> ItemIcon;
 };
 
 USTRUCT(BlueprintType)
@@ -71,8 +73,6 @@ struct MEGABONKLIKE_API FMiscItemDataRow : public FItemDataRow
 	EItemRarity ItemRarity;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<USkill> SkillClass;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<FGameplayTag, FAttributeModifier> AttributeModifiers;
 
 	FMiscItemDataRow() { ItemType = EItemType::Misc; }
 };
