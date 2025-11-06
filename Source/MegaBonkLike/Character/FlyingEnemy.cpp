@@ -27,6 +27,12 @@ AFlyingEnemy::AFlyingEnemy()
 	DamageCollider->OnComponentBeginOverlap.AddDynamic(this, &AFlyingEnemy::OnDamageColliderBeginOverlap);
 	DamageCollider->OnComponentEndOverlap.AddDynamic(this, &AFlyingEnemy::OnDamageColliderEndOverlap);
 
+	GetCharacterMovement()->MaxFlySpeed = 400.f;
+
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+
 	bIsDead = false;
 	MaxHP = 100;
 	CurrHP = MaxHP;
@@ -37,14 +43,23 @@ void AFlyingEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (false == IsPlayerControlled())
-	{
-		bUseControllerRotationYaw = false;
+	Target = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 
-		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
-		//GetCharacterMovement()->MaxFlySpeed = 400.f;
+	GetWorldTimerManager().SetTimer(
+		MoveTimerHandle,
+		this,
+		&AFlyingEnemy::MoveStep,
+		0.05f,
+		true
+	);
 
-	}
+	GetWorldTimerManager().SetTimer(
+		TrackTimerHandle,
+		this,
+		&AFlyingEnemy::UpdateTrack,
+		0.1f,
+		true
+	);
 }
 
 void AFlyingEnemy::UpdateTrack()
@@ -82,7 +97,7 @@ void AFlyingEnemy::MoveStep()
 {
 	if (CurrentDirection.IsNearlyZero()) return;
 
-	FVector NewLocation = GetActorLocation() + CurrentDirection * WalkSpeed * 0.05f;
+	FVector NewLocation = GetActorLocation() + CurrentDirection * GetCharacterMovement()->MaxFlySpeed * 0.05f;
 	SetActorLocation(NewLocation, true);
 
 	FRotator NewRotation = CurrentDirection.Rotation();
@@ -214,10 +229,20 @@ void AFlyingEnemy::SetSpeed(EMBLWaveState Wave)
 {
 	if (!IsValid(StatDataTable)) return;
 	
-	if (EMBLWaveState::SetWave < Wave && Wave < EMBLWaveState::FinalWave)
+	if (EMBLWaveState::SetWave < Wave)
 	{
+		if (Wave > EMBLWaveState::Wave3)
+		{
+			Wave = EMBLWaveState::Wave3;
+		}
+
 		FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
 		FMonsterStat* Monster = StatDataTable->FindRow<FMonsterStat>(RowName, TEXT(""));
+
+
+
+		if (!Monster) return;
+
 		GetCharacterMovement()->MaxFlySpeed = Monster->MoveSpeed;
 	}
 }

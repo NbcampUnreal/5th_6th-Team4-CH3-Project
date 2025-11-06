@@ -60,6 +60,8 @@ public:
 private:
 	bool bIsDead;
 	FTimerHandle DamageTimerHandle;
+	FTimerHandle MoveTimerHandle;
+	FTimerHandle TrackTimerHandle;
 
 	FVector CurrentDirection;
 	TWeakObjectPtr<AActor> Target;

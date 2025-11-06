@@ -39,10 +39,12 @@ AMBLBossCharacter::AMBLBossCharacter()
 	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->AirControl = 0.5f;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f);
-
 	GetCharacterMovement()->bUseRVOAvoidance = true;
 	GetCharacterMovement()->AvoidanceWeight = 1.f;
+
+	bUseControllerRotationYaw = false;
 
 	bIsDead = false;
 	MaxHP = 1000;
@@ -55,19 +57,6 @@ AMBLBossCharacter::AMBLBossCharacter()
 void AMBLBossCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (false == IsPlayerControlled())
-	{
-		bUseControllerRotationYaw = false;
-
-		GetCharacterMovement()->bOrientRotationToMovement = true;
-		GetCharacterMovement()->bUseControllerDesiredRotation = true;
-		GetCharacterMovement()->RotationRate = FRotator(0.f, 480.f, 0.f);
-
-		GetCharacterMovement()->MaxWalkSpeed = 300.f;
-	}
-	//공격로직테스트용
-	//GroundAttack();
 }
 
 

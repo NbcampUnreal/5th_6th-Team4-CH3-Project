@@ -41,11 +41,14 @@ AMBLNonPlayerCharacter::AMBLNonPlayerCharacter()
 	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->AirControl = 0.5f;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f);
 
 	GetCharacterMovement()->bUseRVOAvoidance = true;
 	GetCharacterMovement()->AvoidanceWeight = 1.f;
+
+	bUseControllerRotationYaw = false;
 
 	bIsDead = false;
 	MaxHP = 100;
@@ -57,19 +60,8 @@ void AMBLNonPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (false == IsPlayerControlled())
-	{
-		bUseControllerRotationYaw = false;
-
-		GetCharacterMovement()->bOrientRotationToMovement = true;
-		GetCharacterMovement()->bUseControllerDesiredRotation = true;
-		GetCharacterMovement()->RotationRate = FRotator(0.f, 480.f, 0.f);
-
-		//GetCharacterMovement()->MaxWalkSpeed = 300.f;
-	}
-	UE_LOG(LogTemp, Warning, TEXT("%.1f"), Attack);
-	UE_LOG(LogTemp, Warning, TEXT("%.f"), GetCharacterMovement()->MaxWalkSpeed);
-	//KillSelf();       몬스터죽음 테스트용
+	//UE_LOG(LogTemp, Warning, TEXT("%.1f"), Attack);
+	//UE_LOG(LogTemp, Warning, TEXT("%.f"), GetCharacterMovement()->MaxWalkSpeed);
 }
 
 
