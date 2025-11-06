@@ -54,6 +54,7 @@ public:
 	void DeadPlayer(); // 플레이어 사망시
 	void DeadEnemy(); // 적 사망시
 	void DeadBoss(); // 보스 사망시
+	float GetWaveDuration() const;
 	void GameOver();
 
 private:
