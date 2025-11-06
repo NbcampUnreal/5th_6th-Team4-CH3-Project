@@ -288,7 +288,7 @@ void AMBLGameMode::NextWave(EMBLWaveState& Wave)
         true
     );
 
-    if (Wave == EMBLWaveState::FinalWave) SpawnBoss();
-
     Wave = GetNextWave(Wave);
+
+    if (Wave == EMBLWaveState::FinalWave) SpawnBoss();
 }
