@@ -167,6 +167,14 @@ void AMBLPlayerController::UpdateWave(int32 CurrentWave, int32 MaxWave)
 	}
 }
 
+void AMBLPlayerController::UpdateBossWaveText()
+{
+	if (HUDWidgetInstance)
+	{
+		HUDWidgetInstance -> UpdateBossWaveText();
+	}
+}
+
 
 void AMBLPlayerController::TogglePauseMenu()
 {
@@ -313,4 +321,22 @@ void AMBLPlayerController::RestartGame()
 {
 	UGameplayStatics::OpenLevel(GetWorld(), FName("StartLevel"));
 	SetPause(false);
+}
+
+//보스 웨이브때만 보이게
+void AMBLPlayerController::ShowBossHPBar(bool bShow)
+{
+	if (HUDWidgetInstance)
+	{
+		HUDWidgetInstance->ShowBossHPBar(bShow);
+	}
+}
+
+//보스체력바
+void AMBLPlayerController::UpdateBossHP(float CurrentHP, float MaxHP)
+{
+	if (HUDWidgetInstance)
+	{
+		HUDWidgetInstance->UpdateBossHP(CurrentHP, MaxHP);
+	}
 }

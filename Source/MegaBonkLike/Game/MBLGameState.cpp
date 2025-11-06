@@ -6,7 +6,7 @@
 AMBLGameState::AMBLGameState()
 {
 	CurrentWaveIndex = 0;
-	MaxWaves = 3;
+	MaxWaves = 4;
 	WaveDuration = 20.0f; //임시 60초로 할 예정
 	RemainingTime = WaveDuration;
 	CollectedCoinCount = 0;
@@ -54,9 +54,13 @@ void AMBLGameState::OnWaveEnd()
 {
 	CurrentWaveIndex++;
 
-	if (CurrentWaveIndex < MaxWaves)
+	if (CurrentWaveIndex < MaxWaves - 1)
 	{
 		StartWave();
+	}
+	else if (CurrentWaveIndex == MaxWaves - 1)
+	{
+		UpdateHUD();
 	}
 	else
 	{
@@ -91,7 +95,16 @@ void AMBLGameState::UpdateHUD()
 			GameController->UpdateTimer(RemainingTime);
 			GameController->UpdateCoinCount(CollectedCoinCount);
 			GameController->UpdateKillCount(KillCount);
-			GameController->UpdateWave(CurrentWaveIndex + 1, MaxWaves);
+			
+			if (CurrentWaveIndex < MaxWaves - 1)
+			{
+				GameController->UpdateWave(CurrentWaveIndex + 1, MaxWaves - 1);
+			}
+			else if (CurrentWaveIndex == MaxWaves - 1)
+			{
+				GameController->UpdateBossWaveText();
+			}
+			
 		}
 	}
 }

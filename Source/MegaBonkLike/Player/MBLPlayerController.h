@@ -81,6 +81,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HUD|Wave")
 	void UpdateWave(int32 CurrentWave, int32 MaxWave);
 
+	UFUNCTION(BlueprintCallable, Category = "HUD|Wave")
+	void UpdateBossWaveText();
+	
+	UFUNCTION(BlueprintCallable, Category = "HUD|Boss")
+	void ShowBossHPBar(bool bShow);
+
+	UFUNCTION(BlueprintCallable, Category = "HUD|Boss")
+	void UpdateBossHP(float CurrentHP, float MaxHP);
+
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void ShowMainMenu(bool bIsRestart);
 
