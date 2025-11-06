@@ -3,10 +3,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Attack/AttackData.h"
+#include "Common/PoolSpawnable.h"
 #include "DamageAreaActor.generated.h"
 
 UCLASS(Abstract)
-class MEGABONKLIKE_API ADamageAreaActor : public AActor
+class MEGABONKLIKE_API ADamageAreaActor : public AActor, public IPoolSpawnable
 {
 	GENERATED_BODY()
 	
@@ -14,6 +15,9 @@ public:
 	ADamageAreaActor();
 
 	virtual void BeginPlay() override;
+
+	virtual void Activate() override;
+	virtual void Deactivate() override;
 
 	void SetAttackData(const FAttackData& InAttackData);
 	void SetSize(float InSize);
@@ -27,6 +31,8 @@ private:
 	void Shrink();
 	void SetOverlapEnable(bool bInEnable);
 	void CheckHit();
+
+	void ReturnToPool();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)

@@ -12,9 +12,9 @@ bool UPopupItemAcquire::Initialize()
 	if (Super::Initialize() == false)
 		return false;
 
-	if (BtnBanish)
+	if (BtnSkip)
 	{
-
+		BtnSkip->OnClicked.AddDynamic(this, &ThisClass::RemoveFromParent);
 	}
 
 	if (BtnTake)
@@ -68,6 +68,7 @@ void UPopupItemAcquire::SetOption()
 			FText Text = RarityEnum->GetDisplayNameTextByValue(static_cast<int64>(Option.Rarity));
 			TextRarity->SetText(Text);
 		}
+		TextRarity->SetColorAndOpacity(FSlateColor(ColorTextRarity[Option.Rarity]));
 	}
 
 	if (IsValid(TextName) == true)

@@ -9,6 +9,7 @@
 #include "Game/MBLGameInstance.h"
 #include "Components/TextBlock.h"
 #include "IngameUI/PopupBase.h"
+#include "OutgameUI/OutgameUIEndGameScreen.h"  //추가
 
 void AMBLPlayerController::BeginPlay()
 {
@@ -131,6 +132,7 @@ void AMBLPlayerController::UpdatePlayerLevel(int32 NewLevel)
 {
 	if (HUDWidgetInstance)
 	{
+
 		HUDWidgetInstance->UpdateLevel(NewLevel);
 	}
 }
@@ -304,15 +306,22 @@ void AMBLPlayerController::ShowEndGameScreen(bool bIsRestart)
 		EndGameScreenWidgetInstance = nullptr;
 	}
 
-	if (EndGameScreenWidgetClass)
+	if (EndGameScreenWidgetClass)  // 추가
 	{
-		EndGameScreenWidgetInstance = CreateWidget<UUserWidget>(this, EndGameScreenWidgetClass);
-		if (EndGameScreenWidgetInstance)
+		UOutgameUIEndGameScreen* OutgameUIEndGameScreen = CreateWidget<UOutgameUIEndGameScreen>(this, EndGameScreenWidgetClass);
+		if (OutgameUIEndGameScreen)
 		{
-			EndGameScreenWidgetInstance->AddToViewport();
+			OutgameUIEndGameScreen->AddToViewport();
 
 			bShowMouseCursor = true;
 			SetInputMode(FInputModeUIOnly());
+
+			if (AMBLPlayerCharacter* PlayerCharacter = Cast<AMBLPlayerCharacter>(GetPawn()))
+			{
+				OutgameUIEndGameScreen->SetPlayer(PlayerCharacter);
+			}
+
+			EndGameScreenWidgetInstance = OutgameUIEndGameScreen;
 		}
 	}
 }

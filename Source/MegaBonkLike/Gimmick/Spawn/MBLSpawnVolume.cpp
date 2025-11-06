@@ -4,6 +4,8 @@
 #include "NavigationSystem.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Gimmick/Spawn/MBLSpawnSubsystem.h"
+#include "Character/EnemyBase.h"
+#include "Character/FlyingEnemy.h"
 
 AMBLSpawnVolume::AMBLSpawnVolume()
 {
@@ -51,12 +53,12 @@ FVector AMBLSpawnVolume::GetRandomObjectSpawnLocation() const
 	return GetValidNavMeshLocation(RandomPoint, SearchRadius);
 }
 
-void AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AActor> EnemyClass)
+AEnemyBase* AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AEnemyBase> EnemyClass)
 {
-	if (!IsValid(EnemyClass)) return;
+	if (!IsValid(EnemyClass)) return nullptr;
 
 	UWorld* World = GetWorld();
-	if (!IsValid(World)) return;
+	if (!IsValid(World)) return nullptr;
 
 	FVector SpawnLocation = GetRandomEnemySpawnLocation();
 	//if (SpawnLocation.IsNearlyZero())
@@ -65,20 +67,22 @@ void AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AActor> EnemyClass)
 	//	return;
 	//}
 
+	if (EnemyClass->IsChildOf(AFlyingEnemy::StaticClass()))
+	{
+		SpawnLocation.Z += 250.0f;
+	}
+
 	AActor* Player = GetPlayerInBox();
 
 	if (!IsValid(Player))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No player actor found"));
-		return;
+		return nullptr;
 	}
 
 	FRotator SpawnRotation = (Player->GetActorLocation() - SpawnLocation).Rotation();
 
-	if (UMBLSpawnSubsystem* Subsystem = World->GetSubsystem<UMBLSpawnSubsystem>())
-	{
-		Subsystem->SpawnActorAtLocation(EnemyClass, SpawnLocation, SpawnRotation);
-	}
+	return World->SpawnActor<AEnemyBase>(EnemyClass, SpawnLocation, SpawnRotation);
 }
 
 void AMBLSpawnVolume::SpawnObject(TSubclassOf<AActor> ObjectClass)
@@ -98,10 +102,7 @@ void AMBLSpawnVolume::SpawnObject(TSubclassOf<AActor> ObjectClass)
 
 	FRotator SpawnRotation = FRotator(0.f, FMath::FRandRange(0.f, 360.f), 0.f);
 
-	if (UMBLSpawnSubsystem* Subsystem = World->GetSubsystem<UMBLSpawnSubsystem>())
-	{
-		Subsystem->SpawnActorAtLocation(ObjectClass, SpawnLocation, SpawnRotation);
-	}
+	World->SpawnActor<AActor>(ObjectClass, SpawnLocation, SpawnRotation);
 }
 
 AActor* AMBLSpawnVolume::GetPlayerInBox() const

@@ -27,6 +27,12 @@ AFlyingEnemy::AFlyingEnemy()
 	DamageCollider->OnComponentBeginOverlap.AddDynamic(this, &AFlyingEnemy::OnDamageColliderBeginOverlap);
 	DamageCollider->OnComponentEndOverlap.AddDynamic(this, &AFlyingEnemy::OnDamageColliderEndOverlap);
 
+	GetCharacterMovement()->MaxFlySpeed = 400.f;
+
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+
 	bIsDead = false;
 	MaxHP = 100;
 	CurrHP = MaxHP;
@@ -37,14 +43,23 @@ void AFlyingEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (false == IsPlayerControlled())
-	{
-		bUseControllerRotationYaw = false;
+	Target = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 
-		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
-		GetCharacterMovement()->MaxFlySpeed = 400.f;
+	GetWorldTimerManager().SetTimer(
+		MoveTimerHandle,
+		this,
+		&AFlyingEnemy::MoveStep,
+		0.05f,
+		true
+	);
 
-	}
+	GetWorldTimerManager().SetTimer(
+		TrackTimerHandle,
+		this,
+		&AFlyingEnemy::UpdateTrack,
+		0.1f,
+		true
+	);
 }
 
 void AFlyingEnemy::UpdateTrack()
@@ -82,7 +97,7 @@ void AFlyingEnemy::MoveStep()
 {
 	if (CurrentDirection.IsNearlyZero()) return;
 
-	FVector NewLocation = GetActorLocation() + CurrentDirection * WalkSpeed * 0.05f;
+	FVector NewLocation = GetActorLocation() + CurrentDirection * GetCharacterMovement()->MaxFlySpeed * 0.05f;
 	SetActorLocation(NewLocation, true);
 
 	FRotator NewRotation = CurrentDirection.Rotation();
@@ -133,7 +148,27 @@ void AFlyingEnemy::DamageTick()
 {
 	if (DamageTarget)
 	{
+		//데미지 적용
 		UGameplayStatics::ApplyDamage(DamageTarget, Attack, GetInstigatorController(), GetInstigator(), UDamageType::StaticClass());
+
+		//넉백 적용
+		AMBLCharacterBase* Player = Cast<AMBLCharacterBase>(DamageTarget);
+		if (Player)
+		{
+			FVector KnockbackDir = Player->GetActorLocation() - GetActorLocation();
+			KnockbackDir.Z = 0.f;
+			KnockbackDir.Normalize();
+
+			const float KnockbackStrength = 700.f;
+			Player->LaunchCharacter(KnockbackDir * KnockbackStrength, true, true);
+
+			UCharacterMovementComponent* MoveComp = Player->GetCharacterMovement();
+			if (MoveComp)
+			{
+				MoveComp->StopMovementImmediately();
+			}
+
+		}
 	}
 	else
 	{
@@ -192,7 +227,22 @@ void AFlyingEnemy::DeadHandle()
 
 void AFlyingEnemy::SetSpeed(EMBLWaveState Wave)
 {
-	FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
-	FMonsterStat* Monster = StatTable->FindRow<FMonsterStat>(RowName, TEXT(""));
-	GetCharacterMovement()->MaxFlySpeed = Monster->MoveSpeed;
+	if (!IsValid(StatDataTable)) return;
+	
+	if (EMBLWaveState::SetWave < Wave)
+	{
+		if (Wave > EMBLWaveState::Wave3)
+		{
+			Wave = EMBLWaveState::Wave3;
+		}
+
+		FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
+		FMonsterStat* Monster = StatDataTable->FindRow<FMonsterStat>(RowName, TEXT(""));
+
+
+
+		if (!Monster) return;
+
+		GetCharacterMovement()->MaxFlySpeed = Monster->MoveSpeed;
+	}
 }

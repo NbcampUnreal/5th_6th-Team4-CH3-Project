@@ -41,11 +41,14 @@ AMBLNonPlayerCharacter::AMBLNonPlayerCharacter()
 	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->AirControl = 0.5f;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f);
 
 	GetCharacterMovement()->bUseRVOAvoidance = true;
 	GetCharacterMovement()->AvoidanceWeight = 1.f;
+
+	bUseControllerRotationYaw = false;
 
 	bIsDead = false;
 	MaxHP = 100;
@@ -56,19 +59,9 @@ AMBLNonPlayerCharacter::AMBLNonPlayerCharacter()
 void AMBLNonPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (false == IsPlayerControlled())
-	{
-		bUseControllerRotationYaw = false;
-
-		GetCharacterMovement()->bOrientRotationToMovement = true;
-		GetCharacterMovement()->bUseControllerDesiredRotation = true;
-		GetCharacterMovement()->RotationRate = FRotator(0.f, 480.f, 0.f);
-
-		GetCharacterMovement()->MaxWalkSpeed = 300.f;
-	}
-
-	//KillSelf();       몬스터죽음 테스트용
+	
+	//UE_LOG(LogTemp, Warning, TEXT("%.1f"), Attack);
+	//UE_LOG(LogTemp, Warning, TEXT("%.f"), GetCharacterMovement()->MaxWalkSpeed);
 }
 
 
@@ -165,7 +158,26 @@ void AMBLNonPlayerCharacter::DamageTick()
 {
 	if (DamageTarget)
 	{
+		//데미지 적용
 		UGameplayStatics::ApplyDamage(DamageTarget, Attack, GetInstigatorController(), GetInstigator(), UDamageType::StaticClass());
+
+		//넉백 적용
+		AMBLCharacterBase* Player = Cast<AMBLCharacterBase>(DamageTarget);
+		if (Player)
+		{
+			FVector KnockbackDir = Player->GetActorLocation() - GetActorLocation();
+			KnockbackDir.Z = 0.f;
+			KnockbackDir.Normalize();
+
+			const float KnockbackStrength = 700.f;
+			Player->LaunchCharacter(KnockbackDir * KnockbackStrength, true, true);
+
+			UCharacterMovementComponent* MoveComp = Player->GetCharacterMovement();
+			if (MoveComp)
+			{
+				MoveComp->StopMovementImmediately();
+			}
+		}
 	}
 	else
 	{

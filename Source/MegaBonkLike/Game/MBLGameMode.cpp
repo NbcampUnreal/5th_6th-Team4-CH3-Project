@@ -7,19 +7,20 @@
 #include "Player/MBLPlayerController.h"
 #include "Gimmick/Spawn/MBLSpawnVolume.h"
 #include "Gimmick/Data/InteractionObjectsRow.h"
+#include "Gimmick/Data/SpawnEnemiesWeight.h"
 
 AMBLGameMode::AMBLGameMode()
     : SpawnVolume(nullptr)
-    , Enemy(nullptr)
+    , Enemy()
+    , EnemyTable(nullptr)
     , Boss(nullptr)
     , DropTable(nullptr)
-    , CurrentWave(EMBLWaveState::Wave1)
-    , WaveDuration(30.0f)
+    , CurrentWave(EMBLWaveState::SetWave)
+    , WaveDuration(20.0f)
     , MaxSpawnObject(500)
     , SpawnInterval(2.0f)
     , MaxSpawnEnemy(10)
     , CurrentEnemy(0)
-
 {
     DefaultPawnClass = AMBLPlayerCharacter::StaticClass();
     PlayerControllerClass = AMBLPlayerController::StaticClass();
@@ -50,19 +51,25 @@ void AMBLGameMode::BeginPlay()
 
 void AMBLGameMode::SpawnManager()
 {
-    if (!SpawnVolume) return;
+    if (!IsValid(SpawnVolume)) return;
 
     if (MaxSpawnEnemy > CurrentEnemy)
     {
-        SpawnVolume->SpawnEnemy(Enemy);
+        AEnemyBase* NewEnemy = SpawnVolume->SpawnEnemy(GetEnemyClass(CurrentWave));
+        if (!IsValid(NewEnemy)) return;
+
+        NewEnemy->SetAttack(CurrentWave);
+        NewEnemy->SetSpeed(CurrentWave);
+        NewEnemy->SetColor(CurrentWave);
+
         CurrentEnemy++;
     }
-
 }
 
 void AMBLGameMode::SpawnBoss()
 {
-    SpawnVolume->SpawnEnemy(Boss);
+    AEnemyBase* NewEnemy = SpawnVolume->SpawnEnemy(Boss);
+    if (!IsValid(NewEnemy)) return;
 
     GetWorldTimerManager().SetTimer(
         GameOverTimerHandle,
@@ -75,7 +82,7 @@ void AMBLGameMode::SpawnBoss()
 
 FInteractionObjectsRow* AMBLGameMode::GetDropObject() const
 {
-    if (!DropTable) return nullptr;
+    if (!IsValid(DropTable)) return nullptr;
 
     TArray<FInteractionObjectsRow*> AllRows;
     static const FString ContextString(TEXT("InteractionObjectContext"));
@@ -108,6 +115,43 @@ FInteractionObjectsRow* AMBLGameMode::GetDropObject() const
     return nullptr;
 }
 
+TSubclassOf<AEnemyBase> AMBLGameMode::GetEnemyClass(EMBLWaveState Wave) const
+{
+    if (!IsValid(EnemyTable)) return nullptr;
+
+    if (Wave == EMBLWaveState::SetWave) return nullptr;
+
+    if (Wave >= EMBLWaveState::Wave3) Wave = EMBLWaveState::Wave3;
+
+    FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
+    FSpawnEnemyList* EnemyInfo = EnemyTable->FindRow<FSpawnEnemyList>(RowName, TEXT(""));
+
+    if (!EnemyInfo) return nullptr;
+
+    const TArray<FSpawnEnemiesWeight>& EnemyList = EnemyInfo->Enemies;
+
+    float TotalWeight = 0.0f;
+
+    for (const auto& Info : EnemyList)
+    {
+        TotalWeight += Info.Weight;
+    }
+
+    float RandValue = FMath::FRandRange(0.0f, TotalWeight);
+    float Drawing = 0.0f;
+
+    for (const auto& Info : EnemyList)
+    {
+        Drawing += Info.Weight;
+        if (RandValue <= Drawing)
+        {
+            return Info.Enemy;
+        }
+    }
+
+    return nullptr;
+}
+
 void AMBLGameMode::DeadPlayer()
 {
     GameOver();
@@ -122,11 +166,26 @@ void AMBLGameMode::DeadEnemy()
     }
 
     CurrentEnemy--;
+
+    if (AMBLGameState* GS = GetGameState<AMBLGameState>())  //추가
+    {
+        GS->Addkill();
+    }
 }
 
 void AMBLGameMode::DeadBoss()
 {
+    if (AMBLGameState* GS = GetGameState<AMBLGameState>())  //추가
+    {
+        GS->Addkill();
+    }
+
     GameOver();
+}
+
+float AMBLGameMode::GetWaveDuration() const
+{
+    return WaveDuration;
 }
 
 void AMBLGameMode::GameOver()
@@ -145,16 +204,8 @@ void AMBLGameMode::StartWave()
 {
     if (!IsValid(SpawnVolume)) return;
 
-    //IngameUI
-    if (AMBLGameState* CurrentGameState = GetGameState<AMBLGameState>())
+    if (CurrentWave == EMBLWaveState::SetWave)
     {
-        CurrentGameState->StartWave();
-    }
-    //IngameUI
-
-    switch (CurrentWave)
-    {
-    case EMBLWaveState::Wave1:
         for (int i = 0; i < MaxSpawnObject; ++i)
         {
             if (FInteractionObjectsRow* SelectedRow = GetDropObject())
@@ -166,47 +217,39 @@ void AMBLGameMode::StartWave()
             }
         }
 
-        NextWave(CurrentWave);
-
-        break;
-
-    case EMBLWaveState::Wave2:
-        SpawnInterval = 1.0f;
-        MaxSpawnEnemy = 20;
-
-        NextWave(CurrentWave);
-
-        break;
-
-    case EMBLWaveState::Wave3:
-        SpawnInterval = 0.5f;
-        MaxSpawnEnemy = 30;
+        //IngameUI
+        if (AMBLGameState* CurrentGameState = GetGameState<AMBLGameState>())
+        {
+            CurrentGameState->StartWave();
+        }
+        //IngameUI
 
         NextWave(CurrentWave);
-
-        break;
-
-    case EMBLWaveState::FinalWave:
-        SpawnBoss();
-        UE_LOG(LogTemp, Warning, TEXT("BossSpawn"));
-
-        CurrentWave = GetNextWave(CurrentWave);
-
-        break;
-
-    default:
         return;
     }
+
+    NextWave(CurrentWave);
 }
 
 void AMBLGameMode::NextWave(EMBLWaveState& Wave)
 {
+    UE_LOG(LogTemp, Warning, TEXT("Wave %d"), Wave);
     if (Wave == EMBLWaveState::Finished) return;
 
     GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
 
-    if (Wave != EMBLWaveState::FinalWave)
+    if (Wave == EMBLWaveState::SetWave)
     {
+        Wave = GetNextWave(Wave);
+
+        FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
+        FSpawnEnemyList* EnemyInfo = EnemyTable->FindRow<FSpawnEnemyList>(RowName, TEXT(""));
+
+        if (!EnemyInfo) return;
+
+        SpawnInterval = EnemyInfo->SpawnInterval;
+        MaxSpawnEnemy = EnemyInfo->MaxSpawnEnemy;
+
         GetWorldTimerManager().SetTimer(
             SpawnTimerHandle,
             this,
@@ -214,45 +257,38 @@ void AMBLGameMode::NextWave(EMBLWaveState& Wave)
             SpawnInterval,
             true
         );
+
+        return;
     }
+
+    FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
+    FSpawnEnemyList* EnemyInfo = EnemyTable->FindRow<FSpawnEnemyList>(RowName, TEXT(""));
+
+    if (!EnemyInfo) return;
+
+    SpawnInterval = EnemyInfo->SpawnInterval;
+    MaxSpawnEnemy = EnemyInfo->MaxSpawnEnemy;
+
+    /*if (Wave != EMBLWaveState::SetWave)
+    {
+        FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
+        FSpawnEnemyList* EnemyInfo = EnemyTable->FindRow<FSpawnEnemyList>(RowName, TEXT(""));
+
+        if (!EnemyInfo) return;
+
+        SpawnInterval = EnemyInfo->SpawnInterval;
+        MaxSpawnEnemy = EnemyInfo->MaxSpawnEnemy;
+    }*/
+
+    GetWorldTimerManager().SetTimer(
+        SpawnTimerHandle,
+        this,
+        &AMBLGameMode::SpawnManager,
+        SpawnInterval,
+        true
+    );
+
+    if (Wave == EMBLWaveState::FinalWave) SpawnBoss();
 
     Wave = GetNextWave(Wave);
 }
-
-// 제거 예정 함수
-void AMBLGameMode::Dead(AActor* DeadActor)
-{
-    if (!IsValid(DeadActor)) return;
-    
-    if (AMBLPlayerCharacter* Player = Cast<AMBLPlayerCharacter>(DeadActor))
-    {
-        GameOver();
-        return;
-    }
-
-    if (AMBLNonPlayerCharacter* NPC = Cast<AMBLNonPlayerCharacter>(DeadActor))
-    {
-        if (CurrentEnemy <= 0)
-        {
-            CurrentEnemy = 0;
-            return;
-        }
-
-        CurrentEnemy--;
-        return;
-    }
-
-    if (AMBLBossCharacter* BossNPC = Cast<AMBLBossCharacter>(DeadActor))
-    {
-        GameOver();
-        return;
-    }
-
-}
-
-
-
-
-
-
-

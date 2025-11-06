@@ -41,9 +41,6 @@ public:
 
 	TObjectPtr<AActor> DamageTarget;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UDataTable> StatDataTable;
-
 protected:
 	virtual void BeginPlay() override;
 

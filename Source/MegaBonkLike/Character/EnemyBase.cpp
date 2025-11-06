@@ -4,11 +4,10 @@
 
 AEnemyBase::AEnemyBase()
 {
-
 }
 void AEnemyBase::BeginPlay()
 {
-	Super::BeginPlay();    //이거 왜 넣고 안넣고 차이가? 
+	Super::BeginPlay();
 
 	if (GetMesh())
 	{
@@ -28,28 +27,71 @@ void AEnemyBase::BeginPlay()
 
 void AEnemyBase::SetAttack(EMBLWaveState Wave)
 {
-	FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
-	FMonsterStat* Monster = StatTable->FindRow<FMonsterStat>(RowName, TEXT(""));
-	Attack = Monster->Attack;
+	if (!IsValid(StatDataTable)) return;
+
+	if (EMBLWaveState::SetWave < Wave)
+	{
+		if (Wave > EMBLWaveState::Wave3)
+		{
+			Wave = EMBLWaveState::Wave3;
+		}
+
+		FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
+		FMonsterStat* Monster = StatDataTable->FindRow<FMonsterStat>(RowName, TEXT(""));
+
+	
+
+		if (!Monster) return;
+
+		Attack = Monster->Attack;
+	}
 }
 
 void AEnemyBase::SetSpeed(EMBLWaveState Wave)
 {
-	FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
-	FMonsterStat* Monster = StatTable->FindRow<FMonsterStat>(RowName, TEXT(""));
-	GetCharacterMovement()->MaxWalkSpeed = Monster->MoveSpeed;
+	if (!IsValid(StatDataTable)) return;
+
+	if (EMBLWaveState::SetWave < Wave)
+	{
+		if (Wave > EMBLWaveState::Wave3)
+		{
+			Wave = EMBLWaveState::Wave3;
+		}
+
+		FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
+		FMonsterStat* Monster = StatDataTable->FindRow<FMonsterStat>(RowName, TEXT(""));
+
+		
+
+		if (!Monster) return;
+
+		GetCharacterMovement()->MaxWalkSpeed = Monster->MoveSpeed;
+	}
 }
 
 void AEnemyBase::SetColor(EMBLWaveState Wave)
 {
-	FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
-	FMonsterStat* Monster = StatTable->FindRow<FMonsterStat>(RowName, TEXT(""));
+	if (!IsValid(StatDataTable)) return;
 
-	for (UMaterialInstanceDynamic* DynMat : DynamicMaterials)
+	if (EMBLWaveState::SetWave < Wave )
 	{
-		if (DynMat)
+		if (Wave > EMBLWaveState::Wave3)
 		{
-			DynMat->SetVectorParameterValue(FName("BaseColor"), Monster->BodyColor);
+			Wave = EMBLWaveState::Wave3;
+		}
+
+		//DynamicMaterials.Empty();
+		FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
+ 		FMonsterStat* Monster = StatDataTable->FindRow<FMonsterStat>(RowName, TEXT(""));
+
+		if (!Monster) return;
+		
+		for (UMaterialInstanceDynamic* DynMat : DynamicMaterials)
+		{
+			if (DynMat)
+			{
+				DynMat->SetVectorParameterValue(FName("BaseColor"), Monster->BodyColor);
+			}
 		}
 	}
 }
