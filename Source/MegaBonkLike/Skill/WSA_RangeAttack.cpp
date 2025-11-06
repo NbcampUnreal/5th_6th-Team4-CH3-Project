@@ -4,6 +4,7 @@
 #include "TimerManager.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "MegaBonkLike.h"
+#include "Common/PoolSubsystem.h"
 
 void UWSA_RangeAttack::Activate(TWeakObjectPtr<AActor> InInstigator)
 {
@@ -150,15 +151,18 @@ void UWSA_RangeAttack::ShootSpread(const FVector& TargetDir)
 
 void UWSA_RangeAttack::ShootSingle(const FVector& TargetDir)
 {
-	FVector SpawnLocation = Instigator->GetActorLocation() + TargetDir * 10.f;
-	FRotator SpawnRotation = TargetDir.Rotation();
-	FActorSpawnParameters Params;
-	Params.Owner = Instigator.Get();
-	Params.Instigator = Cast<APawn>(Instigator.Get());
-	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	AProjectile* Projectile = Instigator->GetWorld()->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, Params);
+	UPoolSubsystem* PoolSubsystem = GetWorld()->GetSubsystem<UPoolSubsystem>();
+	if (IsValid(PoolSubsystem) == false)
+		return;
+
+	FVector Location = Instigator->GetActorLocation() + TargetDir * 10.f;
+	FRotator Rotation = TargetDir.Rotation();
+	AProjectile* Projectile = PoolSubsystem->GetFromPool<AProjectile>(ProjectileClass, Location, Rotation);
 	if (IsValid(Projectile) == true)
 	{
+		Projectile->SetOwner(Instigator.Get());
+		Projectile->SetInstigator(Cast<APawn>(Instigator.Get()));
+
 		Projectile->SetActorEnableCollision(false);
 		Projectile->SetDirectionAndSpeed(TargetDir, GetValue(TAG_Attribute_ProjectileSpeed));
 		Projectile->SetSize(GetValue(TAG_Attribute_Size));
