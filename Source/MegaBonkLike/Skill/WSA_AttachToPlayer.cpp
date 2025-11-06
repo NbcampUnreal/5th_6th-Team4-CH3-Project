@@ -3,6 +3,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Item/WeaponItem.h"
 #include "Character/MBLPlayerCharacter.h"
+#include "Common/PoolSubsystem.h"
 
 void UWSA_AttachToPlayer::Activate(TWeakObjectPtr<AActor> InInstigator)
 {
@@ -10,14 +11,18 @@ void UWSA_AttachToPlayer::Activate(TWeakObjectPtr<AActor> InInstigator)
 
     if (Instigator.IsValid() == true && IsValid(AttachedActorClass) == true)
     {
-        FActorSpawnParameters SpawnParams;
-        SpawnParams.Owner = Instigator.Get();
-        SpawnParams.Instigator = Cast<APawn>(Instigator);
+        UPoolSubsystem* PoolSubsystem = GetWorld()->GetSubsystem<UPoolSubsystem>();
+        if (IsValid(PoolSubsystem) == false)
+            return;
+
         FVector SpawnLocation = Instigator->GetActorLocation() + LocationOffset;
         FRotator SpawnRotation = Instigator->GetActorRotation() + RotationOffset;
-        AttachedActor = Instigator->GetWorld()->SpawnActor<ADamageAreaActor>(AttachedActorClass, SpawnLocation, SpawnRotation, SpawnParams);
-        if (AttachedActor)
+        AttachedActor = PoolSubsystem->GetFromPool<ADamageAreaActor>(AttachedActorClass, SpawnLocation, SpawnRotation);
+        if (IsValid(AttachedActor) == true)
         {
+            AttachedActor->SetOwner(Instigator.Get());
+            AttachedActor->SetInstigator(Cast<APawn>(Instigator.Get()));
+
             FAttachmentTransformRules AttachRules(EAttachmentRule::KeepWorld, true);
             AttachedActor->AttachToComponent(Instigator->GetRootComponent(), AttachRules);
 

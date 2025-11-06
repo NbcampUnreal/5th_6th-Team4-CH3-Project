@@ -5,6 +5,7 @@
 #include "Item/ItemEnums.h"
 #include "UObject/EnumProperty.h"
 #include "Attribute/AttributeTags.h"
+#include "Components/Image.h"
 
 bool UUIItemSelectOption::Initialize()
 {
@@ -45,7 +46,7 @@ void UUIItemSelectOption::SetOption(const FItemSelectOption& InOption)
 
 	if (IsValid(TextDesc) == true)
 	{
-		if (InOption.bIsNewItem)
+		if (InOption.bIsNewItem && InOption.ItemType != EItemType::Tomes)
 		{
 			TextDesc->SetText(OptionItemData->ItemDesc);
 		}
@@ -54,8 +55,7 @@ void UUIItemSelectOption::SetOption(const FItemSelectOption& InOption)
 			FString String;
 			for (const auto& Change : InOption.AttributeChanges)
 			{
-				String += FString::Printf(TEXT("Gain +%.2f  "), Change.DeltaValue);
-				String += GetTagName(Change.AttributeTag);
+				String += FString::Printf(TEXT("%s: %.2f ➔ %.2f"), *GetTagName(Change.AttributeTag), Change.CurrentValue, Change.NewValue);
 				String += TEXT("\n");
 			}
 			FString Result = String.TrimEnd();
@@ -77,6 +77,8 @@ void UUIItemSelectOption::SetOption(const FItemSelectOption& InOption)
 				FText Text = RarityEnum->GetDisplayNameTextByValue(static_cast<int64>(InOption.Rarity));
 				TextRarity->SetText(Text);
 			}
+			TextRarity->SetColorAndOpacity(FSlateColor(ColorTextRarity[InOption.Rarity]));
+			ImgBackground->SetColorAndOpacity(ColorImgBackground[InOption.Rarity]);
 		}
 	}
 	

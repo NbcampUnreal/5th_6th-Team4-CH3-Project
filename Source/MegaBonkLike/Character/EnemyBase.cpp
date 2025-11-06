@@ -7,11 +7,7 @@ AEnemyBase::AEnemyBase()
 }
 void AEnemyBase::BeginPlay()
 {
-	Super::BeginPlay();    //이거 왜 넣고 안넣고 차이가? 
-
-	//SetAttack(CurrentWave);
-	//SetSpeed(CurrentWave);
-	//SetColor(CurrentWave);
+	Super::BeginPlay();
 
 	if (GetMesh())
 	{
@@ -33,10 +29,17 @@ void AEnemyBase::SetAttack(EMBLWaveState Wave)
 {
 	if (!IsValid(StatDataTable)) return;
 
-	if (EMBLWaveState::SetWave < Wave && Wave < EMBLWaveState::FinalWave)
+	if (EMBLWaveState::SetWave < Wave)
 	{
+		if (Wave > EMBLWaveState::Wave3)
+		{
+			Wave = EMBLWaveState::Wave3;
+		}
+
 		FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
 		FMonsterStat* Monster = StatDataTable->FindRow<FMonsterStat>(RowName, TEXT(""));
+
+	
 
 		if (!Monster) return;
 
@@ -48,10 +51,17 @@ void AEnemyBase::SetSpeed(EMBLWaveState Wave)
 {
 	if (!IsValid(StatDataTable)) return;
 
-	if (EMBLWaveState::SetWave < Wave && Wave < EMBLWaveState::FinalWave)
+	if (EMBLWaveState::SetWave < Wave)
 	{
+		if (Wave > EMBLWaveState::Wave3)
+		{
+			Wave = EMBLWaveState::Wave3;
+		}
+
 		FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
 		FMonsterStat* Monster = StatDataTable->FindRow<FMonsterStat>(RowName, TEXT(""));
+
+		
 
 		if (!Monster) return;
 
@@ -63,27 +73,16 @@ void AEnemyBase::SetColor(EMBLWaveState Wave)
 {
 	if (!IsValid(StatDataTable)) return;
 
-	if (EMBLWaveState::SetWave < Wave && Wave < EMBLWaveState::FinalWave)
+	if (EMBLWaveState::SetWave < Wave )
 	{
+		if (Wave > EMBLWaveState::Wave3)
+		{
+			Wave = EMBLWaveState::Wave3;
+		}
+
 		//DynamicMaterials.Empty();
-
-		//if (GetMesh())
-		//{
-		//	int32 MaterialCount = GetMesh()->GetNumMaterials();
-		//	for (int32 i = 0; i < MaterialCount; i++)
-		//	{
-		//		UMaterialInterface* Mat = GetMesh()->GetMaterial(i);
-		//		if (Mat)
-		//		{
-		//			UMaterialInstanceDynamic* DynMat = UMaterialInstanceDynamic::Create(Mat, this);
-		//			GetMesh()->SetMaterial(i, DynMat);
-		//			DynamicMaterials.Add(DynMat);
-		//		}
-		//	}
-		//}
-
 		FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
-		FMonsterStat* Monster = StatDataTable->FindRow<FMonsterStat>(RowName, TEXT(""));
+ 		FMonsterStat* Monster = StatDataTable->FindRow<FMonsterStat>(RowName, TEXT(""));
 
 		if (!Monster) return;
 		
