@@ -83,5 +83,10 @@ void UOutgameUIEndGameScreen::SetOutgameUIInventory()
 		{
 			TomesList->SetItems(Inventory->GetCachedItems(EItemType::Tomes));
 		}
+
+		if (IsValid(TomesList) == true)
+		{
+			MiscList->SetItems(Inventory->GetCachedItems(EItemType::Misc));
+		}
 	}
 }
