@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Attack/AttackData.h"
+#include "Common/PoolSpawnable.h"
 #include "Projectile.generated.h"
 
 class USphereComponent;
@@ -12,12 +13,15 @@ class UNiagaraSystem;
 class UProjectileMovementComponent;
 
 UCLASS(Abstract)
-class MEGABONKLIKE_API AProjectile : public AActor
+class MEGABONKLIKE_API AProjectile : public AActor, public IPoolSpawnable
 {
 	GENERATED_BODY()
 	
 public:	
 	AProjectile();
+
+    virtual void Activate() override;
+    virtual void Deactivate() override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -28,7 +32,11 @@ public:
     void SetSize(float InSize);
     void SetPenetrate(bool bInPenetrate);
 
+    void SetLifeTimer();
+
     void ApplyDamage(AActor* TargetActor);
+
+    void ReturnToPool();
 
 protected:
     UFUNCTION()
@@ -61,4 +69,6 @@ protected:
     float OriginTrailWidth;
 
     FTimerHandle DestroyTimerHandle;
+
+    static const float LifeTime;
 };

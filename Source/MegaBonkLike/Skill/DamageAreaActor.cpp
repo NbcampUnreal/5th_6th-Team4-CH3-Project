@@ -3,6 +3,7 @@
 #include "Components/SphereComponent.h"
 #include "MegaBonkLike.h"
 #include "Attack/AttackHandleComponent.h"
+#include "Common/PoolSubsystem.h"
 
 ADamageAreaActor::ADamageAreaActor()
 {
@@ -23,6 +24,22 @@ void ADamageAreaActor::BeginPlay()
     SetOverlapEnable(false);
 }
 
+void ADamageAreaActor::Activate()
+{
+    if (IsValid(CollisionComp) == true)
+    {
+        CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    }
+}
+
+void ADamageAreaActor::Deactivate()
+{
+    if (IsValid(CollisionComp) == true)
+    {
+        CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    }
+}
+
 void ADamageAreaActor::SetAttackData(const FAttackData& InAttackData)
 {
 	AttackData = InAttackData;
@@ -37,6 +54,7 @@ void ADamageAreaActor::SetSize(float InSize)
 void ADamageAreaActor::SetLifeTime(float InLifeTime)
 {
     LifeTime = InLifeTime;
+    LifeTimeTimer = 0.0f;
     GetWorldTimerManager().SetTimer(
         LifeTimeHandle,
         this,
@@ -90,7 +108,7 @@ void ADamageAreaActor::Shrink()
     if (LifeTimeTimer >= LifeTime)
     {
         GetWorldTimerManager().ClearTimer(LifeTimeHandle);
-        Destroy();
+        ReturnToPool();
     }
 }
 
@@ -119,4 +137,15 @@ void ADamageAreaActor::CheckHit()
     }
 
     SetOverlapEnable(false);
+}
+
+void ADamageAreaActor::ReturnToPool()
+{
+    if (UWorld* World = GetWorld())
+    {
+        if (UPoolSubsystem* PoolSubSystem = World->GetSubsystem<UPoolSubsystem>())
+        {
+            PoolSubSystem->ReturnToPool(this);
+        }
+    }
 }

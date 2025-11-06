@@ -41,6 +41,11 @@ protected:
 	TObjectPtr<UTextBlock> TextLevel;
 
 	UPROPERTY(EditAnywhere)
+	TMap<EItemRarity, FLinearColor> ColorTextRarity;
+	UPROPERTY(EditAnywhere)
+	TMap<EItemRarity, FLinearColor> ColorImgBackground;
+
+	UPROPERTY(EditAnywhere)
 	TMap<EItemType, TObjectPtr<UDataTable>> ItemTables;
 	UPROPERTY()
 	FItemSelectOption ItemOption;
