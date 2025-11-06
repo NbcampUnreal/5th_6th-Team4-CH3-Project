@@ -42,7 +42,7 @@ void AFlyingEnemy::BeginPlay()
 		bUseControllerRotationYaw = false;
 
 		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
-		GetCharacterMovement()->MaxFlySpeed = 400.f;
+		//GetCharacterMovement()->MaxFlySpeed = 400.f;
 
 	}
 }
@@ -192,7 +192,12 @@ void AFlyingEnemy::DeadHandle()
 
 void AFlyingEnemy::SetSpeed(EMBLWaveState Wave)
 {
-	FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
-	FMonsterStat* Monster = StatDataTable->FindRow<FMonsterStat>(RowName, TEXT(""));
-	GetCharacterMovement()->MaxFlySpeed = Monster->MoveSpeed;
+	if (!IsValid(StatDataTable)) return;
+	
+	if (EMBLWaveState::SetWave < Wave && Wave < EMBLWaveState::FinalWave)
+	{
+		FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
+		FMonsterStat* Monster = StatDataTable->FindRow<FMonsterStat>(RowName, TEXT(""));
+		GetCharacterMovement()->MaxFlySpeed = Monster->MoveSpeed;
+	}
 }

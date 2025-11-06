@@ -6,6 +6,7 @@
 
 class USceneComponent;
 class UBoxComponent;
+class AEnemyBase;
 
 UCLASS()
 class MEGABONKLIKE_API AMBLSpawnVolume : public AActor
@@ -25,13 +26,9 @@ private:
 	UBoxComponent* SpawnBox;
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "Spawn")
 	FVector GetRandomEnemySpawnLocation() const;
-	UFUNCTION(BlueprintCallable, Category = "Spawn")
 	FVector GetRandomObjectSpawnLocation() const;
-	UFUNCTION(BlueprintCallable, Category = "Spawn")
-	void SpawnEnemy(TSubclassOf<AActor> EnemyClass);
-	UFUNCTION(BlueprintCallable, Category = "Spawn")
+	AEnemyBase* SpawnEnemy(TSubclassOf<AEnemyBase> EnemyClass);
 	void SpawnObject(TSubclassOf<AActor> ObjectClass);
 
 private:

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Character/EnemyBase.h"
 #include "Engine/DataTable.h"
 #include "SpawnEnemiesWeight.generated.h"
 
@@ -10,7 +11,7 @@ struct MEGABONKLIKE_API FSpawnEnemiesWeight
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<AActor> Enemy;
+	TSubclassOf<AEnemyBase> Enemy;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Weight;
 };
