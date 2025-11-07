@@ -198,6 +198,17 @@ void AMBLPlayerCharacter::AcquireGold(float InGold)
 	OnChangedGold.Broadcast(Gold);
 }
 
+bool AMBLPlayerCharacter::UseGold(float Price)
+{
+	if (Price > Gold)
+		return false;
+
+	Gold -= Price;
+	OnChangedGold.Broadcast(Gold);
+
+	return true;
+}
+
 void AMBLPlayerCharacter::Input_Move(const FInputActionValue& InputValue)
 {
 	FVector2D MoveVector = InputValue.Get<FVector2D>();
