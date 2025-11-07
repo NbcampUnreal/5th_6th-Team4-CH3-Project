@@ -113,7 +113,7 @@ void AFlyingEnemy::UpdateTrack()
 	const float ZDiff = TargetZ - MyZ;
 
 	float FlyStartThreshold = 160.f; 
-	float FlyStopThreshold = 10.f;
+	float FlyStopThreshold = 0.f;
 
 	if (!bIsFlyingMode && ZDiff >= FlyStartThreshold)
 	{

@@ -46,7 +46,7 @@ void UBTTask_FlyToPlayer::CheckLandingCondition()
 
 	FHitResult HitResult;
 	FVector Start = cachedEnemy->GetActorLocation();
-	FVector End = Start - FVector(0, 0, 200.f); // 발 밑 200cm까지 검사
+	FVector End = Start - FVector(0, 0, 200.f);
 
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(cachedEnemy);
@@ -59,14 +59,8 @@ void UBTTask_FlyToPlayer::CheckLandingCondition()
 		Params
 	);
 
-	// 라인트레이스 디버그용 (확인용으로 그려보면 좋음)
-	// DrawDebugLine(World, Start, End, FColor::Green, false, 0.1f, 0, 1.f);
-
 	if (bHit)
 	{
-		// 실제로 바닥과 충돌했을 때만 착지로 간주
-		cachedEnemy->SetFlyingMode(false);
-
 		cachedEnemy->GetWorldTimerManager().ClearTimer(CheckHandle);
 
 		if (CachedOwnerComp)
@@ -75,22 +69,4 @@ void UBTTask_FlyToPlayer::CheckLandingCondition()
 		}
 	}
 
-
-	/*if (!cachedEnemy || !cachedEnemy->Target.IsValid()) return;
-
-	const float MyZ = cachedEnemy->GetActorLocation().Z;
-	const float TargetZ = cachedEnemy->Target->GetActorLocation().Z;
-	const float ZDiff = FMath::Abs(TargetZ - MyZ);
-
-	if (ZDiff < 10.f)
-	{
-		cachedEnemy->SetFlyingMode(false);
-
-		cachedEnemy->GetWorldTimerManager().ClearTimer(CheckHandle);
-
-		if (CachedOwnerComp)
-		{
-			FinishLatentTask(*CachedOwnerComp, EBTNodeResult::Succeeded);
-		}
-	}*/
 }
