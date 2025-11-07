@@ -40,8 +40,8 @@ public:
 	void SetColor(EMBLWaveState Wave);
 	UFUNCTION(BlueprintCallable)
 	void SetMaxHealth(EMBLWaveState Wave);
-
-
+	UFUNCTION(BlueprintCallable)
+	void SetAll(EMBLWaveState Wave);
 
 
 };

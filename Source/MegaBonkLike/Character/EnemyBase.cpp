@@ -117,5 +117,13 @@ void AEnemyBase::SetMaxHealth(EMBLWaveState Wave)
 	}
 }
 
+void AEnemyBase::SetAll(EMBLWaveState Wave)
+{
+	SetAttack(Wave);
+	SetSpeed(Wave);
+	SetColor(Wave);
+	SetMaxHealth(Wave);
+}
+
 
 
