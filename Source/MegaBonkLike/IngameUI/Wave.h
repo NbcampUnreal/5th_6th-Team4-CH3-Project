@@ -15,6 +15,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateWaveText(int32 CurrentWave, int32 MaxWave);
 
+	UFUNCTION(BlueprintCallable)
+	void UpdateBossWaveText();
+
 protected:
 
 	UPROPERTY(meta = (BindWidget))

@@ -21,7 +21,7 @@ FAttackData UWeaponSkillAction::CreateAttackDataBase()
     AttackData.Damage = GetValue(TAG_Attribute_Damage);
     AttackData.CriticalChance = GetValue(TAG_Attribute_CriticalChance);
     AttackData.CriticalMultiplier = GetValue(TAG_Attribute_CriticalMultiplier);
-    AttackData.Knockback = GetValue(TAG_Attribute_Knockback);
+    AttackData.Knockback = bKnockback == true ? GetValue(TAG_Attribute_Knockback) : 0.0f;
     AttackData.Causer = Instigator;
     return AttackData;
 }

@@ -24,6 +24,9 @@ public:
 	UFUNCTION()
 	void TakeItem();
 
+private:
+	void LoadIcon(const TSoftObjectPtr<UTexture2D>& IconTexture);
+
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> TextRarity;

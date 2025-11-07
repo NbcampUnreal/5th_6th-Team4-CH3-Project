@@ -16,7 +16,7 @@ AMBLGameMode::AMBLGameMode()
     , Boss(nullptr)
     , DropTable(nullptr)
     , CurrentWave(EMBLWaveState::SetWave)
-    , WaveDuration(10.0f)
+    , WaveDuration(20.0f)
     , MaxSpawnObject(500)
     , SpawnInterval(2.0f)
     , MaxSpawnEnemy(10)
@@ -57,16 +57,11 @@ void AMBLGameMode::SpawnManager()
     {
         AEnemyBase* NewEnemy = SpawnVolume->SpawnEnemy(GetEnemyClass(CurrentWave));
         if (!IsValid(NewEnemy)) return;
-        //NewEnemy->SetCurrentWave(CurrentWave);
+
         NewEnemy->SetAttack(CurrentWave);
         NewEnemy->SetSpeed(CurrentWave);
         NewEnemy->SetColor(CurrentWave);
 
-        //FTransform SpawnTransform;
-        //SpawnTransform.SetLocation(NewEnemy->GetActorLocation());
-        //SpawnTransform.SetRotation(NewEnemy->GetActorRotation().Quaternion());
-
-        //UGameplayStatics::FinishSpawningActor(NewEnemy, SpawnTransform);
         CurrentEnemy++;
     }
 }
@@ -76,11 +71,6 @@ void AMBLGameMode::SpawnBoss()
     AEnemyBase* NewEnemy = SpawnVolume->SpawnEnemy(Boss);
     if (!IsValid(NewEnemy)) return;
 
-    //FTransform SpawnTransform;
-    //SpawnTransform.SetLocation(NewEnemy->GetActorLocation());
-    //SpawnTransform.SetRotation(NewEnemy->GetActorRotation().Quaternion());
-
-    //UGameplayStatics::FinishSpawningActor(NewEnemy, SpawnTransform);
     GetWorldTimerManager().SetTimer(
         GameOverTimerHandle,
         this,
@@ -193,6 +183,11 @@ void AMBLGameMode::DeadBoss()
     GameOver();
 }
 
+float AMBLGameMode::GetWaveDuration() const
+{
+    return WaveDuration;
+}
+
 void AMBLGameMode::GameOver()
 {
     if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
@@ -209,16 +204,8 @@ void AMBLGameMode::StartWave()
 {
     if (!IsValid(SpawnVolume)) return;
 
-    //IngameUI
-    if (AMBLGameState* CurrentGameState = GetGameState<AMBLGameState>())
+    if (CurrentWave == EMBLWaveState::SetWave)
     {
-        CurrentGameState->StartWave();
-    }
-    //IngameUI
-
-    switch (CurrentWave)
-    {
-    case EMBLWaveState::SetWave:
         for (int i = 0; i < MaxSpawnObject; ++i)
         {
             if (FInteractionObjectsRow* SelectedRow = GetDropObject())
@@ -230,45 +217,18 @@ void AMBLGameMode::StartWave()
             }
         }
 
-        NextWave(CurrentWave);
-
-        break;
-
-    case EMBLWaveState::Wave1:
-        SpawnInterval = 1.0f;
-        MaxSpawnEnemy = 10;
-
-        NextWave(CurrentWave);
-
-        break;
-
-    case EMBLWaveState::Wave2:
-        SpawnInterval = 0.5f;
-        MaxSpawnEnemy = 10;
+        //IngameUI
+        if (AMBLGameState* CurrentGameState = GetGameState<AMBLGameState>())
+        {
+            CurrentGameState->StartWave();
+        }
+        //IngameUI
 
         NextWave(CurrentWave);
-
-        break;
-
-    case EMBLWaveState::Wave3:
-        SpawnInterval = 0.5f;
-        MaxSpawnEnemy = 10;
-
-        NextWave(CurrentWave);
-
-        break;
-
-    case EMBLWaveState::FinalWave:
-        SpawnBoss();
-        UE_LOG(LogTemp, Warning, TEXT("BossSpawn"));
-
-        NextWave(CurrentWave);
-
-        break;
-
-    default:
         return;
     }
+
+    NextWave(CurrentWave);
 }
 
 void AMBLGameMode::NextWave(EMBLWaveState& Wave)
@@ -277,6 +237,49 @@ void AMBLGameMode::NextWave(EMBLWaveState& Wave)
     if (Wave == EMBLWaveState::Finished) return;
 
     GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
+
+    if (Wave == EMBLWaveState::SetWave)
+    {
+        Wave = GetNextWave(Wave);
+
+        FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
+        FSpawnEnemyList* EnemyInfo = EnemyTable->FindRow<FSpawnEnemyList>(RowName, TEXT(""));
+
+        if (!EnemyInfo) return;
+
+        SpawnInterval = EnemyInfo->SpawnInterval;
+        MaxSpawnEnemy = EnemyInfo->MaxSpawnEnemy;
+
+        GetWorldTimerManager().SetTimer(
+            SpawnTimerHandle,
+            this,
+            &AMBLGameMode::SpawnManager,
+            SpawnInterval,
+            true
+        );
+
+        return;
+    }
+
+    FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
+    FSpawnEnemyList* EnemyInfo = EnemyTable->FindRow<FSpawnEnemyList>(RowName, TEXT(""));
+
+    if (!EnemyInfo) return;
+
+    SpawnInterval = EnemyInfo->SpawnInterval;
+    MaxSpawnEnemy = EnemyInfo->MaxSpawnEnemy;
+
+    /*if (Wave != EMBLWaveState::SetWave)
+    {
+        FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
+        FSpawnEnemyList* EnemyInfo = EnemyTable->FindRow<FSpawnEnemyList>(RowName, TEXT(""));
+
+        if (!EnemyInfo) return;
+
+        SpawnInterval = EnemyInfo->SpawnInterval;
+        MaxSpawnEnemy = EnemyInfo->MaxSpawnEnemy;
+    }*/
+
     GetWorldTimerManager().SetTimer(
         SpawnTimerHandle,
         this,
@@ -284,6 +287,8 @@ void AMBLGameMode::NextWave(EMBLWaveState& Wave)
         SpawnInterval,
         true
     );
+
+    if (Wave == EMBLWaveState::FinalWave) SpawnBoss();
 
     Wave = GetNextWave(Wave);
 }

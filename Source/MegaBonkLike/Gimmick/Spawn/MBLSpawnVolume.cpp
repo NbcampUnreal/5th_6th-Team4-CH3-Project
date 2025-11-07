@@ -5,6 +5,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Gimmick/Spawn/MBLSpawnSubsystem.h"
 #include "Character/EnemyBase.h"
+#include "Character/FlyingEnemy.h"
 
 AMBLSpawnVolume::AMBLSpawnVolume()
 {
@@ -66,6 +67,11 @@ AEnemyBase* AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AEnemyBase> EnemyClass)
 	//	return;
 	//}
 
+	if (EnemyClass->IsChildOf(AFlyingEnemy::StaticClass()))
+	{
+		SpawnLocation.Z += 250.0f;
+	}
+
 	AActor* Player = GetPlayerInBox();
 
 	if (!IsValid(Player))
@@ -77,17 +83,6 @@ AEnemyBase* AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AEnemyBase> EnemyClass)
 	FRotator SpawnRotation = (Player->GetActorLocation() - SpawnLocation).Rotation();
 
 	return World->SpawnActor<AEnemyBase>(EnemyClass, SpawnLocation, SpawnRotation);
-
-	//FTransform SpawnTransform;
-	//SpawnTransform.SetLocation(SpawnLocation);
-	//SpawnTransform.SetRotation(SpawnRotation.Quaternion());
-
-	//return World->SpawnActorDeferred<AEnemyBase>(EnemyClass, SpawnTransform);
-
-	//if (UMBLSpawnSubsystem* Subsystem = World->GetSubsystem<UMBLSpawnSubsystem>())
-	//{
-	//	Subsystem->SpawnActorAtLocation(EnemyClass, SpawnLocation, SpawnRotation);
-	//}
 }
 
 void AMBLSpawnVolume::SpawnObject(TSubclassOf<AActor> ObjectClass)
@@ -108,10 +103,6 @@ void AMBLSpawnVolume::SpawnObject(TSubclassOf<AActor> ObjectClass)
 	FRotator SpawnRotation = FRotator(0.f, FMath::FRandRange(0.f, 360.f), 0.f);
 
 	World->SpawnActor<AActor>(ObjectClass, SpawnLocation, SpawnRotation);
-	//if (UMBLSpawnSubsystem* Subsystem = World->GetSubsystem<UMBLSpawnSubsystem>())
-	//{
-	//	Subsystem->SpawnActorAtLocation(ObjectClass, SpawnLocation, SpawnRotation);
-	//}
 }
 
 AActor* AMBLSpawnVolume::GetPlayerInBox() const

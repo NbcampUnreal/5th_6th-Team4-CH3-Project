@@ -2,14 +2,14 @@
 #include "Player/MBLPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Game/MBLGameMode.h"
-#include "Game/MBLGameState.h"  //추가
+
 
 AMBLGameState::AMBLGameState()
 {
 	CurrentWaveIndex = 0;
-	MaxWaves = 3;
-	WaveDuration = 20.0f; //임시 60초로 할 예정
-	RemainingTime = WaveDuration;
+	MaxWaves = 4;
+	WaveDuration = 0; //임시 60초로 할 예정
+	RemainingTime = 0;
 	CollectedCoinCount = 0;
 	KillCount = 0;
 }
@@ -17,16 +17,17 @@ AMBLGameState::AMBLGameState()
 void AMBLGameState::BeginPlay()
 {
 	Super::BeginPlay();
+	if (AMBLGameMode* GameMode = Cast<AMBLGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
+	{
+		WaveDuration = GameMode->GetWaveDuration();
+	}
 	StartWave();
 }
 
 void AMBLGameState::StartWave()
 {	//float GetWaveDuration();
 
-	/*if (AMBLGameMode* GameMode = Cast<AMBLGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
-	{
-		RemainingTime = GetWaveDuration();
-	}*/
+	
 
 	RemainingTime = WaveDuration;
 	GetWorldTimerManager().SetTimer(
@@ -55,20 +56,18 @@ void AMBLGameState::OnWaveEnd()
 {
 	CurrentWaveIndex++;
 
-	if (CurrentWaveIndex < MaxWaves)
-	{
-		StartWave();
-	}
-	else
-	{
-		if (APlayerController* Controller = GetWorld()->GetFirstPlayerController())
-		{
-			if (AMBLPlayerController* MBLController = Cast<AMBLPlayerController>(Controller))
-			{
-				MBLController->ShowEndGameScreen(true);
-			}
-		}
-	}
+	StartWave();
+
+	//if (CurrentWaveIndex < MaxWaves - 1)
+	//{
+	//	StartWave();
+	//}
+	//else  //if (CurrentWaveIndex == MaxWaves - 1)
+	//{
+	//	UpdateHUD();
+	//	StartWave();
+	//}
+
 }
 
 void AMBLGameState::Addkill()
@@ -92,7 +91,16 @@ void AMBLGameState::UpdateHUD()
 			GameController->UpdateTimer(RemainingTime);
 			GameController->UpdateCoinCount(CollectedCoinCount);
 			GameController->UpdateKillCount(KillCount);
-			GameController->UpdateWave(CurrentWaveIndex + 1, MaxWaves);
+			
+			if (CurrentWaveIndex < MaxWaves - 1)
+			{
+				GameController->UpdateWave(CurrentWaveIndex + 1 , MaxWaves - 1);
+			}
+			else 
+			{
+				GameController->UpdateBossWaveText();
+			}
+			
 		}
 	}
 }

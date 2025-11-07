@@ -11,6 +11,7 @@ class UKillCounter;
 class UTimer;
 class UCoinCounter;
 class UWave;
+class UBossHPBar;
 
 UCLASS()
 class MEGABONKLIKE_API UUIHUD : public UUserWidget
@@ -44,6 +45,17 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateWave(int32 CurrentWave, int32 MaxWave);
 
+	//BossWave
+	UFUNCTION(BlueprintCallable)
+	void UpdateBossWaveText();
+
+	//BossHP
+	UFUNCTION(BlueprintCallable)
+	void ShowBossHPBar(bool bshow);
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateBossHP(float CurrentHP, float MaxHP);
+
 	UFUNCTION()
 	void UpdateItems();
 
@@ -68,6 +80,13 @@ protected:
 	//Wave
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UWave> WaveWidget;
+
+	//Boss
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UBossHPBar> BossHPBarClass;
+
+	UPROPERTY()
+	TObjectPtr<UBossHPBar> BossHPBarWidget;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UUIHorizontalItemList> WeaponList;
