@@ -1,8 +1,11 @@
 #include "OutgameUI/UIGridItemSlot.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "Components/Image.h"
 #include "Item/ItemBase.h"
 #include "Item/ItemDataRow.h"
+#include "Engine/StreamableManager.h"
+#include "Engine/AssetManager.h"
 
 void UUIGridItemSlot::NativeConstruct()
 {
@@ -23,7 +26,6 @@ void UUIGridItemSlot::SetItem(TWeakObjectPtr<UItemBase> InItem)
 		return;
 	}
 
-	//  3. 아이템 데이터 존재 여부 확인
 	const FItemDataRow* Data = Item->GetData();
 	if (Data == nullptr)
 	{
@@ -34,12 +36,38 @@ void UUIGridItemSlot::SetItem(TWeakObjectPtr<UItemBase> InItem)
 	{
 		TextItemName->SetText(Item->GetData()->ItemName);
 	}
+
+	if (IsValid(ImgIcon) == true)
+	{
+		LoadIcon(Data->ItemIcon);
+	}
 }
 
 void UUIGridItemSlot::ButtonClicked()
 {
 	if (Item.IsValid())
 	{
-		OnSlotClicked.Broadcast(Item.Get()); //알림 보냄
+		OnSlotClicked.Broadcast(Item.Get());
 	}
+}
+
+void UUIGridItemSlot::LoadIcon(const TSoftObjectPtr<UTexture2D>& IconTexture)
+{
+	if (IconTexture.IsNull())
+	{
+		ImgIcon->SetVisibility(ESlateVisibility::Collapsed);
+		ImgIcon->SetBrushFromTexture(nullptr);
+		return;
+	}
+
+	ImgIcon->SetVisibility(ESlateVisibility::Visible);
+	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+	Streamable.RequestAsyncLoad(IconTexture.ToSoftObjectPath(),
+		[this, IconTexture]()
+		{
+			if (UTexture2D* LoadedIcon = IconTexture.Get())
+			{
+				ImgIcon->SetBrushFromTexture(LoadedIcon);
+			}
+		});
 }

@@ -7,6 +7,7 @@
 class UTextBlock;
 class UItemBase;
 class UButton;
+class UImage;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSlotClicked, UItemBase*, ClickedItem);
 
@@ -18,6 +19,8 @@ class MEGABONKLIKE_API UUIGridItemSlot : public UUserWidget
 public:
 	void SetItem(TWeakObjectPtr<UItemBase> InItem);
 
+	void LoadIcon(const TSoftObjectPtr<UTexture2D>& IconTexture);
+
 	UPROPERTY(BlueprintAssignable, Category = "Item")
 	FOnSlotClicked OnSlotClicked;
 
@@ -26,6 +29,9 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> TextItemName;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> ImgIcon;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> Button_Item;

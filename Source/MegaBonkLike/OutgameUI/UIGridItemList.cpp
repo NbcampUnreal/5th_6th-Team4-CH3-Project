@@ -36,5 +36,5 @@ void UUIGridItemList::SetItems(const TArray<TWeakObjectPtr<UItemBase>>& Items, i
 
 void UUIGridItemList::SlotClicked(UItemBase* ClickedItem)
 {
-    OnItemClicked.Broadcast(ClickedItem); //위젯으로 신호 전달
+    OnItemClicked.Broadcast(ClickedItem);
 }

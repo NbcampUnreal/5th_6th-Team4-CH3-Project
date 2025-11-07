@@ -1,10 +1,11 @@
 #include "OutgameUI/UIWeaponSelection.h"
 #include "OutgameUI/UIGridItemList.h"
-//#include "OutgameUI/UIWeaponInfoPanel.h"
+#include "OutgameUI/UIWeaponInfoPanel.h"
 #include "Item/ItemBase.h"
 #include "Item/WeaponItem.h"
 #include "Item/ItemDataRow.h"
 #include "Engine/DataTable.h"
+#include "Game/MBLGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 
 void UUIWeaponSelection::NativeConstruct()
@@ -15,7 +16,6 @@ void UUIWeaponSelection::NativeConstruct()
     {
         return;
     }
-    //  배열 선언은 한 번만!
     TArray<TWeakObjectPtr<UItemBase>> Items;
 
     //  무기 데이터테이블 로드
@@ -30,7 +30,6 @@ void UUIWeaponSelection::NativeConstruct()
 
     for (auto* Row : AllRows)
     {
-        //  무기만 필터링
         if (Row->ItemType == EItemType::Weapon)
         {
             UWeaponItem* NewItem = NewObject<UWeaponItem>(this);
@@ -41,7 +40,6 @@ void UUIWeaponSelection::NativeConstruct()
             }
         }
     }
-    //  UI에 세팅
     UIGridItemList->SetItems(Items);
 
     UIGridItemList->OnItemClicked.AddDynamic(this, &UUIWeaponSelection::OnWeaponInfoPanel); //델리게이트
@@ -49,17 +47,25 @@ void UUIWeaponSelection::NativeConstruct()
 
 void UUIWeaponSelection::OnWeaponInfoPanel(UItemBase* ClickedItem)
 {
-    if (!ClickedItem || !ClickedItem->GetData())
+    if (!ClickedItem)
+    {
         return;
+    }
 
-    const FItemDataRow* Data = ClickedItem->GetData();
+    if (!ClickedItem->GetData())
+    {
+        return;
+    }
 
-    //  선택된 무기 ID 저장
-    SelectedWeaponId = Data->ItemId;
+    SelectedWeaponId = ClickedItem->GetData()->ItemId;
 
-    //  오른쪽 정보 패널 업데이트
-    //if (WeaponInfoPanel)
-    //{
-    //    WeaponInfoPanel->SetWeaponInfo(Data);
-    //}
+    if (UMBLGameInstance* GameInstance = Cast<UMBLGameInstance>(UGameplayStatics::GetGameInstance(GetWorld())))
+    {
+        GameInstance->SelectedWeaponId = SelectedWeaponId;
+    }
+
+    if (WeaponInfoPanel)
+    {
+        WeaponInfoPanel->SetWeaponInfo(ClickedItem);
+    }
 }

@@ -18,8 +18,8 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	int32 SelectedWeaponId;
 
-	//UPROPERTY(meta = (BindWidgetOptional))
-	//class UUIWeaponInfoPanel* WeaponInfoPanel;
+	UPROPERTY(meta = (BindWidget))
+	class UUIWeaponInfoPanel* WeaponInfoPanel;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UUIGridItemList> UIGridItemList;

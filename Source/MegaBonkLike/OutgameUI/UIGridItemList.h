@@ -36,5 +36,5 @@ protected:
     TSubclassOf<UUIGridItemSlot> ItemSlotClass;
 
     UFUNCTION()
-    void SlotClicked(UItemBase* ClickedItem); // 슬롯 클릭 시 호출
+    void SlotClicked(UItemBase* ClickedItem);
 };
