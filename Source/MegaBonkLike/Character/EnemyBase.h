@@ -14,6 +14,9 @@ class MEGABONKLIKE_API AEnemyBase : public AMBLCharacterBase
 public:
 	AEnemyBase();
 
+	/*UPROPERTY(VisibleAnywhere, Category = "State")
+	bool bIsFlyingMode = true;*/
+
 protected:
 	virtual void BeginPlay() override;
 

@@ -41,12 +41,15 @@ void AMBLAIController::OnPossess(APawn* InPawn)
 		else if (AMBLNonPlayerCharacter* Walk = Cast<AMBLNonPlayerCharacter>(InPawn))
 		{
 			//일반몬스터 BB/BT 실행
+			BlackboardComp->SetValueAsBool(TEXT("CanFly"), false);
 			StartBehaviorTree();
 		}
 
 		if (AFlyingEnemy* Enemy = Cast<AFlyingEnemy>(InPawn))
 		{
-			Enemy->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
+			BlackboardComp->SetValueAsBool(TEXT("CanFly"), true);
+			BlackboardComp->SetValueAsBool(TEXT("IsFlyingMode"), true);
+			StartBehaviorTree();
 		}
 
 	}

@@ -40,13 +40,14 @@ public:
 
 	void UpdateTrack();
 	void MoveStep();
+	UFUNCTION(Blueprintcallable)
+	void SetFlyingMode(bool bNewFlying);
 
 protected:
 	virtual void BeginPlay() override;
 
 
 public:
-
 	UPROPERTY(VisibleAnywhere)
 	UCapsuleComponent* DamageCollider;
 
@@ -55,7 +56,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Drop")
 	TSubclassOf<class AMBLExpObject> ExpCoin;
 
+	TWeakObjectPtr<AActor> Target;
+
 	TObjectPtr<AActor> DamageTarget;
+
+	UPROPERTY(VisibleAnywhere, Category = "State")
+	bool bIsFlyingMode = true;
 
 private:
 	bool bIsDead;
@@ -64,7 +70,6 @@ private:
 	FTimerHandle TrackTimerHandle;
 
 	FVector CurrentDirection;
-	TWeakObjectPtr<AActor> Target;
 
 	/*테스트용 코드
 	void KillSelf();*/
