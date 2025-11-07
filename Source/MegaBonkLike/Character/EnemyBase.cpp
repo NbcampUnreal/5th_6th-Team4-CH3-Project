@@ -96,5 +96,26 @@ void AEnemyBase::SetColor(EMBLWaveState Wave)
 	}
 }
 
+void AEnemyBase::SetMaxHealth(EMBLWaveState Wave)
+{
+	if (!IsValid(StatDataTable)) return;
+
+	if (EMBLWaveState::SetWave < Wave)
+	{
+		if (Wave > EMBLWaveState::Wave3)
+		{
+			Wave = EMBLWaveState::Wave3;
+		}
+
+		FName RowName(*StaticEnum<EMBLWaveState>()->GetNameStringByValue((int64)Wave));
+		FMonsterStat* Monster = StatDataTable->FindRow<FMonsterStat>(RowName, TEXT(""));
+
+		if (!Monster) return;
+
+		MaxHP = Monster->MaxHealth;
+		CurrHP = MaxHP;
+	}
+}
+
 
 
