@@ -38,8 +38,10 @@ public:
 	virtual void SetSpeed(EMBLWaveState Wave);
 	UFUNCTION(BlueprintCallable)
 	void SetColor(EMBLWaveState Wave);
-
-
+	UFUNCTION(BlueprintCallable)
+	void SetMaxHealth(EMBLWaveState Wave);
+	UFUNCTION(BlueprintCallable)
+	void SetAll(EMBLWaveState Wave);
 
 
 };

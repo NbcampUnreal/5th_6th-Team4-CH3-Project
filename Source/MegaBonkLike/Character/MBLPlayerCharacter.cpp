@@ -22,6 +22,7 @@
 #include "IngameUI/PopupTags.h"
 #include "IngameUI/PopupItemAcquire.h"
 #include "Attack/AttackHandleComponent.h"
+#include "Game/MBLGameInstance.h"  //////////////////////////////////////////////////////////////////////////// 시작 아이템 
 #include "Game/MBLGameMode.h"
 
 AMBLPlayerCharacter::AMBLPlayerCharacter()
@@ -122,6 +123,16 @@ void AMBLPlayerCharacter::BeginPlay()
 		&ThisClass::AttractItems,
 		0.2f,
 		true);
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////// 시작 아이템
+	if (auto GameInstance = Cast<UMBLGameInstance>(GetGameInstance()))
+	{
+		if (GameInstance->SelectedWeaponId != 0)
+		{
+			Inventory->AddItem(GameInstance->SelectedWeaponId);
+		}
+	}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
 void AMBLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

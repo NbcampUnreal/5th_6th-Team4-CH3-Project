@@ -32,6 +32,9 @@ private:
 	UUIHorizontalItemList* TomesList;
 
 	UPROPERTY(meta = (BindWidget))
+	UUIHorizontalItemList* MiscList;
+
+	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* KillsText;
 
 	UPROPERTY(meta = (BindWidget))
