@@ -12,7 +12,7 @@ void AMBLBuffObject::OnObjectActivated(AActor* Activator)
 	SantuaryOptions.GetKeys(OptionTags);
 
 	TArray<FGameplayTag> OptionsToShow;
-	int Count = FMath::Max(3, OptionTags.Num());
+	int Count = FMath::Min(3, OptionTags.Num());
 
 	for (int i = 0; i < Count; ++i)
 	{
@@ -20,4 +20,6 @@ void AMBLBuffObject::OnObjectActivated(AActor* Activator)
 		OptionsToShow.Add(OptionTags[RandomIdx]);
 		OptionTags.RemoveAt(RandomIdx);
 	}
+
+	TMap<FGameplayTag, FAttributeModifier> SelectedOptions;
 }

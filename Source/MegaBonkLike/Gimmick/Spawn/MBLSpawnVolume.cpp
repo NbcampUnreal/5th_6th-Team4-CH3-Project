@@ -155,8 +155,40 @@ FVector AMBLSpawnVolume::GetValidNavMeshLocation(const FVector& Location, float 
 		ValidLocation
 	);
 
-	if (bFound) return ValidLocation.Location;
+	if (!bFound)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GetValidNavMeshLocation is not valid"));
+		return FVector::ZeroVector;
+	}
 
-	UE_LOG(LogTemp, Warning, TEXT("GetValidNavMeshLocation is not valid"));
-	return FVector::ZeroVector;
+	FVector FinalLocation = ValidLocation.Location;
+
+	const float StartOffset = 1000.f;
+	const float EndOffset = 1000.f;
+	
+	FVector Start = FVector(FinalLocation.X, FinalLocation.Y, FinalLocation.Z + StartOffset);
+	FVector End = FVector(FinalLocation.X, FinalLocation.Y, FinalLocation.Z - EndOffset);
+
+	FHitResult Hit;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	bool bHit = World->LineTraceSingleByChannel(
+		Hit,
+		Start,
+		End,
+		ECC_Visibility,
+		Params
+	);
+
+	if (bHit)
+	{
+		FinalLocation.Z = Hit.Location.Z;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("LineTrace failed. Using NavMesh Z."));
+	}
+
+	return FinalLocation;
 }
