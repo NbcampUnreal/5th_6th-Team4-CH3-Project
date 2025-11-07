@@ -3,6 +3,7 @@
 #include "AI/MBLAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 #include "Game/MBLGameMode.h"
@@ -27,7 +28,7 @@ AFlyingEnemy::AFlyingEnemy()
 	DamageCollider->OnComponentBeginOverlap.AddDynamic(this, &AFlyingEnemy::OnDamageColliderBeginOverlap);
 	DamageCollider->OnComponentEndOverlap.AddDynamic(this, &AFlyingEnemy::OnDamageColliderEndOverlap);
 
-	GetCharacterMovement()->MaxFlySpeed = 400.f;
+	GetCharacterMovement()->MaxFlySpeed = 300.f;
 
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
@@ -44,6 +45,7 @@ void AFlyingEnemy::BeginPlay()
 	Super::BeginPlay();
 
 	Target = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 
 	GetWorldTimerManager().SetTimer(
 		MoveTimerHandle,
@@ -91,6 +93,39 @@ void AFlyingEnemy::UpdateTrack()
 	{
 		CurrentDirection = (End - Start).GetSafeNormal();
 	}
+
+	// ¸÷ÀÌ ¶¥°ú ´ê´ÂÁö Ã¼Å©¿ë LineTrace
+	FHitResult GroundHit;
+	FVector GroundStart = GetActorLocation();
+	FVector GroundEnd = GroundStart - FVector(0.f, 0.f, 200.f);
+
+	bool bOnGround = GetWorld()->LineTraceSingleByChannel(
+		GroundHit,
+		GroundStart,
+		GroundEnd,
+		ECC_Visibility,
+		Params
+	);
+
+	// ÇÃ·¹ÀÌ¾î¿Í ¸÷ÀÇ ³ôÀÌ ºñ±³
+	const float MyZ =GetActorLocation().Z;
+	const float TargetZ = Target->GetActorLocation().Z;
+	const float ZDiff = TargetZ - MyZ;
+
+	float FlyStartThreshold = 160.f; 
+	float FlyStopThreshold = 0.f;
+
+	if (!bIsFlyingMode && ZDiff >= FlyStartThreshold)
+	{
+		SetFlyingMode(true);
+	}
+	else if (bIsFlyingMode && ZDiff < FlyStopThreshold && bOnGround)
+	{
+		SetFlyingMode(false);
+	}
+
+	//UE_LOG(LogTemp, Warning, TEXT("ZDiff: %.2f | bIsFlyingMode: %s"), ZDiff, bIsFlyingMode ? TEXT("true") : TEXT("false"));
+
 }
 
 void AFlyingEnemy::MoveStep()
@@ -98,10 +133,54 @@ void AFlyingEnemy::MoveStep()
 	if (CurrentDirection.IsNearlyZero()) return;
 
 	FVector NewLocation = GetActorLocation() + CurrentDirection * GetCharacterMovement()->MaxFlySpeed * 0.05f;
-	SetActorLocation(NewLocation, true);
+	SetActorLocation(NewLocation, false);
 
 	FRotator NewRotation = CurrentDirection.Rotation();
 	SetActorRotation(NewRotation);
+}
+
+void AFlyingEnemy::SetFlyingMode(bool bNewFlying)
+{
+	bIsFlyingMode = bNewFlying;
+
+	if (AAIController* AICon = Cast<AAIController>(GetController()))
+	{
+		if (UBlackboardComponent* BB = AICon->GetBlackboardComponent())
+		{
+			BB->SetValueAsBool(TEXT("IsFlyingMode"), bIsFlyingMode);
+		}
+	}
+	GetCharacterMovement()->SetMovementMode(bIsFlyingMode ? MOVE_Flying : MOVE_Walking);
+
+	UE_LOG(LogTemp, Warning, TEXT("SetFlyingMode called: %s"), bNewFlying ? TEXT("Flying") : TEXT("Walking"));
+
+	if (bIsFlyingMode)
+	{
+
+		GetWorldTimerManager().SetTimer(
+			MoveTimerHandle,
+			this,
+			&AFlyingEnemy::MoveStep,
+			0.05f,
+			true
+		);
+	}
+	else
+	{
+		GetWorldTimerManager().ClearTimer(MoveTimerHandle);
+	}
+
+	if (!GetWorldTimerManager().IsTimerActive(TrackTimerHandle))
+	{
+		GetWorldTimerManager().SetTimer(
+			TrackTimerHandle,
+			this,
+			&AFlyingEnemy::UpdateTrack,
+			0.1f,
+			true
+		);
+	}
+
 }
 
 void AFlyingEnemy::OnDamageColliderBeginOverlap(
@@ -244,5 +323,6 @@ void AFlyingEnemy::SetSpeed(EMBLWaveState Wave)
 		if (!Monster) return;
 
 		GetCharacterMovement()->MaxFlySpeed = Monster->MoveSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = (Monster->MoveSpeed) * 2;
 	}
 }
