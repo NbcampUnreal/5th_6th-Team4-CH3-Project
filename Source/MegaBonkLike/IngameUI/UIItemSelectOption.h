@@ -21,6 +21,9 @@ public:
 	virtual bool Initialize() override;
 
 	void SetOption(const FItemSelectOption& InOption);
+	
+	void LoadIcon(const TSoftObjectPtr<UTexture2D>& IconTexture);
+	
 	UFUNCTION()
 	void OnItemButtonClicked();
 
@@ -39,6 +42,8 @@ protected:
 	TObjectPtr<UTextBlock> TextDesc;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> TextLevel;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> ImgIcon;
 
 	UPROPERTY(EditAnywhere)
 	TMap<EItemRarity, FLinearColor> ColorTextRarity;

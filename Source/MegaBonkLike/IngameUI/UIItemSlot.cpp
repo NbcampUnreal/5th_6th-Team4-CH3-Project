@@ -4,6 +4,9 @@
 #include "Item/TomesItem.h"
 #include "Item/MiscItem.h"
 #include "Item/ItemDataRow.h"
+#include "Components/Image.h"
+#include "Engine/StreamableManager.h"
+#include "Engine/AssetManager.h"
 
 void UUIItemSlot::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
@@ -25,9 +28,13 @@ void UUIItemSlot::SetItem(TWeakObjectPtr<UItemBase> InItem)
 	if (Item.IsValid() == false)
 		return;
 
+	const FItemDataRow* Data = Item->GetData();
+	if (Data == nullptr)
+		return;
+
 	if (IsValid(TextItemName) == true)
 	{
-		TextItemName->SetText(Item->GetData()->ItemName);
+		//TextItemName->SetText(Data->ItemName);
 	}
 
 	if (IsValid(TextItemLevel) == true)
@@ -45,4 +52,30 @@ void UUIItemSlot::SetItem(TWeakObjectPtr<UItemBase> InItem)
 			TextItemLevel->SetText(FText::FromString(FString::Printf(TEXT("x%d"), Misc->GetStackCount())));
 		}
 	}
+
+	if (IsValid(ImgIcon) == true)
+	{
+		LoadIcon(Data->ItemIcon);
+	}
+}
+
+void UUIItemSlot::LoadIcon(const TSoftObjectPtr<UTexture2D>& IconTexture)
+{
+	if (IconTexture.IsNull())
+	{
+		ImgIcon->SetVisibility(ESlateVisibility::Collapsed);
+		ImgIcon->SetBrushFromTexture(nullptr);
+		return;
+	}
+
+	ImgIcon->SetVisibility(ESlateVisibility::Visible);
+	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+	Streamable.RequestAsyncLoad(IconTexture.ToSoftObjectPath(),
+		[this, IconTexture]()
+		{
+			if (UTexture2D* LoadedIcon = IconTexture.Get())
+			{
+				ImgIcon->SetBrushFromTexture(LoadedIcon);
+			}
+		});
 }

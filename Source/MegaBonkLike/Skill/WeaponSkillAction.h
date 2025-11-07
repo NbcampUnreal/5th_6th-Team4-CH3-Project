@@ -20,4 +20,7 @@ protected:
 protected:
 	UPROPERTY()
 	TWeakObjectPtr<UWeaponItem> OwnerWeapon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool bKnockback = true;
 };

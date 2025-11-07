@@ -6,6 +6,7 @@
 
 class UTextBlock;
 class UItemBase;
+class UImage;
 
 UCLASS()
 class MEGABONKLIKE_API UUIItemSlot : public UUserWidget
@@ -18,11 +19,15 @@ public:
 
 	void SetItem(TWeakObjectPtr<UItemBase> InItem);
 
+	void LoadIcon(const TSoftObjectPtr<UTexture2D>& IconTexture);
+
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> TextItemName;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> TextItemLevel;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> ImgIcon;
 
 	UPROPERTY()
 	TWeakObjectPtr<const UItemBase> Item;
