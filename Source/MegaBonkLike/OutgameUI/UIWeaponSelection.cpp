@@ -12,6 +12,13 @@ void UUIWeaponSelection::NativeConstruct()
 {
     Super::NativeConstruct();
 
+    SelectedWeaponId = 100;
+    if (UMBLGameInstance* GameInstance = Cast<UMBLGameInstance>(UGameplayStatics::GetGameInstance(GetWorld())))
+    {
+        GameInstance->SelectedWeaponId = SelectedWeaponId;
+    }
+
+
     if (!IsValid(UIGridItemList))
     {
         return;
