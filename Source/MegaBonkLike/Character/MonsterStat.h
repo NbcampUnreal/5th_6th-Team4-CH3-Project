@@ -15,4 +15,6 @@ public:
 	float MoveSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FLinearColor BodyColor;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MaxHealth;
 };
