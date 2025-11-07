@@ -5,6 +5,8 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "MegaBonkLike.h"
 #include "Common/PoolSubsystem.h"
+#include "Skill/Projectile/ProjectileActionBase.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 
 void UWSA_RangeAttack::Activate(TWeakObjectPtr<AActor> InInstigator)
 {
@@ -155,7 +157,7 @@ void UWSA_RangeAttack::ShootSingle(const FVector& TargetDir)
 	if (IsValid(PoolSubsystem) == false)
 		return;
 
-	FVector Location = Instigator->GetActorLocation() + TargetDir * 10.f;
+	FVector Location = Instigator->GetActorLocation() + TargetDir * 2.f;
 	FRotator Rotation = TargetDir.Rotation();
 	AProjectile* Projectile = PoolSubsystem->GetFromPool<AProjectile>(ProjectileClass, Location, Rotation);
 	if (IsValid(Projectile) == true)
@@ -167,7 +169,11 @@ void UWSA_RangeAttack::ShootSingle(const FVector& TargetDir)
 		Projectile->SetDirectionAndSpeed(TargetDir, GetValue(TAG_Attribute_ProjectileSpeed));
 		Projectile->SetSize(GetValue(TAG_Attribute_Size));
 		Projectile->SetAttackData(CreateAttackDataBase());
-		Projectile->SetPenetrate(bPenetrate);
+		FProjectileActionContext ActionContext;
+		ActionContext.LifeTime = BaseLifeTime * GetValue(TAG_Attribute_Duration);
+		ActionContext.ChainCount = BaseChainCount;		// 영향 주는 속성 생기면 적용
+		ActionContext.Instigator = Instigator;
+		Projectile->SetProjectileAction(ProjectileActionClass, ActionContext);
 		Projectile->SetActorEnableCollision(true);
 	}
 }

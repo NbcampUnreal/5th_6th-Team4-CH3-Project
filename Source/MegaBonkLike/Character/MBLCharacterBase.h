@@ -22,6 +22,8 @@ protected:
 
 public:
 	void AddHealth(float Heal);
+	float GetCurrHP() const { return CurrHP; }
+	float GetMaxHP() const { return MaxHP; }
 
 protected:
 	void SetMaxHP(float InMaxHP);
