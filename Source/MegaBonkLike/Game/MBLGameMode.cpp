@@ -94,6 +94,15 @@ void AMBLGameMode::SpawnBoss()
     AEnemyBase* NewEnemy = SpawnVolume->SpawnEnemy(Boss);
     if (!IsValid(NewEnemy)) return;
 
+    //보스가 등장할때 체력바 표시
+    if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+    {
+        if (AMBLPlayerController* MBLPlayerController = Cast<AMBLPlayerController>(PlayerController))
+        {
+            MBLPlayerController->ShowBossHPBar(true);
+        }
+    }
+
     GetWorldTimerManager().SetTimer(
         GameOverTimerHandle,
         this,
@@ -201,6 +210,15 @@ void AMBLGameMode::DeadBoss()
     if (AMBLGameState* GS = GetGameState<AMBLGameState>())  //추가
     {
         GS->Addkill();
+    }
+
+    //보스가죽었을때 체력바 사라지는표시
+    if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+    {
+        if (AMBLPlayerController* MBLPlayerController = Cast<AMBLPlayerController>(PlayerController))
+        {
+            MBLPlayerController->ShowBossHPBar(false);
+        }
     }
 
     GameOver();

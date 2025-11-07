@@ -25,10 +25,7 @@ void AMBLGameState::BeginPlay()
 }
 
 void AMBLGameState::StartWave()
-{	//float GetWaveDuration();
-
-	
-
+{	
 	RemainingTime = WaveDuration;
 	GetWorldTimerManager().SetTimer(
 		WaveTimerHandle,
@@ -57,16 +54,7 @@ void AMBLGameState::OnWaveEnd()
 	CurrentWaveIndex++;
 
 	StartWave();
-
-	//if (CurrentWaveIndex < MaxWaves - 1)
-	//{
-	//	StartWave();
-	//}
-	//else  //if (CurrentWaveIndex == MaxWaves - 1)
-	//{
-	//	UpdateHUD();
-	//	StartWave();
-	//}
+		
 
 }
 
