@@ -26,7 +26,7 @@ private:
 	UBoxComponent* SpawnBox;
 
 public:
-	FVector GetRandomEnemySpawnLocation() const;
+	FVector GetRandomEnemySpawnLocation(float CapsuleHalfHeight) const;
 	FVector GetRandomObjectSpawnLocation() const;
 	AEnemyBase* SpawnEnemy(TSubclassOf<AEnemyBase> EnemyClass);
 	void SpawnObject(TSubclassOf<AActor> ObjectClass);
@@ -34,6 +34,6 @@ public:
 private:
 	const float SearchRadius = 100.f;
 	AActor* GetPlayerInBox() const;
-	FVector GetValidNavMeshLocation(const FVector& Location, float Radius) const;
+	FVector GetValidNavMeshLocation(const FVector& Location, float Radius, float CapsuleHalfHeight = 0.0f) const;
 
 };

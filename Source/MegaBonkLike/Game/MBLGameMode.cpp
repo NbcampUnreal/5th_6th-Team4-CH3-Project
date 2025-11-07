@@ -15,7 +15,7 @@ AMBLGameMode::AMBLGameMode()
     , Boss(nullptr)
     , DropTable(nullptr)
     , CurrentWave(EMBLWaveState::SetWave)
-    , WaveDuration(30.0f)
+    , WaveDuration(10.0f)//
     , MaxSpawnObject(500)
     , SpawnInterval(1.0f)
     , MaxSpawnEnemy(1)
@@ -82,11 +82,9 @@ void AMBLGameMode::SpawnManager()
         AEnemyBase* NewEnemy = SpawnVolume->SpawnEnemy(GetEnemyClass(CurrentWave));
         if (!IsValid(NewEnemy)) return;
 
-        NewEnemy->SetAttack(CurrentWave);
-        NewEnemy->SetSpeed(CurrentWave);
-        NewEnemy->SetColor(CurrentWave);
-
+        NewEnemy->SetAll(CurrentWave);
         CurrentEnemy++;
+
         return;
     }
 }
