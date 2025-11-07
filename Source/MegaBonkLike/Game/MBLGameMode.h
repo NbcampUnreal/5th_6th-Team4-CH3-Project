@@ -17,59 +17,60 @@ class MEGABONKLIKE_API AMBLGameMode : public AGameMode
 
 public:
 	AMBLGameMode();
-
-protected:
-	virtual void BeginPlay() override;
-
-public:
-	// 프로토 타입
-	FTimerHandle SpawnTimerHandle;
-	FTimerHandle NextWaveTimerHandle;
-	FTimerHandle GameOverTimerHandle;
-	EMBLWaveState CurrentWave;
-	float WaveDuration;
-	AMBLSpawnVolume* SpawnVolume;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test|ItemObjects")
-	int32 MaxSpawnObject;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test|EnemyClass")
-	TArray<TSubclassOf<AEnemyBase>> Enemy;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnemyTable")
-	UDataTable* EnemyTable;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test|BossClass")
-	TSubclassOf<AEnemyBase> Boss;
-	float SpawnInterval;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test")
-	int32 MaxSpawnEnemy;
-	int32 CurrentEnemy;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DropTable")
-	UDataTable* DropTable;
-	
-	void SpawnManager();
 	void SpawnBoss();
 	FInteractionObjectsRow* GetDropObject() const;
 	TSubclassOf<AEnemyBase> GetEnemyClass(EMBLWaveState Wave) const;
-
 	void DeadPlayer(); // 플레이어 사망시
 	void DeadEnemy(); // 적 사망시
 	void DeadBoss(); // 보스 사망시
 	float GetWaveDuration() const;
 	void GameOver();
 
-private:
-	void StartWave();
-	void NextWave(EMBLWaveState& Wave);
+protected:
+	virtual void BeginPlay() override;
 
-	inline EMBLWaveState GetNextWave(EMBLWaveState& Wave) const
+private:
+	UPROPERTY(VisibleAnywhere)
+	AMBLSpawnVolume* SpawnVolume;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MaxSpawnObjects", meta = (AllowPrivateAccess = "true"))
+	int32 MaxSpawnObject;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnemyTable", meta = (AllowPrivateAccess = "true"))
+	UDataTable* EnemyTable;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BossClass", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AEnemyBase> Boss;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DropTable", meta = (AllowPrivateAccess = "true"))
+	UDataTable* DropTable;
+	int32 MaxSpawnEnemy;
+	int32 CurrentEnemy;
+	FTimerHandle SpawnTimerHandle;
+	FTimerHandle NextWaveTimerHandle;
+	FTimerHandle GameOverTimerHandle;
+	EMBLWaveState CurrentWave;
+	float WaveDuration;
+	float SpawnInterval;
+
+	void WaveSet();
+	void SpawnManager();
+
+	inline void NextWave()
 	{
-		switch (Wave)
+		switch (CurrentWave)
 		{
-		case EMBLWaveState::SetWave: return EMBLWaveState::Wave1;
-		case EMBLWaveState::Wave1: return EMBLWaveState::Wave2;
-		case EMBLWaveState::Wave2: return EMBLWaveState::Wave3;
-		case EMBLWaveState::Wave3: return EMBLWaveState::FinalWave;
-		default: return EMBLWaveState::Finished;
+		case EMBLWaveState::SetWave:
+			CurrentWave = EMBLWaveState::Wave1;
+			return;
+		case EMBLWaveState::Wave1:
+			CurrentWave = EMBLWaveState::Wave2;
+			return;
+		case EMBLWaveState::Wave2:
+			CurrentWave = EMBLWaveState::Wave3;
+			return;
+		case EMBLWaveState::Wave3:
+			CurrentWave = EMBLWaveState::FinalWave;
+			return;
+		default:
+			CurrentWave = EMBLWaveState::Finished;
+			return;
 		}
 	}
 };
