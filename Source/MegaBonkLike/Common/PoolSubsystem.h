@@ -2,8 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
-#include "Common/PoolBase.h"
-#include "Common/PoolSpawnable.h"
+#include "Common/ActorPool.h"
+#include "Common/NiagaraPool.h"
 #include "PoolSubsystem.generated.h"
 
 UCLASS()
@@ -13,26 +13,36 @@ class MEGABONKLIKE_API UPoolSubsystem : public UWorldSubsystem
 	
 public:
 	template <typename T>
-	T* GetFromPool(const TSubclassOf<T>& ActorClass, const FVector& Location, const FRotator& Rotation);
+	T* GetFromPool(const TSubclassOf<T>& ObjectClass, const FVector& Location = FVector(), const FRotator& Rotation = FRotator());
 
-	void ReturnToPool(AActor* Actor);
+	void ReturnToPool(UObject* Object);
 
 private:
 	UPROPERTY()
-	TMap<TSubclassOf<AActor>, TObjectPtr<UPoolBase>> PoolMap;
+	TMap<TSubclassOf<UObject>, TObjectPtr<UPoolBase>> PoolMap;
 };
 
 template<typename T>
-inline T* UPoolSubsystem::GetFromPool(const TSubclassOf<T>& ActorClass, const FVector& Location, const FRotator& Rotation)
+inline T* UPoolSubsystem::GetFromPool(const TSubclassOf<T>& ObjectClass, const FVector& Location, const FRotator& Rotation)
 {
-	TObjectPtr<UPoolBase>* PoolPtr = PoolMap.Find(ActorClass);
+	if (IsValid(ObjectClass) == false)
+		return nullptr;
+
+	TObjectPtr<UPoolBase>* PoolPtr = PoolMap.Find(ObjectClass);
 	if (PoolPtr == nullptr)
 	{
-		UPoolBase* NewPool = NewObject<UPoolBase>(this);
-		NewPool->Initialize(ActorClass, 5);
-		PoolMap.Add(ActorClass, NewPool);
+		UPoolBase* NewPool = nullptr;
+		if (TIsDerivedFrom<T, AActor>::Value)
+			NewPool = NewObject<UActorPool>(this);
+		if (TIsDerivedFrom<T, UNiagaraComponent>::Value)
+			NewPool = NewObject<UNiagaraPool>(this);
 
-		PoolPtr = PoolMap.Find(ActorClass);
+		if (IsValid(NewPool) == false)
+			return nullptr;
+
+		NewPool->Initialize(ObjectClass, 5);
+		PoolMap.Add(ObjectClass, NewPool);
+		PoolPtr = PoolMap.Find(ObjectClass);
 		if (!PoolPtr)
 			return nullptr;
 	}
@@ -41,19 +51,5 @@ inline T* UPoolSubsystem::GetFromPool(const TSubclassOf<T>& ActorClass, const FV
 	if (IsValid(Pool) == false)
 		return nullptr;
 
-	AActor* PooledActorBase = Pool->GetActor();
-	if (PooledActorBase == nullptr)
-		return nullptr;
-
-	PooledActorBase->SetActorLocation(Location);
-	PooledActorBase->SetActorRotation(Rotation);
-	if (IPoolSpawnable* PoolSpawnable = Cast<IPoolSpawnable>(PooledActorBase))
-	{
-		PoolSpawnable->Activate();
-	}
-
-	T* PooledActor = Cast<T>(PooledActorBase);
-	checkf(IsValid(PooledActor), TEXT("Wrong Pooling"));
-
-	return PooledActor;
+	return Cast<T>(Pool->Get(Location, Rotation));
 }

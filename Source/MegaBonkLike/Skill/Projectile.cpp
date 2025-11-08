@@ -36,28 +36,14 @@ AProjectile::AProjectile()
     ProjectileMovement->Friction = 0.0f;
     ProjectileMovement->ProjectileGravityScale = 0.0f;
 
-    Trail = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Trail"));
-    Trail->SetupAttachment(RootComponent);
+    TrailTransform = CreateDefaultSubobject<USceneComponent>(TEXT("TrailTransform"));
+
+    TrailTemplate = UNiagaraComponent::StaticClass();
 }
 
 void AProjectile::BeginPlay()
 {
     Super::BeginPlay();
-
-    if (IsValid(Trail) == true)
-    {
-        TrailRelativeLocation = Trail->GetRelativeLocation();
-        TrailRelativeRotation = Trail->GetRelativeRotation();
-
-        if (IsValid(TrailEffect) == true)
-        {
-            Trail->SetAsset(TrailEffect);
-            Trail->Activate();
-
-            Trail->SetVariableFloat(TEXT("User.LifeTime"), OriginTrailLifeTime);
-            Trail->SetVariableLinearColor(TEXT("User.LinearColor"), OriginTrailColor);
-        }
-    }
 }
 
 void AProjectile::SetDirectionAndSpeed(const FVector& InDirection, float InSpeed)
@@ -83,9 +69,9 @@ void AProjectile::SetSize(float InSize)
     Size = InSize;
     FVector NewScale = InSize * FVector::OneVector;
     SetActorScale3D(NewScale);
-    if (IsValid(Trail) == true)
+    if (IsValid(TrailComponent) == true)
     {
-        Trail->SetVariableFloat(TEXT("User.Width"), Size * OriginTrailWidth);
+        TrailComponent->SetVariableFloat(TEXT("User.Width"), Size * OriginTrailWidth);
     }
 }
 
@@ -144,22 +130,27 @@ void AProjectile::Activate()
     {
         StaticMesh->SetHiddenInGame(false);
     }
-    
-    if (IsValid(Trail) == false)
+
+    if (IsValid(TrailComponent) == false)
     {
-        Trail = NewObject<UNiagaraComponent>(this);
-        Trail->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
-        Trail->RegisterComponent();
-        Trail->SetRelativeLocation(TrailRelativeLocation);
-        Trail->SetRelativeRotation(TrailRelativeRotation);
+        UPoolSubsystem* PoolSubsystem = GetWorld()->GetSubsystem<UPoolSubsystem>();
+        if (IsValid(PoolSubsystem) == true)
+        {
+            auto* NewTrail = PoolSubsystem->GetFromPool<UNiagaraComponent>(TrailTemplate);
+            TrailComponent = IsValid(NewTrail) == true ? NewTrail : nullptr;
+        }
     }
 
-    Trail->SetAsset(TrailEffect);
-    Trail->DeactivateImmediate();
-    Trail->Activate(true);
-
-    Trail->SetVariableFloat(TEXT("User.LifeTime"), OriginTrailLifeTime);
-    Trail->SetVariableLinearColor(TEXT("User.LinearColor"), OriginTrailColor);
+    if (IsValid(TrailComponent) == true)
+    {
+        TrailComponent->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+        TrailComponent->SetRelativeLocation(TrailTransform->GetRelativeLocation());
+        TrailComponent->SetRelativeRotation(TrailTransform->GetRelativeRotation());
+        TrailComponent->SetAsset(TrailEffect);
+        TrailComponent->Activate(true);
+        TrailComponent->SetVariableFloat(TEXT("User.LifeTime"), OriginTrailLifeTime);
+        TrailComponent->SetVariableLinearColor(TEXT("User.LinearColor"), OriginTrailColor);
+    }
 
     bReturnedToPool = false;
 }
@@ -183,11 +174,12 @@ void AProjectile::Deactivate()
         StaticMesh->SetHiddenInGame(true);
     }
 
-    if (IsValid(Trail) == true)
+    if (IsValid(TrailComponent) == true)
     {
-        Trail->Deactivate();
+        TrailComponent->Deactivate();
     }
 
+    bReturnedToPool = true;
     GetWorldTimerManager().ClearTimer(DestroyTimerHandle);
 }
 
@@ -226,21 +218,16 @@ void AProjectile::ReturnToPool()
     if (bReturnedToPool)
         return;
 
-    if (IsValid(Trail) == true)
+    if (IsValid(TrailComponent) == true)
     {
-        Trail->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-        Trail->Rename(nullptr, GetWorld());
-        Trail->SetAutoDestroy(true);
-        Trail = nullptr;
+        TrailComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+        TrailComponent = nullptr;
     }
 
-    if (UWorld* World = GetWorld())
+    UPoolSubsystem* PoolSubsystem = GetWorld()->GetSubsystem<UPoolSubsystem>();
+    if (IsValid(PoolSubsystem) == true)
     {
-        if (UPoolSubsystem* PoolSubSystem = World->GetSubsystem<UPoolSubsystem>())
-        {
-            PoolSubSystem->ReturnToPool(this);
-            bReturnedToPool = true;
-        }
+        PoolSubsystem->ReturnToPool(this);
     }
 }
 
