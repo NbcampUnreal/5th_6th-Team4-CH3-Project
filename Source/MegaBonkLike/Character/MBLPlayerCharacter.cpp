@@ -93,6 +93,7 @@ void AMBLPlayerCharacter::BeginPlay()
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_CriticalChance, 0.0f);
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_CriticalMultiplier, 1.5f);
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_Knockback, 200.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_LifeSteal, 0.0f);
 
 	SetPlayerAttributeCallbacks();
 
@@ -206,6 +207,17 @@ void AMBLPlayerCharacter::AcquireGold(float InGold)
 {
 	Gold += InGold * GetAttributeValue(TAG_Attribute_GoldGain);
 	OnChangedGold.Broadcast(Gold);
+}
+
+bool AMBLPlayerCharacter::UseGold(float Price)
+{
+	if (Price > Gold)
+		return false;
+
+	Gold -= Price;
+	OnChangedGold.Broadcast(Gold);
+
+	return true;
 }
 
 void AMBLPlayerCharacter::Input_Move(const FInputActionValue& InputValue)

@@ -5,6 +5,7 @@
 #include "WSA_RangeAttack.generated.h"
 
 class AProjectile;
+class UProjectileActionBase;
 
 UCLASS(BlueprintType)
 class MEGABONKLIKE_API UWSA_RangeAttack : public UWeaponSkillAction
@@ -31,18 +32,23 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<AProjectile> ProjectileClass;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<UProjectileActionBase> ProjectileActionClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float BaseLifeTime = 3.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int32 BaseChainCount = 4;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float AutoDetectRadius;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bAutoDetect;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bShootSpread;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	bool bPenetrate;
 
 	FTimerHandle AttackIntervalHandle;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly)
 	int32 ProjectileCount = 0;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly)
 	float AttackInterval;
 
 	TArray<TWeakObjectPtr<AActor>> AttackTargets;

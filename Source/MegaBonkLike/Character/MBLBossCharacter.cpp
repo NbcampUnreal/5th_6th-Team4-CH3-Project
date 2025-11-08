@@ -6,6 +6,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Game/MBLGameMode.h"
 #include "MegaBonkLike.h"
+#include "Player/MBLPlayerController.h" //IngameUI 추가
+#include "Kismet/GameplayStatics.h" //IngameUI 추가
 
 AMBLBossCharacter::AMBLBossCharacter()
 {
@@ -57,6 +59,15 @@ AMBLBossCharacter::AMBLBossCharacter()
 void AMBLBossCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//IngameUI
+	if (AMBLPlayerController* CT = Cast<AMBLPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)))
+	{
+		CT->UpdateBossHP(CurrHP, MaxHP);
+		OnHPChanged.AddDynamic(CT, &AMBLPlayerController::UpdateBossHP);
+	}
+	//IngameUI
+
 }
 
 

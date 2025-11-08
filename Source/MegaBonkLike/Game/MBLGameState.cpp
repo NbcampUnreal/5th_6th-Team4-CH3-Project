@@ -1,4 +1,4 @@
-#include "Game/MBLGameState.h"
+ï»¿#include "Game/MBLGameState.h"
 #include "Player/MBLPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Game/MBLGameMode.h"
@@ -8,7 +8,7 @@ AMBLGameState::AMBLGameState()
 {
 	CurrentWaveIndex = 0;
 	MaxWaves = 4;
-	WaveDuration = 0; //ÀÓ½Ã 60ÃÊ·Î ÇÒ ¿¹Á¤
+	WaveDuration = 0; //ï¿½Ó½ï¿½ 60ï¿½Ê·ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	RemainingTime = 0;
 	CollectedCoinCount = 0;
 	KillCount = 0;
@@ -25,10 +25,7 @@ void AMBLGameState::BeginPlay()
 }
 
 void AMBLGameState::StartWave()
-{	//float GetWaveDuration();
-
-	
-
+{	
 	RemainingTime = WaveDuration;
 	GetWorldTimerManager().SetTimer(
 		WaveTimerHandle,
@@ -57,22 +54,15 @@ void AMBLGameState::OnWaveEnd()
 	CurrentWaveIndex++;
 
 	StartWave();
-
-	//if (CurrentWaveIndex < MaxWaves - 1)
-	//{
-	//	StartWave();
-	//}
-	//else  //if (CurrentWaveIndex == MaxWaves - 1)
-	//{
-	//	UpdateHUD();
-	//	StartWave();
-	//}
+		
 
 }
 
 void AMBLGameState::Addkill()
 {
 	KillCount++;
+
+	OnChangedKillCount.Broadcast(KillCount);
 	UpdateHUD();
 }
 

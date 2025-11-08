@@ -17,6 +17,7 @@ UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Attribute_JumpHeight);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Attribute_CriticalChance);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Attribute_CriticalMultiplier);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Attribute_Knockback);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Attribute_LifeSteal);
 
 const TArray<FGameplayTag>& GetAttributeTags();
 FString GetTagName(const FGameplayTag& Tag);

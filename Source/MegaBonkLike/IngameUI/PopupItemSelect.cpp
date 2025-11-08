@@ -12,11 +12,6 @@ bool UPopupItemSelect::Initialize()
 	if (Super::Initialize() == false)
 		return false;
 
-	if (BtnBanish)
-	{
-
-	}
-
 	if (BtnSkip)
 	{
 		BtnSkip->OnClicked.AddDynamic(this, &ThisClass::RemoveFromParent);
@@ -26,6 +21,8 @@ bool UPopupItemSelect::Initialize()
 	{
 		BtnRefresh->OnClicked.AddDynamic(this, &ThisClass::RefreshOptions);
 	}
+	
+	SetRefreshCount(RefreshCount);
 
 	return true;
 }
@@ -72,5 +69,24 @@ void UPopupItemSelect::SelectItem(const FItemSelectOption& Option)
 
 void UPopupItemSelect::RefreshOptions()
 {
+	if (RefreshCount <= 0)
+		return;
+
+	SetRefreshCount(RefreshCount - 1);
 	SetOptions(OptionCount);
+}
+
+void UPopupItemSelect::SetRefreshCount(int32 Count)
+{
+	RefreshCount = Count;
+	
+	if (RefreshCount <= 0 && IsValid(BtnRefresh) == true)
+	{
+		BtnRefresh->SetIsEnabled(false);
+	}
+
+	if (TextRefreshCount)
+	{
+		TextRefreshCount->SetText(FText::FromString(FString::FormatAsNumber(RefreshCount)));
+	}
 }
