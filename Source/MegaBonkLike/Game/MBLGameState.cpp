@@ -10,7 +10,6 @@ AMBLGameState::AMBLGameState()
 	MaxWaves = 4;
 	WaveDuration = 0; //�ӽ� 60�ʷ� �� ����
 	RemainingTime = 0;
-	CollectedCoinCount = 0;
 	KillCount = 0;
 }
 
@@ -66,12 +65,6 @@ void AMBLGameState::Addkill()
 	UpdateHUD();
 }
 
-void AMBLGameState::AddCoin(int32 Amount)
-{
-	CollectedCoinCount += Amount;
-	UpdateHUD();
-}
-
 void AMBLGameState::UpdateHUD()
 {
 	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
@@ -79,7 +72,6 @@ void AMBLGameState::UpdateHUD()
 		if (AMBLPlayerController* GameController = Cast<AMBLPlayerController>(PlayerController))
 		{
 			GameController->UpdateTimer(RemainingTime);
-			GameController->UpdateCoinCount(CollectedCoinCount);
 			GameController->UpdateKillCount(KillCount);
 			
 			if (CurrentWaveIndex < MaxWaves - 1)

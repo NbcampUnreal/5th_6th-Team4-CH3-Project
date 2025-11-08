@@ -98,13 +98,6 @@ void AMBLPlayerCharacter::BeginPlay()
 	SetPlayerAttributeCallbacks();
 
 	SetLevel(1);
-	if (AMBLPlayerController* PlayerController = Cast<AMBLPlayerController>(GetController()))
-	{
-		PlayerController->UpdatePlayerLevel(Level);
-		OnChangedLevel.AddDynamic(PlayerController, &AMBLPlayerController::UpdatePlayerLevel);
-		PlayerController->UpdateXP(CurrExp, MaxExp);
-		OnExpChanged.AddDynamic(PlayerController, &AMBLPlayerController::UpdateXP);
-	}
 
 	SetPlayerMaxHP();
 	UpdateCurrHP(MaxHP);
@@ -123,6 +116,17 @@ void AMBLPlayerCharacter::BeginPlay()
 		&ThisClass::AttractItems,
 		0.2f,
 		true);
+
+	if (AMBLPlayerController* PlayerController = Cast<AMBLPlayerController>(GetController()))
+	{
+		PlayerController->UpdatePlayerLevel(Level);
+		PlayerController->UpdateXP(CurrExp, MaxExp);
+		PlayerController->UpdateCoinCount(Gold);
+
+		OnChangedLevel.AddDynamic(PlayerController, &AMBLPlayerController::UpdatePlayerLevel);
+		OnExpChanged.AddDynamic(PlayerController, &AMBLPlayerController::UpdateXP);
+		OnChangedGold.AddDynamic(PlayerController, &AMBLPlayerController::UpdateCoinCount);
+	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////// 시작 아이템
 	if (auto GameInstance = Cast<UMBLGameInstance>(GetGameInstance()))
