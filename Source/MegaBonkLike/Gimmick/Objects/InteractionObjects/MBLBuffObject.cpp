@@ -1,6 +1,12 @@
-#include "Gimmick/Objects/InteractionObjects/MBLBuffObject.h"
+ï»¿#include "Gimmick/Objects/InteractionObjects/MBLBuffObject.h"
 #include "Item/ItemRarityDataRow.h"
 #include "Gimmick/Data/ShrineOption.h"
+#include "Character/MBLPlayerCharacter.h"
+#include "Player/MBLPlayerController.h"
+#include "Character/AttributeComponent.h"
+#include "Character/InventoryComponent.h"
+#include "IngameUI/PopupShrine.h"
+#include "Gimmick/Data/BuffObjectDataManager.h"
 
 AMBLBuffObject::AMBLBuffObject()
 {
@@ -14,8 +20,38 @@ void AMBLBuffObject::OnObjectActivated(AActor* Activator)
 
 	if (!SelectedOptions.IsEmpty())
 	{
-		//UI¿¡ ³Ñ±â±â
-		Super::DestroyObject();
+		AMBLPlayerCharacter* Player = Cast<AMBLPlayerCharacter>(Activator);
+		if (IsValid(Player) == false)
+			return;
+
+		AMBLPlayerController* PlayerController = Cast<AMBLPlayerController>(Player->GetController());
+		if (IsValid(PlayerController) == false)
+			return;
+
+		UPopupShrine* PopupShrine = Cast<UPopupShrine>(PlayerController->MakePopup(TAG_Popup_Shrine));
+		if (IsValid(PopupShrine) == false)
+		{
+			DestroyObject();
+			return;
+		}
+
+		PopupShrine->SetInventory(Player->FindComponentByClass<UInventoryComponent>());
+		PopupShrine->SetOptions(SelectedOptions);
+
+		PopupShrine->OnSelectedShrine.AddLambda(
+			[WeakThis = TWeakObjectPtr<ThisClass>(this)](const FShrineOption& SelectedOption)
+			{
+				if (WeakThis.IsValid() == false)
+					return;
+
+				if (UWorld* World = WeakThis->GetWorld())
+				{
+					if (UBuffObjectDataManager* BuffObjectDataManager = World->GetSubsystem<UBuffObjectDataManager>())
+					{
+						BuffObjectDataManager->ApplyShrineBuff(SelectedOption);
+					}
+				}
+			});
 	}
 }
 
