@@ -38,7 +38,7 @@ void UOutgameUIEndGameScreen::SetOutgameUIScore()
 	if (GameState)
 	{
 		Kills = GameState->GetKills();
-		TimeSurvived = GameState->GetRemainingTime();
+		TimeSurvived = GameState->TimeSurvived();
 	}
 
 	if (PlayerCharacter)
