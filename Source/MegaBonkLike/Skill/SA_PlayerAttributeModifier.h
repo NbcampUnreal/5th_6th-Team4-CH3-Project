@@ -58,6 +58,9 @@ public:
 
 private:
     UFUNCTION()
+    void HandleAllModifiers();
+
+    UFUNCTION()
     void HandlePlayerDamaged(float Damage, AActor* DamageCauser);
     UFUNCTION()
     void HandleKilled(int32 KillCount);

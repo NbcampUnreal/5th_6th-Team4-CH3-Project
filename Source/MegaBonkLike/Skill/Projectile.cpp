@@ -143,10 +143,11 @@ void AProjectile::Activate()
 
     if (IsValid(TrailComponent) == true)
     {
+        TrailComponent->SetAsset(TrailEffect);
         TrailComponent->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
         TrailComponent->SetRelativeLocation(TrailTransform->GetRelativeLocation());
         TrailComponent->SetRelativeRotation(TrailTransform->GetRelativeRotation());
-        TrailComponent->SetAsset(TrailEffect);
+        TrailComponent->ResetSystem();
         TrailComponent->Activate(true);
         TrailComponent->SetVariableFloat(TEXT("User.LifeTime"), OriginTrailLifeTime);
         TrailComponent->SetVariableLinearColor(TEXT("User.LinearColor"), OriginTrailColor);
