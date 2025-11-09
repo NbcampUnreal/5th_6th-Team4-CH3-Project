@@ -18,7 +18,7 @@ void AMBLChestObject::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//UpdateRequiredGold();
+	UpdateRequiredGold();
 
 	if (UGoldManagerSubsystem* GoldManager = GetWorld()->GetSubsystem<UGoldManagerSubsystem>())
 	{
@@ -26,7 +26,6 @@ void AMBLChestObject::BeginPlay()
 		{
 			GoldManager->OnRequiredGoldUpdated.AddDynamic(this, &AMBLChestObject::UpdateRequiredGold);
 		}
-		GoldManager->SearchCurrentPhaseRequiredGold();
 	}
 }
 

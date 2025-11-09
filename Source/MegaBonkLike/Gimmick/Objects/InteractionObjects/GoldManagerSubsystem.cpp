@@ -11,6 +11,7 @@ UGoldManagerSubsystem::UGoldManagerSubsystem()
 void UGoldManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+	SearchCurrentPhaseRequiredGold();
 }
 
 void UGoldManagerSubsystem::NextPhase()
