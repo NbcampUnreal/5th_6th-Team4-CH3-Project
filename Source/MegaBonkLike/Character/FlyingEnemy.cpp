@@ -11,6 +11,8 @@
 
 AFlyingEnemy::AFlyingEnemy()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
 	AIControllerClass = AMBLAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
@@ -48,20 +50,29 @@ void AFlyingEnemy::BeginPlay()
 	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 
 	GetWorldTimerManager().SetTimer(
-		MoveTimerHandle,
-		this,
-		&AFlyingEnemy::MoveStep,
-		0.02f,
-		true
-	);
-
-	GetWorldTimerManager().SetTimer(
 		TrackTimerHandle,
 		this,
 		&AFlyingEnemy::UpdateTrack,
 		0.1f,
 		true
 	);
+}
+
+void AFlyingEnemy::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (bIsDead) return;
+	if (!bIsFlyingMode) return;
+
+	if (!CurrentDirection.IsNearlyZero())
+	{
+		FVector NewLocation = GetActorLocation() + CurrentDirection * GetCharacterMovement()->MaxFlySpeed * DeltaTime;
+		SetActorLocation(NewLocation, false);
+
+		FRotator NewRotation = CurrentDirection.Rotation();
+		SetActorRotation(NewRotation);
+	}
 }
 
 void AFlyingEnemy::UpdateTrack()
@@ -128,17 +139,6 @@ void AFlyingEnemy::UpdateTrack()
 
 }
 
-void AFlyingEnemy::MoveStep()
-{
-	if (CurrentDirection.IsNearlyZero()) return;
-
-	FVector NewLocation = GetActorLocation() + CurrentDirection * GetCharacterMovement()->MaxFlySpeed * 0.05f;
-	SetActorLocation(NewLocation, false);
-
-	FRotator NewRotation = CurrentDirection.Rotation();
-	SetActorRotation(NewRotation);
-}
-
 void AFlyingEnemy::SetFlyingMode(bool bNewFlying)
 {
 	bIsFlyingMode = bNewFlying;
@@ -152,34 +152,7 @@ void AFlyingEnemy::SetFlyingMode(bool bNewFlying)
 	}
 	GetCharacterMovement()->SetMovementMode(bIsFlyingMode ? MOVE_Flying : MOVE_Walking);
 
-	UE_LOG(LogTemp, Warning, TEXT("SetFlyingMode called: %s"), bNewFlying ? TEXT("Flying") : TEXT("Walking"));
-
-	if (bIsFlyingMode)
-	{
-
-		GetWorldTimerManager().SetTimer(
-			MoveTimerHandle,
-			this,
-			&AFlyingEnemy::MoveStep,
-			0.05f,
-			true
-		);
-	}
-	else
-	{
-		GetWorldTimerManager().ClearTimer(MoveTimerHandle);
-	}
-
-	if (!GetWorldTimerManager().IsTimerActive(TrackTimerHandle))
-	{
-		GetWorldTimerManager().SetTimer(
-			TrackTimerHandle,
-			this,
-			&AFlyingEnemy::UpdateTrack,
-			0.1f,
-			true
-		);
-	}
+	//UE_LOG(LogTemp, Warning, TEXT("SetFlyingMode called: %s"), bNewFlying ? TEXT("Flying") : TEXT("Walking"));
 
 }
 

@@ -181,7 +181,7 @@ void AMBLBossCharacter::OnDamageColliderBeginOverlap(
 				DamageTimerHandle,
 				this,
 				&AMBLBossCharacter::DamageTick,
-				0.5f,
+				1.0f,
 				true,
 				0.f
 			);
@@ -198,7 +198,7 @@ void AMBLBossCharacter::OnDamageColliderEndOverlap(
 	if (OtherActor && OtherActor == DamageTarget)
 	{
 		DamageTarget = nullptr;
-		GetWorldTimerManager().ClearTimer(DamageTimerHandle);
+		//GetWorldTimerManager().ClearTimer(DamageTimerHandle);
 		//UE_LOG(LogTemp, Warning, TEXT("Player left dectection area."));
 	}
 }

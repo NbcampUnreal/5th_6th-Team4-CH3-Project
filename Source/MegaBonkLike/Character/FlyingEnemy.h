@@ -39,12 +39,12 @@ public:
 	void DamageTick();
 
 	void UpdateTrack();
-	void MoveStep();
 	UFUNCTION(Blueprintcallable)
 	void SetFlyingMode(bool bNewFlying);
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
 
 public:
