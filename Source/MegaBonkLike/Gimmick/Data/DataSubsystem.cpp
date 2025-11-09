@@ -17,16 +17,12 @@ void UDataSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 bool UDataSubsystem::GetChestRequiredGoldRow(int32 RowIndex, FChestRequiredGoldRow& OutRow) const
 {
-	if (!LoadedChestRequiredGoldTable) return false;
+	if (!RequiredGoldTable) return false;
 
 	static const FString Context = TEXT("Try GetChestRequiredGoldRow");
-	FChestRequiredGoldRow* Row = LoadedChestRequiredGoldTable->FindRow<FChestRequiredGoldRow>(*FString::FromInt(RowIndex), Context);
+	FChestRequiredGoldRow* Row = RequiredGoldTable->FindRow<FChestRequiredGoldRow>(*FString::FromInt(RowIndex), Context);
 	
-	TArray<FName> RowNames = LoadedChestRequiredGoldTable->GetRowNames();
-	for (const FName& N : RowNames)
-	{
-		UE_LOG(LogTemp, Log, TEXT("DataTable RowName: %s"), *N.ToString());
-	}
+	TArray<FName> RowNames = RequiredGoldTable->GetRowNames();
 
 	if (!Row) return false;
 

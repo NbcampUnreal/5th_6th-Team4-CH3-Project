@@ -4,8 +4,9 @@
 #include "Components/StaticMeshComponent.h"
 #include "Gimmick/Spawn/MBLSpawnSubsystem.h"
 #include "Gimmick/Objects/SpawnObjects/MBLBaseSpawnObject.h"
+#include "Gimmick/Objects/UI/InteractionWidget.h"
 #include "Components/WidgetComponent.h"
-#include "Components/TextBlock.h"
+
 
 
 AMBLBaseInteractionObject::AMBLBaseInteractionObject()
@@ -63,7 +64,15 @@ void AMBLBaseInteractionObject::OnPlayerOverlapBegin(
 	const FHitResult& SweepResult)
 {
 	InteractableWidget->SetVisibility(true);
-	UE_LOG(LogTemp, Warning, TEXT("Player can interact this object"));
+	
+	if (UUserWidget* Widget = InteractableWidget->GetWidget())
+	{
+		if (UInteractionWidget* InteractionWidget = Cast<UInteractionWidget>(Widget))
+		{
+			InteractionWidget->SetGoldText(40.0f);
+		}
+	}
+
 }
 
 void AMBLBaseInteractionObject::OnPlayerOverlapEnd(
@@ -73,7 +82,6 @@ void AMBLBaseInteractionObject::OnPlayerOverlapEnd(
 	int32 OtherBodyIndex)
 {
 	InteractableWidget->SetVisibility(false);
-	UE_LOG(LogTemp, Warning, TEXT("Player lost"));
 }
 
 void AMBLBaseInteractionObject::CallOverlap(UPrimitiveComponent* CollisionComponent)

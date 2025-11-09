@@ -12,7 +12,7 @@ class MEGABONKLIKE_API UDataSubsystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 private:
 	UPROPERTY(EditAnywhere)
-	UDataTable* LoadedChestRequiredGoldTable;
+	UDataTable* RequiredGoldTable;
 
 public:
 	UDataSubsystem();
