@@ -117,7 +117,7 @@ void UUIHUD::ShowBossHPBar(bool bShow)
 			BossHPBarWidget = CreateWidget<UBossHPBar>(GetWorld(), BossHPBarClass);
 			if (BossHPBarWidget)
 			{
-				BossHPBarWidget->AddToViewport(100);
+				BossHPBarWidget->AddToViewport();
 			}
 		}
 		else if (BossHPBarWidget)
