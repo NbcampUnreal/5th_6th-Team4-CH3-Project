@@ -58,11 +58,11 @@ void UAttackHandleComponent::ApplyKnockback(AActor* Target, AActor* Causer, floa
 			FTimerHandle KnockbackTimerHandle;
 			FTimerDelegate Delegate;
 			Delegate.BindLambda(
-				[this, AIController, TargetLocation]()
+				[WeakThis = TWeakObjectPtr<UAttackHandleComponent>(this), WeakAI = TWeakObjectPtr<AAIController>(AIController), TargetLocation]()
 				{
-					if (IsValid(this) == true && IsValid(AIController))
+					if (WeakThis.IsValid() == true && WeakAI.IsValid() == true)
 					{
-						this->OnEndAIKnockback(AIController, TargetLocation);
+						WeakThis->OnEndAIKnockback(WeakAI.Get(), TargetLocation);
 					}
 				});
 			UWorld* World = GetWorld();
