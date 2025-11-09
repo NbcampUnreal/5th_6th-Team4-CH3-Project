@@ -2,6 +2,7 @@
 #include "Gimmick/Data/ChestRequiredGoldRow.h"
 
 UDataSubsystem::UDataSubsystem()
+	: RequiredGoldTable(nullptr)
 {
 }
 
@@ -29,4 +30,22 @@ bool UDataSubsystem::GetChestRequiredGoldRow(int32 RowIndex, FChestRequiredGoldR
 	OutRow = *Row;
 
 	return true;
+}
+
+int32 UDataSubsystem::GetLastPhase() const
+{
+	if (!RequiredGoldTable) return -1;
+
+	const TMap<FName, uint8*>& RowMap = RequiredGoldTable->GetRowMap();
+	if (RowMap.IsEmpty()) return -1;
+
+	int32 LastPhase = -1;
+
+	for (auto& Row : RowMap)
+	{
+		int32 Phase = FCString::Atoi(*Row.Key.ToString());
+		LastPhase = FMath::Max(LastPhase, Phase);
+	}
+
+	return LastPhase;
 }

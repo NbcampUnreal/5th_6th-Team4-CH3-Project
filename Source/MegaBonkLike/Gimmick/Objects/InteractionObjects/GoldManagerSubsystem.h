@@ -14,6 +14,8 @@ class MEGABONKLIKE_API UGoldManagerSubsystem : public UWorldSubsystem
 
 private:
 	int32 Phase;
+	int32 LastPhase;
+	float LastRequiredGold;
 	FChestRequiredGoldRow SearchRow;
 
 public:
@@ -26,5 +28,6 @@ public:
 	void NextPhase();
 	float GetRequiredGold();
 	void SearchCurrentPhaseRequiredGold();
+	void GenerateRequiredGold();
 
 };

@@ -4,6 +4,8 @@
 
 UGoldManagerSubsystem::UGoldManagerSubsystem()
 	: Phase(1)
+	, LastPhase(0)
+	, LastRequiredGold(0.0f)
 	, SearchRow({})
 {
 }
@@ -11,6 +13,15 @@ UGoldManagerSubsystem::UGoldManagerSubsystem()
 void UGoldManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+	
+	if (UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(this))
+	{
+		if (UDataSubsystem* Data = GameInstance->GetSubsystem<UDataSubsystem>())
+		{
+			LastPhase = Data->GetLastPhase();
+		}
+	}
+
 	SearchCurrentPhaseRequiredGold();
 }
 
@@ -33,10 +44,31 @@ void UGoldManagerSubsystem::SearchCurrentPhaseRequiredGold()
 	UDataSubsystem* Data = GameInstance->GetSubsystem<UDataSubsystem>();
 	if (!IsValid(Data)) return;
 
-	if (Data->GetChestRequiredGoldRow(Phase, SearchRow))
+	if (LastPhase >= Phase)
 	{
-		OnRequiredGoldUpdated.Broadcast();
-		return;
+		Data->GetChestRequiredGoldRow(Phase, SearchRow);
+		LastRequiredGold = SearchRow.RequiredGold;
+		//if (Data->GetChestRequiredGoldRow(Phase, SearchRow))
+		//{
+		//	OnRequiredGoldUpdated.Broadcast();
+		//	return;
+		//}
 	}
+	else
+	{
+		GenerateRequiredGold();
+	}
+
+	OnRequiredGoldUpdated.Broadcast();
+}
+
+void UGoldManagerSubsystem::GenerateRequiredGold()
+{
+	//float RequiredGold = LastRequiredGold;
+	//int32 ExtraPhase = Phase - LastPhase;
+	const float GrowthRate = 1.08f;
+	float GeneratedRequiredGold = LastRequiredGold * FMath::Pow(GrowthRate, Phase - LastPhase);
+
+	SearchRow.RequiredGold = GeneratedRequiredGold;
 }
 
