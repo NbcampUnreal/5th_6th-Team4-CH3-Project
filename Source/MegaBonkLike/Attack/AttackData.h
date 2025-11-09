@@ -15,6 +15,8 @@ struct MEGABONKLIKE_API FAttackData
 	UPROPERTY()
 	float CriticalMultiplier;
 	UPROPERTY()
+	float LifeSteal;
+	UPROPERTY()
 	float Knockback;
 	UPROPERTY()
 	FVector KnockbackDirection;

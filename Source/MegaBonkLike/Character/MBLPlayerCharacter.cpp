@@ -93,17 +93,11 @@ void AMBLPlayerCharacter::BeginPlay()
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_CriticalChance, 0.0f);
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_CriticalMultiplier, 1.5f);
 	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_Knockback, 200.0f);
+	AttributeComponent->AddAttribute(EAttributeSourceType::Player, TAG_Attribute_LifeSteal, 0.0f);
 
 	SetPlayerAttributeCallbacks();
 
 	SetLevel(1);
-	if (AMBLPlayerController* PlayerController = Cast<AMBLPlayerController>(GetController()))
-	{
-		PlayerController->UpdatePlayerLevel(Level);
-		OnChangedLevel.AddDynamic(PlayerController, &AMBLPlayerController::UpdatePlayerLevel);
-		PlayerController->UpdateXP(CurrExp, MaxExp);
-		OnExpChanged.AddDynamic(PlayerController, &AMBLPlayerController::UpdateXP);
-	}
 
 	SetPlayerMaxHP();
 	UpdateCurrHP(MaxHP);
@@ -122,6 +116,17 @@ void AMBLPlayerCharacter::BeginPlay()
 		&ThisClass::AttractItems,
 		0.2f,
 		true);
+
+	if (AMBLPlayerController* PlayerController = Cast<AMBLPlayerController>(GetController()))
+	{
+		PlayerController->UpdatePlayerLevel(Level);
+		PlayerController->UpdateXP(CurrExp, MaxExp);
+		PlayerController->UpdateCoinCount(Gold);
+
+		OnChangedLevel.AddDynamic(PlayerController, &AMBLPlayerController::UpdatePlayerLevel);
+		OnExpChanged.AddDynamic(PlayerController, &AMBLPlayerController::UpdateXP);
+		OnChangedGold.AddDynamic(PlayerController, &AMBLPlayerController::UpdateCoinCount);
+	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////// 시작 아이템
 	if (auto GameInstance = Cast<UMBLGameInstance>(GetGameInstance()))
@@ -206,6 +211,17 @@ void AMBLPlayerCharacter::AcquireGold(float InGold)
 {
 	Gold += InGold * GetAttributeValue(TAG_Attribute_GoldGain);
 	OnChangedGold.Broadcast(Gold);
+}
+
+bool AMBLPlayerCharacter::UseGold(float Price)
+{
+	if (Price > Gold)
+		return false;
+
+	Gold -= Price;
+	OnChangedGold.Broadcast(Gold);
+
+	return true;
 }
 
 void AMBLPlayerCharacter::Input_Move(const FInputActionValue& InputValue)

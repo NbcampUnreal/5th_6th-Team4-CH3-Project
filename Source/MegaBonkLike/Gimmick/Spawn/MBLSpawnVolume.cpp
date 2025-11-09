@@ -4,6 +4,7 @@
 #include "NavigationSystem.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Gimmick/Spawn/MBLSpawnSubsystem.h"
+#include "Components/CapsuleComponent.h"
 #include "Character/EnemyBase.h"
 #include "Character/FlyingEnemy.h"
 
@@ -24,7 +25,7 @@ void AMBLSpawnVolume::BeginPlay()
 	Super::BeginPlay();
 }
 
-FVector AMBLSpawnVolume::GetRandomEnemySpawnLocation() const
+FVector AMBLSpawnVolume::GetRandomEnemySpawnLocation(float CapsuleHalfHeight) const
 {
 	AActor* PlayerActor = GetPlayerInBox();
 	if (!PlayerActor) return FVector::ZeroVector;
@@ -39,8 +40,8 @@ FVector AMBLSpawnVolume::GetRandomEnemySpawnLocation() const
 
 	const FVector Offset(FMath::Cos(Angle) * Radius, FMath::Sin(Angle) * Radius, 0.f);
 	FVector SpawnLocation = PlayerLocation + Offset;
-
-	return GetValidNavMeshLocation(SpawnLocation, SearchRadius);
+	
+	return GetValidNavMeshLocation(SpawnLocation, SearchRadius, CapsuleHalfHeight);
 }
 
 FVector AMBLSpawnVolume::GetRandomObjectSpawnLocation() const
@@ -60,12 +61,23 @@ AEnemyBase* AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AEnemyBase> EnemyClass)
 	UWorld* World = GetWorld();
 	if (!IsValid(World)) return nullptr;
 
-	FVector SpawnLocation = GetRandomEnemySpawnLocation();
-	//if (SpawnLocation.IsNearlyZero())
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("Player not found in spawn box"));
-	//	return;
-	//}
+	float CapsuleHalfHeight;
+
+	if (UCapsuleComponent* CapsuleComp = EnemyClass->GetDefaultObject<AEnemyBase>()->GetCapsuleComponent())
+	{
+		CapsuleHalfHeight = CapsuleComp->GetScaledCapsuleHalfHeight();
+	}
+	else
+	{
+		CapsuleHalfHeight = 100.f;
+	}
+
+	FVector SpawnLocation = GetRandomEnemySpawnLocation(CapsuleHalfHeight);
+	if (SpawnLocation.IsNearlyZero())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Player not found in spawn box"));
+		return nullptr;
+	}
 
 	if (EnemyClass->IsChildOf(AFlyingEnemy::StaticClass()))
 	{
@@ -135,7 +147,7 @@ AActor* AMBLSpawnVolume::GetPlayerInBox() const
 	return nullptr;
 }
 
-FVector AMBLSpawnVolume::GetValidNavMeshLocation(const FVector& Location, float Radius) const
+FVector AMBLSpawnVolume::GetValidNavMeshLocation(const FVector& Location, float Radius, float CapsuleHalfHeight) const
 {
 	UWorld* World = GetWorld();
 	if (!World) return FVector::ZeroVector;
@@ -155,8 +167,40 @@ FVector AMBLSpawnVolume::GetValidNavMeshLocation(const FVector& Location, float 
 		ValidLocation
 	);
 
-	if (bFound) return ValidLocation.Location;
+	if (!bFound)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GetValidNavMeshLocation is not valid"));
+		return FVector::ZeroVector;
+	}
 
-	UE_LOG(LogTemp, Warning, TEXT("GetValidNavMeshLocation is not valid"));
-	return FVector::ZeroVector;
+	FVector FinalLocation = ValidLocation.Location;
+
+	const float StartOffset = 5000.f;
+	const float EndOffset = 500.f;
+	
+	FVector Start = FVector(FinalLocation.X, FinalLocation.Y, FinalLocation.Z + StartOffset);
+	FVector End = FVector(FinalLocation.X, FinalLocation.Y, FinalLocation.Z - EndOffset);
+
+	FHitResult Hit;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	bool bHit = World->LineTraceSingleByChannel(
+		Hit,
+		Start,
+		End,
+		ECC_WorldStatic,
+		Params
+	);
+
+	if (bHit)
+	{
+		FinalLocation.Z = Hit.Location.Z + CapsuleHalfHeight;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("LineTrace failed. Using NavMesh Z."));
+	}
+
+	return FinalLocation;
 }

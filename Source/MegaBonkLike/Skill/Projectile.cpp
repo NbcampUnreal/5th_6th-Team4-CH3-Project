@@ -8,8 +8,7 @@
 #include "MegaBonkLike.h"
 #include "Attack/AttackHandleComponent.h"
 #include "Common/PoolSubsystem.h"
-
-const float AProjectile::LifeTime = 5.0f;
+#include "Skill/Projectile/ProjectileActionIncludes.h"
 
 AProjectile::AProjectile()
 {
@@ -32,32 +31,32 @@ AProjectile::AProjectile()
     ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
     ProjectileMovement->SetUpdatedComponent(Collision);
     ProjectileMovement->bRotationFollowsVelocity = true;
-    ProjectileMovement->bShouldBounce = false;
+    ProjectileMovement->bShouldBounce = true;
+    ProjectileMovement->Bounciness = 1.0f;
+    ProjectileMovement->Friction = 0.0f;
     ProjectileMovement->ProjectileGravityScale = 0.0f;
 
-    Trail = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Trail"));
-    Trail->SetupAttachment(RootComponent);
+    TrailTransform = CreateDefaultSubobject<USceneComponent>(TEXT("TrailTransform"));
+
+    TrailTemplate = UNiagaraComponent::StaticClass();
 }
 
 void AProjectile::BeginPlay()
 {
     Super::BeginPlay();
-
-    if (IsValid(TrailEffect) == true)
-    {
-        Trail->SetAsset(TrailEffect);
-        Trail->Activate();
-    }
-
-    SetLifeTimer();
 }
 
 void AProjectile::SetDirectionAndSpeed(const FVector& InDirection, float InSpeed)
 {
+    SetUpdatedComponent();
+
+    ProjectileMovement->Deactivate();
+    ProjectileMovement->StopMovementImmediately();
     Speed = InSpeed;
     ProjectileMovement->InitialSpeed = InSpeed;
     ProjectileMovement->MaxSpeed = InSpeed;
     ProjectileMovement->Velocity = InDirection * InSpeed;
+    ProjectileMovement->Activate(true);
 }
 
 void AProjectile::SetAttackData(const FAttackData& InAttackData)
@@ -70,25 +69,24 @@ void AProjectile::SetSize(float InSize)
     Size = InSize;
     FVector NewScale = InSize * FVector::OneVector;
     SetActorScale3D(NewScale);
-    if (IsValid(Trail) == true)
+    if (IsValid(TrailComponent) == true)
     {
-        Trail->SetVariableFloat(TEXT("User.Width"), Size * OriginTrailWidth);
+        TrailComponent->SetVariableFloat(TEXT("User.Width"), Size * OriginTrailWidth);
     }
 }
 
-void AProjectile::SetPenetrate(bool bInPenetrate)
+void AProjectile::SetProjectileAction(const TSubclassOf<UProjectileActionBase>& ActionClass, const FProjectileActionContext& ActionContext)
 {
-    bPenetrate = bInPenetrate;
-}
+    if (ProjectileAction == nullptr || ProjectileAction->GetClass() != ActionClass)
+    {
+        ProjectileAction = NewObject<UProjectileActionBase>(this, ActionClass);
+    }
 
-void AProjectile::SetLifeTimer()
-{
-    GetWorldTimerManager().SetTimer(
-        DestroyTimerHandle,
-        this,
-        &ThisClass::ReturnToPool,
-        LifeTime,
-        false);
+    SetLifeTimer(ActionContext.LifeTime);
+    if (IsValid(ProjectileAction) == true)
+    {
+        ProjectileAction->Initialize(this, ActionContext);
+    }
 }
 
 void AProjectile::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 BodyIndex, bool bFromSweep, const FHitResult& Hit)
@@ -98,27 +96,29 @@ void AProjectile::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherAc
 
     ApplyDamage(OtherActor);
 
-    if (bPenetrate == false)
+    if (IsValid(ProjectileAction) == true)
     {
-        if (IsValid(Trail) == true)
-        {
-            Trail->Deactivate();
-        }
-        ReturnToPool();
+        ProjectileAction->OnCollision(OtherActor, Hit, true);
     }
 }
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-    ReturnToPool();
+    SetActorLocation(Hit.Location + Hit.ImpactNormal * 1.0f, false, nullptr, ETeleportType::TeleportPhysics);
+
+    if (IsValid(ProjectileAction) == true)
+    {
+        ProjectileAction->OnCollision(OtherActor, Hit, false);
+    }
 }
 
 void AProjectile::Activate()
 {
     if (IsValid(ProjectileMovement) == true)
     {
+        SetUpdatedComponent();
         ProjectileMovement->StopMovementImmediately();
-        ProjectileMovement->Activate();
+        ProjectileMovement->Activate(true);
     }
 
     if (IsValid(Collision) == true)
@@ -130,14 +130,30 @@ void AProjectile::Activate()
     {
         StaticMesh->SetHiddenInGame(false);
     }
-    
-    if (IsValid(Trail) == true)
+
+    if (IsValid(TrailComponent) == false)
     {
-        Trail->DeactivateImmediate();
-        Trail->Activate(true);
+        UPoolSubsystem* PoolSubsystem = GetWorld()->GetSubsystem<UPoolSubsystem>();
+        if (IsValid(PoolSubsystem) == true)
+        {
+            auto* NewTrail = PoolSubsystem->GetFromPool<UNiagaraComponent>(TrailTemplate, GetActorLocation(), GetActorRotation());
+            TrailComponent = IsValid(NewTrail) == true ? NewTrail : nullptr;
+        }
     }
 
-    SetLifeTimer();
+    if (IsValid(TrailComponent) == true)
+    {
+        TrailComponent->SetAsset(TrailEffect);
+        TrailComponent->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+        TrailComponent->SetRelativeLocation(TrailTransform->GetRelativeLocation());
+        TrailComponent->SetRelativeRotation(TrailTransform->GetRelativeRotation());
+        TrailComponent->ResetSystem();
+        TrailComponent->Activate(true);
+        TrailComponent->SetVariableFloat(TEXT("User.LifeTime"), OriginTrailLifeTime);
+        TrailComponent->SetVariableLinearColor(TEXT("User.LinearColor"), OriginTrailColor);
+    }
+
+    bReturnedToPool = false;
 }
 
 void AProjectile::Deactivate()
@@ -159,11 +175,12 @@ void AProjectile::Deactivate()
         StaticMesh->SetHiddenInGame(true);
     }
 
-    if (IsValid(Trail) == true)
+    if (IsValid(TrailComponent) == true)
     {
-        Trail->Deactivate();
+        TrailComponent->Deactivate();
     }
 
+    bReturnedToPool = true;
     GetWorldTimerManager().ClearTimer(DestroyTimerHandle);
 }
 
@@ -187,16 +204,40 @@ void AProjectile::ApplyDamage(AActor* TargetActor)
     {
         AttackHandleComponent->ExecuteAttack(TargetActor, AttackData);
     }
+}
 
+void AProjectile::SetUpdatedComponent()
+{
+    if (ProjectileMovement->UpdatedComponent == nullptr)
+    {
+        ProjectileMovement->SetUpdatedComponent(GetRootComponent());
+    }
 }
 
 void AProjectile::ReturnToPool()
 {
-    if (UWorld* World = GetWorld())
+    if (bReturnedToPool)
+        return;
+
+    if (IsValid(TrailComponent) == true)
     {
-        if (UPoolSubsystem* PoolSubSystem = World->GetSubsystem<UPoolSubsystem>())
-        {
-            PoolSubSystem->ReturnToPool(this);
-        }
+        TrailComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+        TrailComponent = nullptr;
     }
+
+    UPoolSubsystem* PoolSubsystem = GetWorld()->GetSubsystem<UPoolSubsystem>();
+    if (IsValid(PoolSubsystem) == true)
+    {
+        PoolSubsystem->ReturnToPool(this);
+    }
+}
+
+void AProjectile::SetLifeTimer(float LifeTime)
+{
+    GetWorldTimerManager().SetTimer(
+        DestroyTimerHandle,
+        this,
+        &ThisClass::ReturnToPool,
+        LifeTime,
+        false);
 }

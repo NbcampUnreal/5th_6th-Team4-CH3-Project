@@ -4,24 +4,19 @@
 #include "UObject/NoExportTypes.h"
 #include "PoolBase.generated.h"
 
-UCLASS()
+UCLASS(Abstract)
 class MEGABONKLIKE_API UPoolBase : public UObject
 {
 	GENERATED_BODY()
 	
 public:
-	void Initialize(const TSubclassOf<AActor>& InActorClass, int32 InitialSize);
-	AActor* GetActor();
-	void ReturnActor(AActor* Actor);
+	virtual void Initialize(const TSubclassOf<UObject>& InClass, int32 InitialSize);
+	virtual UObject* Get(const FVector& Location, const FRotator& Rotation) PURE_VIRTUAL(UPoolBase::Get, return nullptr;);
+	virtual void Return(UObject* Object) PURE_VIRTUAL(UPoolBase::Return, );
 
-	AActor* MakeActor();
-	void ActivateActor(AActor* Actor, bool bInActivate);
-
-	TSubclassOf<AActor> GetActorClass() const { return ActorClass; }
+	TSubclassOf<UObject> GetClass() const { return ObjectClass; }
 
 protected:
 	UPROPERTY()
-	TSubclassOf<AActor> ActorClass;
-	UPROPERTY()
-	TArray<TObjectPtr<AActor>> Actors;
+	TSubclassOf<UObject> ObjectClass;
 };

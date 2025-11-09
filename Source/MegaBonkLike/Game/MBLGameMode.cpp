@@ -1,4 +1,4 @@
-#include "Game/MBLGameMode.h"
+﻿#include "Game/MBLGameMode.h"
 #include "Game/MBLGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/MBLPlayerCharacter.h"
@@ -15,7 +15,7 @@ AMBLGameMode::AMBLGameMode()
     , Boss(nullptr)
     , DropTable(nullptr)
     , CurrentWave(EMBLWaveState::SetWave)
-    , WaveDuration(30.0f)
+    , WaveDuration(10.0f)//
     , MaxSpawnObject(500)
     , SpawnInterval(1.0f)
     , MaxSpawnEnemy(1)
@@ -82,17 +82,24 @@ void AMBLGameMode::SpawnManager()
         AEnemyBase* NewEnemy = SpawnVolume->SpawnEnemy(GetEnemyClass(CurrentWave));
         if (!IsValid(NewEnemy)) return;
 
-        NewEnemy->SetAttack(CurrentWave);
-        NewEnemy->SetSpeed(CurrentWave);
-        NewEnemy->SetColor(CurrentWave);
-
+        NewEnemy->SetAll(CurrentWave);
         CurrentEnemy++;
+
         return;
     }
 }
 
 void AMBLGameMode::SpawnBoss()
 {
+    //보스가 등장할때 체력바 표시
+    if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+    {
+        if (AMBLPlayerController* MBLPlayerController = Cast<AMBLPlayerController>(PlayerController))
+        {
+            MBLPlayerController->ShowBossHPBar(true);
+        }
+    }
+
     AEnemyBase* NewEnemy = SpawnVolume->SpawnEnemy(Boss);
     if (!IsValid(NewEnemy)) return;
 
@@ -192,7 +199,7 @@ void AMBLGameMode::DeadEnemy()
 
     CurrentEnemy--;
 
-    if (AMBLGameState* GS = GetGameState<AMBLGameState>())  //�߰�
+    if (AMBLGameState* GS = GetGameState<AMBLGameState>())  //추가
     {
         GS->Addkill();
     }
@@ -200,9 +207,18 @@ void AMBLGameMode::DeadEnemy()
 
 void AMBLGameMode::DeadBoss()
 {
-    if (AMBLGameState* GS = GetGameState<AMBLGameState>())  //�߰�
+    if (AMBLGameState* GS = GetGameState<AMBLGameState>())  //추가
     {
         GS->Addkill();
+    }
+
+    //보스가죽었을때 체력바 사라지는표시
+    if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+    {
+        if (AMBLPlayerController* MBLPlayerController = Cast<AMBLPlayerController>(PlayerController))
+        {
+            MBLPlayerController->ShowBossHPBar(false);
+        }
     }
 
     GameOver();

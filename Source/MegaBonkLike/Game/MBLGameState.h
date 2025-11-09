@@ -1,8 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
 #include "MBLGameState.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnChangedKillCount, int32, KillCount);
 
 UCLASS()
 class MEGABONKLIKE_API AMBLGameState : public AGameState
@@ -11,6 +13,8 @@ class MEGABONKLIKE_API AMBLGameState : public AGameState
 public:
 
 	AMBLGameState();
+
+	FOnChangedKillCount OnChangedKillCount;
 
 protected:
 
@@ -30,9 +34,6 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Timer")
 	float RemainingTime;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Coin")
-	int32 CollectedCoinCount;
-
 	UPROPERTY(BlueprintReadWrite, Category = "Kill")
 	int32 KillCount;
 
@@ -42,10 +43,9 @@ public:
 	void OnWaveEnd();
 	void UpdateTimer();
 	void Addkill();
-	void AddCoin(int32 Amount);
 
 	int32 GetKills() const;
-	float GetRemainingTime() const;  //�߰�
+	float GetRemainingTime() const;  //추가
 
 	void UpdateHUD();
 };
