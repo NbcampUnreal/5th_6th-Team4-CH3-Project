@@ -9,8 +9,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "Gimmick/Objects/UI/ChestWidget.h"
 #include "Components/WidgetComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AMBLChestObject::AMBLChestObject()
+	: DenySound(nullptr)
 {
 }
 
@@ -43,6 +45,11 @@ void AMBLChestObject::OnObjectActivated(AActor* Activator)
 
 	if (Player->UseGold(GoldManager->GetRequiredGold()))
 	{
+		if (InteractionSound)
+		{
+			UGameplayStatics::PlaySound2D(this, InteractionSound);
+		}
+
 		UInventoryComponent* Inventory = Player->FindComponentByClass<UInventoryComponent>();
 		if (!IsValid(Inventory)) return;
 
@@ -56,6 +63,18 @@ void AMBLChestObject::OnObjectActivated(AActor* Activator)
 		PopupItemAcquire->SetInventory(Inventory);
 		PopupItemAcquire->SetOption();
 		Super::DestroyObject();
+
+		return;
+	}
+
+	if (DenySound)
+	{
+		DenyMessage();
+		UGameplayStatics::PlaySoundAtLocation(
+			GetWorld(),
+			DenySound,
+			GetActorLocation()
+		);
 	}
 }
 
@@ -69,6 +88,17 @@ void AMBLChestObject::UpdateRequiredGold()
 			{
 				ChestWidget->SetGoldText(GoldManager->GetRequiredGold());
 			}
+		}
+	}
+}
+
+void AMBLChestObject::DenyMessage()
+{
+	if (UUserWidget* Widget = InteractableWidget->GetWidget())
+	{
+		if (UChestWidget* ChestWidget = Cast<UChestWidget>(Widget))
+		{
+			ChestWidget->ViewDenyMessage();
 		}
 	}
 }

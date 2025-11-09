@@ -17,6 +17,7 @@ private:
 	int32 LastPhase;
 	float LastRequiredGold;
 	FChestRequiredGoldRow SearchRow;
+	const float GrowthRate = 1.08f;
 
 public:
 	UGoldManagerSubsystem();

@@ -6,11 +6,16 @@
 #include "Gimmick/Objects/SpawnObjects/MBLBaseSpawnObject.h"
 #include "Gimmick/Objects/UI/InteractionWidget.h"
 #include "Components/WidgetComponent.h"
-
+#include "Kismet/GameplayStatics.h"
 
 
 AMBLBaseInteractionObject::AMBLBaseInteractionObject()
 	: InteractionObjectType("")
+	, SceneComp(nullptr)
+	, DetectionComp(nullptr)
+	, StaticMeshComp(nullptr)
+	, InteractableWidget(nullptr)
+	, InteractionSound(nullptr)
 	, bUsed(false)
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -103,6 +108,10 @@ void AMBLBaseInteractionObject::CallOverlap(UPrimitiveComponent* CollisionCompon
 
 void AMBLBaseInteractionObject::OnObjectActivated(AActor* Activator)
 {
+	if (InteractionSound)
+	{
+		UGameplayStatics::PlaySound2D(this, InteractionSound);
+	}
 	bUsed = true;
 	InteractableWidget->SetVisibility(false);
 }

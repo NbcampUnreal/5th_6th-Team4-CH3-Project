@@ -61,6 +61,7 @@ void AMBLBuffObject::OnObjectActivated(AActor* Activator)
 					}
 				}
 			});
+
 		Super::OnObjectActivated(Activator);
 		ValidComp->SetVisibility(false);
 	}

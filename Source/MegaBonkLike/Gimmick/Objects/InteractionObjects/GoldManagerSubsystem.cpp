@@ -48,11 +48,6 @@ void UGoldManagerSubsystem::SearchCurrentPhaseRequiredGold()
 	{
 		Data->GetChestRequiredGoldRow(Phase, SearchRow);
 		LastRequiredGold = SearchRow.RequiredGold;
-		//if (Data->GetChestRequiredGoldRow(Phase, SearchRow))
-		//{
-		//	OnRequiredGoldUpdated.Broadcast();
-		//	return;
-		//}
 	}
 	else
 	{
@@ -64,11 +59,7 @@ void UGoldManagerSubsystem::SearchCurrentPhaseRequiredGold()
 
 void UGoldManagerSubsystem::GenerateRequiredGold()
 {
-	//float RequiredGold = LastRequiredGold;
-	//int32 ExtraPhase = Phase - LastPhase;
-	const float GrowthRate = 1.08f;
 	float GeneratedRequiredGold = LastRequiredGold * FMath::Pow(GrowthRate, Phase - LastPhase);
-
 	SearchRow.RequiredGold = GeneratedRequiredGold;
 }
 

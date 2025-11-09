@@ -27,7 +27,7 @@ void UChestWidget::ViewDenyMessage()
 			MessageTimerHandle,
 			this,
 			&UChestWidget::HideMessage,
-			2.0f,
+			1.0f,
 			false
 		);
 	}

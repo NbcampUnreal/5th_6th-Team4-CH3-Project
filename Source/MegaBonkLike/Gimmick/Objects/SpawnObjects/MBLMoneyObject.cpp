@@ -21,6 +21,7 @@ void AMBLMoneyObject::OnObjectActivated(AActor* Activator)
 		//юс╫ц 
 
 		Player->AcquireGold(MoneyValue);
+		Super::OnObjectActivated(Activator);
 		Super::DestroyObject();
 	}
 }

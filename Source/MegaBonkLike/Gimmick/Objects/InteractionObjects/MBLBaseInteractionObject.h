@@ -25,14 +25,16 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InteractionObject")
 	FName InteractionObjectType;
 	// ÄÄÆ÷³ÍÆ®
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InteractionObject|Component", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InteractionObject|Component")
 	USceneComponent* SceneComp;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InteractionObject|Component", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InteractionObject|Component")
 	USphereComponent* DetectionComp;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InteractionObject|Component", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InteractionObject|Component")
 	UStaticMeshComponent* StaticMeshComp;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InteractionObject|Component", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InteractionObject|Component")
 	UWidgetComponent* InteractableWidget;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InteractionObject|Sound")
+	USoundBase* InteractionSound;
 	bool bUsed;
 
 public:

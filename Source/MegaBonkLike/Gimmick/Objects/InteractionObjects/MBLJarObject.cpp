@@ -9,6 +9,8 @@ AMBLJarObject::AMBLJarObject()
 
 void AMBLJarObject::OnObjectActivated(AActor* Activator)
 {
+	Super::OnObjectActivated(Activator);
+
 	UWorld* World = GetWorld();
 	if (!World) return;
 

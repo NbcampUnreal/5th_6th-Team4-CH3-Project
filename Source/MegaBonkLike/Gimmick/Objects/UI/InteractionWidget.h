@@ -19,6 +19,5 @@ public:
 	UTextBlock* InteractionText;
 
 	void SetInteractionText(FName ObjectType);
-	//virtual void NativeOnInitialized() override;
 
 };
