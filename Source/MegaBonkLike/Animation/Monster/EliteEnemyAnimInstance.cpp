@@ -1,11 +1,11 @@
-#include "Test/KIH_NpcAnimInstance.h"
+#include "Animation/Monster/EliteEnemyAnimInstance.h"
 #include "Character/MBLCharacterBase.h"
-#include "Character/MBLBossCharacter.h"
+#include "Character/MBLEliteMonster.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Character/MBLNonPlayerCharacter.h"
 
-void UKIH_NpcAnimInstance::NativeInitializeAnimation()
+void UEliteEnemyAnimInstance::NativeInitializeAnimation()
 {
 	APawn* OwnerPawn = TryGetPawnOwner();
 	if (IsValid(OwnerPawn) == true)
@@ -15,7 +15,7 @@ void UKIH_NpcAnimInstance::NativeInitializeAnimation()
 	}
 }
 
-void UKIH_NpcAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
+void UEliteEnemyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	if (IsValid(OwnerCharacter) == true && IsValid(OwnerCharacterMovement) == true)
 	{
@@ -25,16 +25,18 @@ void UKIH_NpcAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		float GroundAcceleration = UKismetMathLibrary::VSizeXY(OwnerCharacterMovement->GetCurrentAcceleration());
 		bool bIsAccelerationNearlyZero = FMath::IsNearlyZero(GroundAcceleration);
 		bShouldMove = (KINDA_SMALL_NUMBER < GroundSpeed) && (bIsAccelerationNearlyZero == false);
-		
-		if (AMBLNonPlayerCharacter* OwnerNPC = Cast<AMBLNonPlayerCharacter>(OwnerCharacter))
-		{
-			bShouldMove = KINDA_SMALL_NUMBER < GroundSpeed;
-		}
 
-		if (AMBLBossCharacter* OwnerNPC = Cast<AMBLBossCharacter>(OwnerCharacter))
+		if (AMBLEliteMonster* OwnerNPC = Cast<AMBLEliteMonster>(OwnerCharacter))
 		{
 			bShouldMove = KINDA_SMALL_NUMBER < GroundSpeed;
 		}
 	}
 }
 
+void UEliteEnemyAnimInstance::AnimNotify_CheckHit()
+{
+	if (OnCheckAttack.IsBound() == true)
+	{
+		OnCheckAttack.Broadcast();
+	}
+}

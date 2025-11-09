@@ -198,6 +198,7 @@ void AMBLBossCharacter::DamageTick()
 	{
 		//데미지 적용
 		UGameplayStatics::ApplyDamage(DamageTarget, Attack, GetInstigatorController(), GetInstigator(), UDamageType::StaticClass());
+		//UE_LOG(LogTemp, Warning, TEXT("Monster HP : %f / %f"), CurrHP, MaxHP);
 
 		//넉백 적용
 		AMBLCharacterBase* Player = Cast<AMBLCharacterBase>(DamageTarget);

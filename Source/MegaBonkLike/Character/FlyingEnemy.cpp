@@ -51,7 +51,7 @@ void AFlyingEnemy::BeginPlay()
 		MoveTimerHandle,
 		this,
 		&AFlyingEnemy::MoveStep,
-		0.05f,
+		0.02f,
 		true
 	);
 
@@ -205,7 +205,7 @@ void AFlyingEnemy::OnDamageColliderBeginOverlap(
 				DamageTimerHandle,
 				this,
 				&AFlyingEnemy::DamageTick,
-				0.5f,
+				1.0f,
 				true,
 				0.f
 			);
@@ -218,7 +218,7 @@ void AFlyingEnemy::OnDamageColliderEndOverlap(UPrimitiveComponent* OverlappedCom
 	if (OtherActor && OtherActor == DamageTarget)
 	{
 		DamageTarget = nullptr;
-		GetWorldTimerManager().ClearTimer(DamageTimerHandle);
+		//GetWorldTimerManager().ClearTimer(DamageTimerHandle);
 		//UE_LOG(LogTemp, Warning, TEXT("Player left dectection area."));
 	}
 }
@@ -229,6 +229,7 @@ void AFlyingEnemy::DamageTick()
 	{
 		//데미지 적용
 		UGameplayStatics::ApplyDamage(DamageTarget, Attack, GetInstigatorController(), GetInstigator(), UDamageType::StaticClass());
+		//UE_LOG(LogTemp, Warning, TEXT("Monster HP : %f / %f"), CurrHP, MaxHP);
 
 		//넉백 적용
 		AMBLCharacterBase* Player = Cast<AMBLCharacterBase>(DamageTarget);
