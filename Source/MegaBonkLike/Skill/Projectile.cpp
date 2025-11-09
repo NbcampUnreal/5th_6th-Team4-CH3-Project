@@ -136,7 +136,7 @@ void AProjectile::Activate()
         UPoolSubsystem* PoolSubsystem = GetWorld()->GetSubsystem<UPoolSubsystem>();
         if (IsValid(PoolSubsystem) == true)
         {
-            auto* NewTrail = PoolSubsystem->GetFromPool<UNiagaraComponent>(TrailTemplate);
+            auto* NewTrail = PoolSubsystem->GetFromPool<UNiagaraComponent>(TrailTemplate, GetActorLocation(), GetActorRotation());
             TrailComponent = IsValid(NewTrail) == true ? NewTrail : nullptr;
         }
     }

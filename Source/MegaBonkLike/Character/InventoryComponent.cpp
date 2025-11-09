@@ -212,6 +212,7 @@ TArray<FItemSelectOption> UInventoryComponent::GetItemSelectOptionsInWeaponAndTo
 				FAttributeComparison NewComparison;
 				const auto& UpgradeEntry = WeaponData->WeaponAttributeEntry[IdxArray[j]];
 				NewComparison.AttributeTag = UpgradeEntry.AttributeTag;
+				NewComparison.ModifierType = UpgradeEntry.UpgradeModifier.Type;
 				NewComparison.CurrentValue = ExistWeapon == nullptr ? 0.0f : ExistWeapon->GetAttributeValue(UpgradeEntry.AttributeTag);
 				NewComparison.DeltaValue = ExistWeapon == nullptr ? UpgradeEntry.BaseValue : (UpgradeEntry.UpgradeModifier.Value * Rarity->Multiplier);
 				NewComparison.NewValue = NewComparison.CurrentValue + NewComparison.DeltaValue;
@@ -234,6 +235,7 @@ TArray<FItemSelectOption> UInventoryComponent::GetItemSelectOptionsInWeaponAndTo
 			const auto& UpgradeModifier = TomesData->AttributeModifiers[Tag];
 			FAttributeComparison NewComparison;
 			NewComparison.AttributeTag = Tag;
+			NewComparison.ModifierType = UpgradeModifier.Type;
 			NewComparison.CurrentValue = ExistTomes == nullptr ? 0.0f : ExistTomes->GetModifierValue(Tag);
 			NewComparison.DeltaValue = UpgradeModifier.Value * (ExistTomes == nullptr ? 1.0f : Rarity->Multiplier);
 			NewComparison.NewValue = NewComparison.CurrentValue + NewComparison.DeltaValue;
