@@ -2,9 +2,7 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 
-void UInteractionWidget::SetGoldText(float RequiredGold)
+void UInteractionWidget::SetInteractionText(FName ObjectType)
 {
-	if (!IsValid(GoldText)) return;
-
-	GoldText->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), RequiredGold)));
+	InteractionText->SetText(FText::FromString(ObjectType.ToString()));
 }

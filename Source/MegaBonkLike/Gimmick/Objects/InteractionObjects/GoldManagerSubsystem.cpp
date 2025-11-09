@@ -8,39 +8,34 @@ UGoldManagerSubsystem::UGoldManagerSubsystem()
 {
 }
 
-bool UGoldManagerSubsystem::TryOpenChest(float& PossessionGold)
+void UGoldManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
-	float RequiredGold = SearchChestRequiredGold();
-	if (FMath::IsNearlyZero(RequiredGold)) return false;
-
-	if (PossessionGold >= RequiredGold)
-	{
-		PossessionGold -= RequiredGold;
-		Phase++;
-		return true;
-	}
-
-	return false;
+	Super::Initialize(Collection);
 }
 
 void UGoldManagerSubsystem::NextPhase()
 {
 	Phase++;
+	SearchCurrentPhaseRequiredGold();
 }
 
-float UGoldManagerSubsystem::SearchChestRequiredGold()
+float UGoldManagerSubsystem::GetRequiredGold()
+{
+	return SearchRow.RequiredGold;
+}
+
+void UGoldManagerSubsystem::SearchCurrentPhaseRequiredGold()
 {
 	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(this);
-	if (!IsValid(GameInstance)) return 0.0f;
+	if (!IsValid(GameInstance)) return;
 
 	UDataSubsystem* Data = GameInstance->GetSubsystem<UDataSubsystem>();
-	if (!IsValid(Data)) return 0.0f;
+	if (!IsValid(Data)) return;
 
 	if (Data->GetChestRequiredGoldRow(Phase, SearchRow))
 	{
-		return SearchRow.RequiredGold;
+		OnRequiredGoldUpdated.Broadcast();
+		return;
 	}
-
-	return 0.0f;
 }
 

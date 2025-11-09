@@ -18,6 +18,8 @@ public:
 	virtual void OnObjectActivated(AActor* Activator) override;
 
 private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Buff|Component", meta = (AllowPrivateAccess = "true"))
+	UWidgetComponent* ValidComp;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Buffs", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UDataTable> ItemRarityTable;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Buffs", meta = (AllowPrivateAccess = "true"))

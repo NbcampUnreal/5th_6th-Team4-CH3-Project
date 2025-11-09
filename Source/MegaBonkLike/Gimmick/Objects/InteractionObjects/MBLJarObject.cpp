@@ -4,6 +4,7 @@
 
 AMBLJarObject::AMBLJarObject()
 {
+	InteractionObjectType = "Break";
 }
 
 void AMBLJarObject::OnObjectActivated(AActor* Activator)

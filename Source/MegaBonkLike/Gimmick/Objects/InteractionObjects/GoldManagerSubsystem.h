@@ -5,6 +5,8 @@
 #include "Gimmick/Data/ChestRequiredGoldRow.h"
 #include "GoldManagerSubsystem.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRequiredGoldUpdated);
+
 UCLASS(Blueprintable)
 class MEGABONKLIKE_API UGoldManagerSubsystem : public UWorldSubsystem
 {
@@ -16,8 +18,13 @@ private:
 
 public:
 	UGoldManagerSubsystem();
-	bool TryOpenChest(float& PossessionGold);
+
+	UPROPERTY()
+	FOnRequiredGoldUpdated OnRequiredGoldUpdated;
+
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	void NextPhase();
-	float SearchChestRequiredGold();
+	float GetRequiredGold();
+	void SearchCurrentPhaseRequiredGold();
 
 };

@@ -10,6 +10,8 @@
 
 
 AMBLBaseInteractionObject::AMBLBaseInteractionObject()
+	: InteractionObjectType("")
+	, bUsed(false)
 {
 	PrimaryActorTick.bCanEverTick = false;
 
@@ -28,7 +30,7 @@ AMBLBaseInteractionObject::AMBLBaseInteractionObject()
 	InteractableWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractableWidget"));
 	InteractableWidget->SetupAttachment(StaticMeshComp);
 	InteractableWidget->SetWidgetSpace(EWidgetSpace::Screen);
-	InteractableWidget->SetVisibility(false);
+	InteractableWidget->SetVisibility(true);
 
 }
 
@@ -51,6 +53,13 @@ void AMBLBaseInteractionObject::BeginPlay()
 	if (InteractableWidget)
 	{
 		InteractableWidget->SetVisibility(false);
+		if (UUserWidget* Widget = InteractableWidget->GetWidget())
+		{
+			if (UInteractionWidget* InteractionWidget = Cast<UInteractionWidget>(Widget))
+			{
+				InteractionWidget->SetInteractionText(GetObejctType());
+			}
+		}
 	}
 
 }
@@ -63,16 +72,8 @@ void AMBLBaseInteractionObject::OnPlayerOverlapBegin(
 	bool bFromSweep,
 	const FHitResult& SweepResult)
 {
+	if (bUsed) return;
 	InteractableWidget->SetVisibility(true);
-	
-	if (UUserWidget* Widget = InteractableWidget->GetWidget())
-	{
-		if (UInteractionWidget* InteractionWidget = Cast<UInteractionWidget>(Widget))
-		{
-			InteractionWidget->SetGoldText(40.0f);
-		}
-	}
-
 }
 
 void AMBLBaseInteractionObject::OnPlayerOverlapEnd(
@@ -102,6 +103,8 @@ void AMBLBaseInteractionObject::CallOverlap(UPrimitiveComponent* CollisionCompon
 
 void AMBLBaseInteractionObject::OnObjectActivated(AActor* Activator)
 {
+	bUsed = true;
+	InteractableWidget->SetVisibility(false);
 }
 
 FName AMBLBaseInteractionObject::GetObejctType() const

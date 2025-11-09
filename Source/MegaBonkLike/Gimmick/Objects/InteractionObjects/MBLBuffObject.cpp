@@ -7,13 +7,22 @@
 #include "Character/InventoryComponent.h"
 #include "IngameUI/PopupShrine.h"
 #include "Gimmick/Data/BuffObjectDataManager.h"
+#include "Components/WidgetComponent.h"
 
 AMBLBuffObject::AMBLBuffObject()
 {
+	InteractionObjectType = "Shrine";
+
+	ValidComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("ValidComp"));
+	ValidComp->SetupAttachment(StaticMeshComp);
+	ValidComp->SetWidgetSpace(EWidgetSpace::Screen);
+	ValidComp->SetVisibility(true);
+
 }
 
 void AMBLBuffObject::OnObjectActivated(AActor* Activator)
 {
+	if (bUsed) return;
 	if (SantuaryOptions.IsEmpty()) return;
 
 	const TArray<FShrineOption> SelectedOptions = GetRandomOptions();
@@ -52,6 +61,8 @@ void AMBLBuffObject::OnObjectActivated(AActor* Activator)
 					}
 				}
 			});
+		Super::OnObjectActivated(Activator);
+		ValidComp->SetVisibility(false);
 	}
 }
 

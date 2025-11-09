@@ -11,14 +11,14 @@ UCLASS()
 class MEGABONKLIKE_API UInteractionWidget : public UUserWidget
 {
 	GENERATED_BODY()
-
+	
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BindWidget))
 	UImage* PressKeyIcon;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BindWidget))
-	UTextBlock* GoldText;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BindWidget))
-	UImage* GoldIcon;
+	UTextBlock* InteractionText;
 
-	void SetGoldText(float RequiredGold);
+	void SetInteractionText(FName ObjectType);
+	//virtual void NativeOnInitialized() override;
+
 };

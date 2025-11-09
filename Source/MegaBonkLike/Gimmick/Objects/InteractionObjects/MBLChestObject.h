@@ -8,8 +8,11 @@ UCLASS()
 class MEGABONKLIKE_API AMBLChestObject : public AMBLBaseInteractionObject
 {
 	GENERATED_BODY()
+
 public:
 	AMBLChestObject();
+	virtual void BeginPlay() override;
 	virtual void OnObjectActivated(AActor* Activator) override;
-	
+	UFUNCTION()
+	void UpdateRequiredGold();
 };

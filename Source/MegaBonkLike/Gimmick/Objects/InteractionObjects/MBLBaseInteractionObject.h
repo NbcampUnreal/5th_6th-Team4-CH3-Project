@@ -24,8 +24,6 @@ protected:
 	// 오브젝트 타입
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InteractionObject")
 	FName InteractionObjectType;
-
-private:
 	// 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InteractionObject|Component", meta = (AllowPrivateAccess = "true"))
 	USceneComponent* SceneComp;
@@ -35,7 +33,7 @@ private:
 	UStaticMeshComponent* StaticMeshComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InteractionObject|Component", meta = (AllowPrivateAccess = "true"))
 	UWidgetComponent* InteractableWidget;
-
+	bool bUsed;
 
 public:
 	virtual void OnPlayerOverlapBegin(
