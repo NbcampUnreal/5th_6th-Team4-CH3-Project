@@ -50,7 +50,7 @@ void AGroundAttack::OnTimelineFinished()
 		GetActorLocation(),
 		FQuat::Identity,
 		ECC_MBL_PLAYER,
-		FCollisionShape::MakeSphere(110 * MaxScale)
+		FCollisionShape::MakeSphere(120 * MaxScale)
 	);
 
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), AttackSound, GetActorLocation(), 0.02f, 1.5f);
