@@ -47,6 +47,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float PlaryTime;
 
+	UPROPERTY(BlueprintReadOnly)
+	bool GmaeClear = false;
+
 	FTimerHandle WaveTimerHandle;
 
 	
