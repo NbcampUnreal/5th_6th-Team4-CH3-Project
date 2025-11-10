@@ -34,9 +34,6 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Timer")
 	float RemainingTime;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Coin")
-	int32 CollectedCoinCount;
-
 	UPROPERTY(BlueprintReadWrite, Category = "Kill")
 	int32 KillCount;
 
@@ -46,7 +43,6 @@ public:
 	void OnWaveEnd();
 	void UpdateTimer();
 	void Addkill();
-	void AddCoin(int32 Amount);
 
 	int32 GetKills() const;
 	float GetRemainingTime() const;  //추가

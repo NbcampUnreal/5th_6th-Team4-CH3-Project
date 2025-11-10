@@ -56,14 +56,18 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     TObjectPtr<UStaticMeshComponent> StaticMesh;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-    TObjectPtr<UNiagaraComponent> Trail;
+    TObjectPtr<USceneComponent> TrailTransform;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     TObjectPtr<UProjectileMovementComponent> ProjectileMovement;
-    UPROPERTY(EditAnywhere)
+    UPROPERTY()
     TObjectPtr<UProjectileActionBase> ProjectileAction;
 
+    UPROPERTY(EditAnywhere)
+    TSubclassOf<UNiagaraComponent> TrailTemplate;
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     TObjectPtr<UNiagaraSystem> TrailEffect;
+    UPROPERTY()
+    TObjectPtr<UNiagaraComponent> TrailComponent;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     FAttackData AttackData;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -79,11 +83,6 @@ protected:
     float OriginTrailLifeTime;
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     FLinearColor OriginTrailColor;
-
-    UPROPERTY()
-    FVector TrailRelativeLocation;
-    UPROPERTY()
-    FRotator TrailRelativeRotation;
 
     FTimerHandle DestroyTimerHandle;
 

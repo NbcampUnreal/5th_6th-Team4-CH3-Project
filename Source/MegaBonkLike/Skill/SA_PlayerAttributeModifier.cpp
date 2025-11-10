@@ -7,6 +7,22 @@ void USA_PlayerAttributeModifier::Activate(TWeakObjectPtr<AActor> InInstigator)
 {
 	Super::Activate(InInstigator);
 
+	TimerDelegate.BindUObject(this, &ThisClass::HandleAllModifiers);
+	SetIntervalTimer();
+}
+
+void USA_PlayerAttributeModifier::Deactivate()
+{
+	Super::Deactivate();
+
+	for (const auto& [TriggerId, TriggeredModifierInfo] : TriggeredModifierInfos)
+	{
+		RemoveModifier(TriggerId);
+	}
+}
+
+void USA_PlayerAttributeModifier::HandleAllModifiers()
+{
 	AMBLPlayerCharacter* Player = Cast<AMBLPlayerCharacter>(Instigator);
 	if (IsValid(Player) == false)
 		return;
@@ -19,7 +35,10 @@ void USA_PlayerAttributeModifier::Activate(TWeakObjectPtr<AActor> InInstigator)
 				ApplyModifier(Index, AttributeTriggers[Index].AttributeModifier);
 				break;
 			case EAttributeTriggerType::Player_OnDamaged:
-				Player->OnDamaged.AddDynamic(this, &ThisClass::HandlePlayerDamaged);
+				if (Player->OnDamaged.IsAlreadyBound(this, &ThisClass::HandlePlayerDamaged) == false)
+				{
+					Player->OnDamaged.AddDynamic(this, &ThisClass::HandlePlayerDamaged);
+				}
 				break;
 			case EAttributeTriggerType::Player_OnKillCountOver:
 			case EAttributeTriggerType::Player_OnEvery_N_Kills:
@@ -33,29 +52,25 @@ void USA_PlayerAttributeModifier::Activate(TWeakObjectPtr<AActor> InInstigator)
 						break;
 
 					HandleKilled(GameState->GetKills());
-					GameState->OnChangedKillCount.AddDynamic(this, &ThisClass::HandleKilled);
+					if (GameState->OnChangedKillCount.IsAlreadyBound(this, &ThisClass::HandleKilled) == false)
+					{
+						GameState->OnChangedKillCount.AddDynamic(this, &ThisClass::HandleKilled);
+					}
 				}
 				break;
 			case EAttributeTriggerType::Player_LowerHP:
 			case EAttributeTriggerType::Player_UpperHP:
 				{
 					HandleHPChanged(Player->GetCurrHP(), Player->GetMaxHP());
-					Player->OnHPChanged.AddDynamic(this, &ThisClass::HandleHPChanged);
+					if (Player->OnHPChanged.IsAlreadyBound(this, &ThisClass::HandleHPChanged) == false)
+					{
+						Player->OnHPChanged.AddDynamic(this, &ThisClass::HandleHPChanged);
+					}
 				}
 				break;
 			default:
 				continue;
 		}
-	}
-}
-
-void USA_PlayerAttributeModifier::Deactivate()
-{
-	Super::Deactivate();
-
-	for (const auto& [TriggerId, TriggeredModifierInfo] : TriggeredModifierInfos)
-	{
-		RemoveModifier(TriggerId);
 	}
 }
 
