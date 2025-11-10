@@ -44,6 +44,8 @@ AProjectile::AProjectile()
 void AProjectile::BeginPlay()
 {
     Super::BeginPlay();
+
+    MovingEffect.SetOwner(this);
 }
 
 void AProjectile::SetDirectionAndSpeed(const FVector& InDirection, float InSpeed)
@@ -131,6 +133,8 @@ void AProjectile::Activate()
         StaticMesh->SetHiddenInGame(false);
     }
 
+    GetRootComponent()->UpdateComponentToWorld();
+
     if (IsValid(TrailComponent) == false)
     {
         UPoolSubsystem* PoolSubsystem = GetWorld()->GetSubsystem<UPoolSubsystem>();
@@ -144,14 +148,18 @@ void AProjectile::Activate()
     if (IsValid(TrailComponent) == true)
     {
         TrailComponent->SetAsset(TrailEffect);
+        TrailComponent->ResetSystem();
         TrailComponent->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
         TrailComponent->SetRelativeLocation(TrailTransform->GetRelativeLocation());
         TrailComponent->SetRelativeRotation(TrailTransform->GetRelativeRotation());
-        TrailComponent->ResetSystem();
+        TrailComponent->UpdateComponentToWorld();
         TrailComponent->Activate(true);
         TrailComponent->SetVariableFloat(TEXT("User.LifeTime"), OriginTrailLifeTime);
         TrailComponent->SetVariableLinearColor(TEXT("User.LinearColor"), OriginTrailColor);
     }
+
+    MovingEffect.SetOwner(this);
+    MovingEffect.ActivateAll();
 
     bReturnedToPool = false;
 }
@@ -179,6 +187,8 @@ void AProjectile::Deactivate()
     {
         TrailComponent->Deactivate();
     }
+
+    MovingEffect.DeactivateAll();
 
     bReturnedToPool = true;
     GetWorldTimerManager().ClearTimer(DestroyTimerHandle);

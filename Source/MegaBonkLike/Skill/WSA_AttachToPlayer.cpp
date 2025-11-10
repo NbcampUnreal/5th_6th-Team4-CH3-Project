@@ -41,8 +41,6 @@ void UWSA_AttachToPlayer::Activate(TWeakObjectPtr<AActor> InInstigator)
     
     TimerDelegate.BindUObject(this, &ThisClass::CheckHit);
     SetIntervalTimer();
-
-    CheckHitEffects.SetOwner(Instigator);
 }
 
 void UWSA_AttachToPlayer::Deactivate()
@@ -74,7 +72,7 @@ void UWSA_AttachToPlayer::SetSize()
     if (IsValid(AttachedActor) == false)
         return;
 
-    AttachedActor->SetActorScale3D(GetValue(TAG_Attribute_Size) * FVector::OneVector);
+    AttachedActor->SetSize(GetValue(TAG_Attribute_Size));
 }
 
 void UWSA_AttachToPlayer::CheckHit()
@@ -83,5 +81,4 @@ void UWSA_AttachToPlayer::CheckHit()
         return;
 
     AttachedActor->CheckHitOnNextFrame();
-    CheckHitEffects.ActivateAll(FVector::ZeroVector, FRotator::ZeroRotator);
 }

@@ -14,6 +14,8 @@ void UWSA_RangeAttack::Activate(TWeakObjectPtr<AActor> InInstigator)
 
 	TimerDelegate.BindUObject(this, &ThisClass::StartShoot);
 	SetIntervalTimer();
+
+	ShootEffects.SetOwner(Instigator);
 }
 
 void UWSA_RangeAttack::StartShoot()
@@ -175,5 +177,7 @@ void UWSA_RangeAttack::ShootSingle(const FVector& TargetDir)
 		ActionContext.Instigator = Instigator;
 		Projectile->SetProjectileAction(ProjectileActionClass, ActionContext);
 		Projectile->SetActorEnableCollision(true);
+
+		ShootEffects.ActivateAll();
 	}
 }

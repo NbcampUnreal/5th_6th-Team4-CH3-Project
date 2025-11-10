@@ -21,6 +21,7 @@ void ADamageAreaActor::BeginPlay()
 {
     Super::BeginPlay();
 
+    CheckHitEffects.SetOwner(this);
     SetOverlapEnable(false);
 }
 
@@ -30,6 +31,7 @@ void ADamageAreaActor::Activate()
     {
         CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
     }
+    CheckHitEffects.SetOwner(this);
 }
 
 void ADamageAreaActor::Deactivate()
@@ -38,6 +40,8 @@ void ADamageAreaActor::Deactivate()
     {
         CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     }
+
+    CheckHitEffects.DeactivateAll();
 }
 
 void ADamageAreaActor::SetAttackData(const FAttackData& InAttackData)
@@ -48,6 +52,7 @@ void ADamageAreaActor::SetAttackData(const FAttackData& InAttackData)
 void ADamageAreaActor::SetSize(float InSize)
 {
 	Size = InSize;
+    CurrSize = Size;
 	SetActorScale3D(Size * FVector::OneVector);
 }
 
@@ -103,8 +108,8 @@ void ADamageAreaActor::Shrink()
 {
     LifeTimeTimer += 0.03f;
     float Alpha = LifeTimeTimer / LifeTime;
-    float Scale = FMath::Lerp(1.f, 0.f, Alpha);
-    SetActorScale3D(Scale * Size * FVector::OneVector);
+    CurrSize = FMath::Lerp(1.f, 0.f, Alpha) * Size;
+    SetActorScale3D(CurrSize * FVector::OneVector);
     if (LifeTimeTimer >= LifeTime)
     {
         GetWorldTimerManager().ClearTimer(LifeTimeHandle);
@@ -136,6 +141,8 @@ void ADamageAreaActor::CheckHit()
         ApplyDamage(OverlapActor);
     }
 
+    //CheckHitEffects.DeactivateAll();
+    CheckHitEffects.ActivateAll(FVector::ZeroVector, FRotator::ZeroRotator, CurrSize);
     SetOverlapEnable(false);
 }
 

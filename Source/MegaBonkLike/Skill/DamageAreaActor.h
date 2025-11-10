@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "Attack/AttackData.h"
 #include "Common/PoolSpawnable.h"
+#include "Skill/SkillEffect/SkillEffectSet.h"
 #include "DamageAreaActor.generated.h"
 
 UCLASS(Abstract)
@@ -44,6 +45,12 @@ protected:
 	float Size = 1.0f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float DamageInterval = 1.0f;
+
+	UPROPERTY()
+	float CurrSize = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FSkillEffectSet CheckHitEffects;
 
 	FTimerHandle HitTimerHandle;
 	FTimerHandle LifeTimeHandle;

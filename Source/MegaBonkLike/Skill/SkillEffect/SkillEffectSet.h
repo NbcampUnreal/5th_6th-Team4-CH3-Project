@@ -15,6 +15,6 @@ struct MEGABONKLIKE_API FSkillEffectSet
 	
 	void SetOwner(TWeakObjectPtr<AActor> InOwner);
 
-	void ActivateAll(const FVector& Location, const FRotator& Rotation);
+	void ActivateAll(const FVector& Location = FVector::ZeroVector, const FRotator& Rotation = FRotator::ZeroRotator, float InScale = 1.0f);
 	void DeactivateAll();
 };

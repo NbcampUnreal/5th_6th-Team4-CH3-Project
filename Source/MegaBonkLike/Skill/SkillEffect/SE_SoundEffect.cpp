@@ -2,12 +2,18 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/AudioComponent.h"
 
-void USE_SoundEffect::Activate(const FVector& Location, const FRotator& Rotation)
+void USE_SoundEffect::Activate(const FVector& Location, const FRotator& Rotation, float InScale)
 {
     if (Owner.IsValid() == false || IsValid(Sound) == false)
         return;
 
-    Audio = UGameplayStatics::SpawnSoundAttached(Sound, Owner->GetRootComponent());
+    if (IsValid(Audio) == false)
+    {
+        Audio = UGameplayStatics::SpawnSoundAttached(Sound, Owner->GetRootComponent());
+    }
+
+    Audio->VolumeMultiplier = InScale;
+    Audio->Play();
 }
 
 void USE_SoundEffect::Deactivate()
@@ -16,5 +22,4 @@ void USE_SoundEffect::Deactivate()
         return;
 
     Audio->Stop();
-    Audio = nullptr;
 }

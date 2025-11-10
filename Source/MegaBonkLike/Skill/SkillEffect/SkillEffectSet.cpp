@@ -9,11 +9,11 @@ void FSkillEffectSet::SetOwner(TWeakObjectPtr<AActor> InOwner)
 	}
 }
 
-void FSkillEffectSet::ActivateAll(const FVector& Location, const FRotator& Rotation)
+void FSkillEffectSet::ActivateAll(const FVector& Location, const FRotator& Rotation, float InScale)
 {
 	for (const auto& Effect : Effects)
 	{
-		Effect->Activate(Location, Rotation);
+		Effect->Activate(Location, Rotation, InScale);
 	}
 }
 
