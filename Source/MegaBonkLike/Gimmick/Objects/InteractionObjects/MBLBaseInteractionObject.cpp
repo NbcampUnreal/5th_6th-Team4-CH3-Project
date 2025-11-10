@@ -54,19 +54,9 @@ void AMBLBaseInteractionObject::BeginPlay()
 	}
 
 	CallOverlap(DetectionComp);
+	UpdateWidgetText();
+	InteractableWidget->SetVisibility(false);
 	
-	if (InteractableWidget)
-	{
-		InteractableWidget->SetVisibility(false);
-		if (UUserWidget* Widget = InteractableWidget->GetWidget())
-		{
-			if (UInteractionWidget* InteractionWidget = Cast<UInteractionWidget>(Widget))
-			{
-				InteractionWidget->SetInteractionText(GetObejctType());
-			}
-		}
-	}
-
 }
 
 void AMBLBaseInteractionObject::OnPlayerOverlapBegin(
@@ -78,6 +68,7 @@ void AMBLBaseInteractionObject::OnPlayerOverlapBegin(
 	const FHitResult& SweepResult)
 {
 	if (bUsed) return;
+	UpdateWidgetText();
 	InteractableWidget->SetVisibility(true);
 }
 
@@ -87,6 +78,7 @@ void AMBLBaseInteractionObject::OnPlayerOverlapEnd(
 	UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex)
 {
+	UpdateWidgetText();
 	InteractableWidget->SetVisibility(false);
 }
 
@@ -124,5 +116,19 @@ FName AMBLBaseInteractionObject::GetObejctType() const
 void AMBLBaseInteractionObject::DestroyObject()
 {
 	Destroy();
+}
+
+void AMBLBaseInteractionObject::UpdateWidgetText()
+{
+	if (InteractableWidget)
+	{
+		if (UUserWidget* Widget = InteractableWidget->GetWidget())
+		{
+			if (UInteractionWidget* InteractionWidget = Cast<UInteractionWidget>(Widget))
+			{
+				InteractionWidget->SetInteractionText(GetObejctType());
+			}
+		}
+	}
 }
 

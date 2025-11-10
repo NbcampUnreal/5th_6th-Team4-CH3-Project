@@ -21,4 +21,5 @@ public:
 	UFUNCTION()
 	void UpdateRequiredGold();
 	void DenyMessage();
+	void PlayOpenSound();
 };

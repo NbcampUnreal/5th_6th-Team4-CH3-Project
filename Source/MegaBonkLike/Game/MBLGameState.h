@@ -6,14 +6,21 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnChangedKillCount, int32, KillCount);
 
+enum class EMBLWaveState : uint8;
+
 UCLASS()
 class MEGABONKLIKE_API AMBLGameState : public AGameState
 {
 	GENERATED_BODY()
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "BGM", meta = (AllowPrivateAccess = "true"))
+	TArray<USoundBase*> WaveBGMs;
+	UPROPERTY()
+	UAudioComponent* BGMComp;
+
 public:
-
 	AMBLGameState();
-
 	FOnChangedKillCount OnChangedKillCount;
 
 protected:
@@ -42,6 +49,9 @@ public:
 
 	FTimerHandle WaveTimerHandle;
 
+	
+	void ChangeBGM(EMBLWaveState CurrentWave);
+
 	void StartWave();
 	void OnWaveEnd();
 	void UpdateTimer();
@@ -50,4 +60,7 @@ public:
 	int32 GetKills() const;
 	float TimeSurvived() const;
 	void UpdateHUD();
+	UFUNCTION()
+	void PlayBGM(EMBLWaveState CurrentWave);
+	void BGMOff();
 };
