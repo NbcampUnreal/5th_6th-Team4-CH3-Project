@@ -15,7 +15,7 @@ AMBLGameMode::AMBLGameMode()
     , Boss(nullptr)
     , DropTable(nullptr)
     , CurrentWave(EMBLWaveState::SetWave)
-    , WaveDuration(10.0f)//
+    , WaveDuration(60.0f)
     , MaxSpawnObject(500)
     , SpawnInterval(1.0f)
     , MaxSpawnEnemy(1)

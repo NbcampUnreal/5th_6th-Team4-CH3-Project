@@ -46,6 +46,7 @@ private:
 	FTimerHandle NextWaveTimerHandle;
 	FTimerHandle GameOverTimerHandle;
 	EMBLWaveState CurrentWave;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Test|WaveDuration", meta = (AllowPrivateAccess = "true"))
 	float WaveDuration;
 	float SpawnInterval;
 

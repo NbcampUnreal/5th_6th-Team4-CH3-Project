@@ -175,7 +175,7 @@ FVector AMBLSpawnVolume::GetValidNavMeshLocation(const FVector& Location, float 
 
 	FVector FinalLocation = ValidLocation.Location;
 
-	const float StartOffset = 5000.f;
+	const float StartOffset = 10000.f;
 	const float EndOffset = 500.f;
 	
 	FVector Start = FVector(FinalLocation.X, FinalLocation.Y, FinalLocation.Z + StartOffset);

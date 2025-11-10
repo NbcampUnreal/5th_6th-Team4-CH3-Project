@@ -22,7 +22,6 @@ protected:
 	virtual void BeginPlay() override;
 
 	// 오브젝트 타입
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InteractionObject")
 	FName InteractionObjectType;
 	// 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InteractionObject|Component")
@@ -56,5 +55,6 @@ public:
 	virtual void OnObjectActivated(AActor* Activator) override;
 	virtual FName GetObejctType() const override;
 	virtual void DestroyObject() override;
+	void UpdateWidgetText();
 
 };
