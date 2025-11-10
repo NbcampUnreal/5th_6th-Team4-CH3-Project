@@ -67,7 +67,7 @@ void UOutgameUIEndGameScreen::SetOutgameUIScore()
 	{
 		if (GameState->GmaeClear)
 		{
-			TitleText->SetText(FText::FromString(TEXT("!! Gmae Clea !!")));
+			TitleText->SetText(FText::FromString(TEXT("!! Game Clear !!")));
 		}
 		else
 		{

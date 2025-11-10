@@ -49,7 +49,7 @@ AMBLBossCharacter::AMBLBossCharacter()
 	bUseControllerRotationYaw = false;
 
 	bIsDead = false;
-	MaxHP = 1000;
+	MaxHP = 10000;
 	CurrHP = MaxHP;
 	Attack = 20;
 
