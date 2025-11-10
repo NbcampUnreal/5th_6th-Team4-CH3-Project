@@ -19,7 +19,7 @@ public:
 	virtual void OnObjectActivated(AActor* Activator) override;
 
 	UFUNCTION()
-	void UpdateRequiredGold();
+	virtual void UpdateRequiredGold();
 	void DenyMessage();
 	void PlayOpenSound();
 };
