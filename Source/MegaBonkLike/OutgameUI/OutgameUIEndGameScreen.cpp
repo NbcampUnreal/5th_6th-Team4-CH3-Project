@@ -38,7 +38,7 @@ void UOutgameUIEndGameScreen::SetOutgameUIScore()
 	if (GameState)
 	{
 		Kills = GameState->GetKills();
-		TimeSurvived = GameState->GetRemainingTime();
+		TimeSurvived = GameState->TimeSurvived();
 	}
 
 	if (PlayerCharacter)
@@ -76,12 +76,12 @@ void UOutgameUIEndGameScreen::SetOutgameUIInventory()
 	{
 		if (IsValid(WeaponList) == true)
 		{
-			WeaponList->SetItems(Inventory->GetCachedItems(EItemType::Weapon));
+			WeaponList->SetItems(Inventory->GetCachedItems(EItemType::Weapon), Inventory->GetMaxWeaponCount());
 		}
 
 		if (IsValid(TomesList) == true)
 		{
-			TomesList->SetItems(Inventory->GetCachedItems(EItemType::Tomes));
+			TomesList->SetItems(Inventory->GetCachedItems(EItemType::Tomes), Inventory->GetMaxWeaponCount());
 		}
 
 		if (IsValid(TomesList) == true)

@@ -37,6 +37,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Kill")
 	int32 KillCount;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float PlaryTime;
+
 	FTimerHandle WaveTimerHandle;
 
 	void StartWave();
@@ -45,7 +48,6 @@ public:
 	void Addkill();
 
 	int32 GetKills() const;
-	float GetRemainingTime() const;  //추가
-
+	float TimeSurvived() const;
 	void UpdateHUD();
 };

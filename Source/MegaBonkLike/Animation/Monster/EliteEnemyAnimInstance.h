@@ -2,13 +2,15 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "KIH_NpcAnimInstance.generated.h"
+#include "EliteEnemyAnimInstance.generated.h"
 
 class AMBLCharacterBase;
 class UCharacterMovementComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCheckAttack);
+
 UCLASS()
-class MEGABONKLIKE_API UKIH_NpcAnimInstance : public UAnimInstance
+class MEGABONKLIKE_API UEliteEnemyAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 	
@@ -28,5 +30,11 @@ protected:
 	float GroundSpeed;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	uint8 bShouldMove : 1;
-	
+
+private:
+	void AnimNotify_CheckHit();
+
+public:
+
+	FOnCheckAttack OnCheckAttack;
 };

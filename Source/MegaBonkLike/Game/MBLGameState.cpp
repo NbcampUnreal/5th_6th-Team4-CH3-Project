@@ -8,8 +8,9 @@ AMBLGameState::AMBLGameState()
 {
 	CurrentWaveIndex = 0;
 	MaxWaves = 4;
-	WaveDuration = 0; //�ӽ� 60�ʷ� �� ����
+	WaveDuration = 0;
 	RemainingTime = 0;
+	PlaryTime = 0;
 	KillCount = 0;
 }
 
@@ -38,6 +39,7 @@ void AMBLGameState::StartWave()
 void AMBLGameState::UpdateTimer()
 {
 	RemainingTime -= 1.0f;
+	PlaryTime += 1.0f;
 
 	UpdateHUD();
 
@@ -92,7 +94,7 @@ int32 AMBLGameState::GetKills() const
 	return KillCount;
 }
 
-float AMBLGameState::GetRemainingTime() const
+float AMBLGameState::TimeSurvived() const
 {
-	return RemainingTime;
+	return PlaryTime;
 }

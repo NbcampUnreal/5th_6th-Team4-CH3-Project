@@ -5,8 +5,6 @@ void UKillCounter::UpdateKillCounter(int32 KillCount)
 {
 	if (KillCounterText)
 	{
-		KillCounterText->SetText(FText::FromString(
-			FString::Printf(TEXT("Kills: %d"), KillCount)
-		));
+		KillCounterText->SetText(FText::AsNumber(KillCount));
 	}
 }
