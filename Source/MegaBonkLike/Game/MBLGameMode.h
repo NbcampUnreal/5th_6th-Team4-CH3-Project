@@ -6,6 +6,8 @@
 #include "Character/EnemyBase.h"
 #include "MBLGameMode.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWaveChanged, EMBLWaveState, Wave);
+
 class AMBLSpawnVolume;
 struct FInteractionObjectsRow;
 struct FSpawnEnemyList;
@@ -17,6 +19,8 @@ class MEGABONKLIKE_API AMBLGameMode : public AGameMode
 
 public:
 	AMBLGameMode();
+	UPROPERTY(BlueprintAssignable)
+	FOnWaveChanged OnWaveChanged;
 	void SpawnBoss();
 	FInteractionObjectsRow* GetDropObject() const;
 	TSubclassOf<AEnemyBase> GetEnemyClass(EMBLWaveState Wave) const;
@@ -46,6 +50,7 @@ private:
 	FTimerHandle NextWaveTimerHandle;
 	FTimerHandle GameOverTimerHandle;
 	EMBLWaveState CurrentWave;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Test|WaveDuration", meta = (AllowPrivateAccess = "true"))
 	float WaveDuration;
 	float SpawnInterval;
 
