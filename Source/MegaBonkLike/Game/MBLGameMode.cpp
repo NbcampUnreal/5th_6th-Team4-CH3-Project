@@ -231,6 +231,11 @@ float AMBLGameMode::GetWaveDuration() const
 
 void AMBLGameMode::GameOver()
 {
+    if (AMBLGameState* CurrentGameState = GetGameState<AMBLGameState>())
+    {
+        CurrentGameState->BGMOff();
+    }
+
     if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
     {
         if (AMBLPlayerController* MBLPlayerController = Cast<AMBLPlayerController>(PlayerController))
@@ -270,4 +275,5 @@ void AMBLGameMode::WaveSet()
     );
 
     if (CurrentWave == EMBLWaveState::FinalWave) SpawnBoss();
+    OnWaveChanged.Broadcast(CurrentWave);
 }

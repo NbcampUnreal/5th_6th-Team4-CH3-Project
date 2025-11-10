@@ -2,9 +2,12 @@
 #include "Player/MBLPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Game/MBLGameMode.h"
-
+#include "Gimmick/Data/MBLWaveEnums.h"
+#include "Components/AudioComponent.h"
 
 AMBLGameState::AMBLGameState()
+	: WaveBGMs()
+	, BGMComp(nullptr)
 {
 	CurrentWaveIndex = 0;
 	MaxWaves = 4;
@@ -19,9 +22,14 @@ void AMBLGameState::BeginPlay()
 	Super::BeginPlay();
 	if (AMBLGameMode* GameMode = Cast<AMBLGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
 	{
+		if (!GameMode->OnWaveChanged.IsAlreadyBound(this, &AMBLGameState::PlayBGM))
+		{
+			GameMode->OnWaveChanged.AddDynamic(this, &AMBLGameState::PlayBGM);
+		}
 		WaveDuration = GameMode->GetWaveDuration();
 	}
 	StartWave();
+	PlayBGM(EMBLWaveState::Wave1);
 }
 
 void AMBLGameState::StartWave()
@@ -86,6 +94,29 @@ void AMBLGameState::UpdateHUD()
 			}
 			
 		}
+	}
+}
+
+void AMBLGameState::PlayBGM(EMBLWaveState CurrentWave)
+{
+	if (WaveBGMs.IsEmpty()) return;
+
+	BGMOff();
+
+	uint8 BGMIndex = uint8(CurrentWave) - 1;
+	uint8 FinalWave = uint8(EMBLWaveState::FinalWave);
+
+	if (BGMIndex > FinalWave) return;
+	
+	BGMComp = UGameplayStatics::SpawnSound2D(this, WaveBGMs[BGMIndex]);
+}
+
+void AMBLGameState::BGMOff()
+{
+	if (BGMComp)
+	{
+		BGMComp->Stop();
+		BGMComp->DestroyComponent();
 	}
 }
 
