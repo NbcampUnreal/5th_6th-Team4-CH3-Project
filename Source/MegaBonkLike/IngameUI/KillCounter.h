@@ -5,6 +5,7 @@
 #include "KillCounter.generated.h"
 
 class UTextBlock;
+class UImage;
 
 UCLASS()
 class MEGABONKLIKE_API UKillCounter : public UUserWidget
@@ -18,6 +19,8 @@ public:
 
 
 protected:
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr <UImage> KillCounterImage;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> KillCounterText;
