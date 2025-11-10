@@ -28,6 +28,7 @@ public:
 	void DeadEnemy(); // Àû »ç¸Á½Ã
 	void DeadBoss(); // º¸½º »ç¸Á½Ã
 	float GetWaveDuration() const;
+	float GetBossWaveDuration() const;
 	void GameOver();
 
 protected:
@@ -52,6 +53,8 @@ private:
 	EMBLWaveState CurrentWave;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Test|WaveDuration", meta = (AllowPrivateAccess = "true"))
 	float WaveDuration;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Test|BossWaveDuration", meta = (AllowPrivateAccess = "true"))
+	float BossWaveDuration;
 	float SpawnInterval;
 
 	void WaveSet();

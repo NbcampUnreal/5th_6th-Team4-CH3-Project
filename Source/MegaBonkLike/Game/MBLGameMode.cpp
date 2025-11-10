@@ -16,6 +16,7 @@ AMBLGameMode::AMBLGameMode()
     , DropTable(nullptr)
     , CurrentWave(EMBLWaveState::SetWave)
     , WaveDuration(60.0f)
+    , BossWaveDuration(30.f)
     , MaxSpawnObject(500)
     , SpawnInterval(1.0f)
     , MaxSpawnEnemy(1)
@@ -107,7 +108,7 @@ void AMBLGameMode::SpawnBoss()
         GameOverTimerHandle,
         this,
         &AMBLGameMode::GameOver,
-        WaveDuration,
+        BossWaveDuration,
         false
     );
 }
@@ -227,6 +228,11 @@ void AMBLGameMode::DeadBoss()
 float AMBLGameMode::GetWaveDuration() const
 {
     return WaveDuration;
+}
+
+float AMBLGameMode::GetBossWaveDuration() const
+{
+    return BossWaveDuration;
 }
 
 void AMBLGameMode::GameOver()
