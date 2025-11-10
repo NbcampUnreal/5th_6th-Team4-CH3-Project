@@ -39,6 +39,12 @@ void AMBLGameMode::BeginPlay()
         return;
     }
 
+    if (AMBLGameState* GS = GetGameState<AMBLGameState>())
+    {
+        GS->GmaeClear = false;
+    }
+
+
     SpawnManager();
     
     WaveSet();
@@ -187,6 +193,11 @@ TSubclassOf<AEnemyBase> AMBLGameMode::GetEnemyClass(EMBLWaveState Wave) const
 
 void AMBLGameMode::DeadPlayer()
 {
+    if (AMBLGameState* GS = GetGameState<AMBLGameState>())
+    {
+        GS->GmaeClear = false;  //클리어 못함
+    }
+
     GameOver();
 }
 
@@ -211,6 +222,7 @@ void AMBLGameMode::DeadBoss()
     if (AMBLGameState* GS = GetGameState<AMBLGameState>())  //추가
     {
         GS->Addkill();
+        GS->GmaeClear = true;  //클리어 함
     }
 
     //보스가죽었을때 체력바 사라지는표시
