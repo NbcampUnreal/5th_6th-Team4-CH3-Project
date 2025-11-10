@@ -16,7 +16,7 @@ AMBLGameMode::AMBLGameMode()
     , DropTable(nullptr)
     , CurrentWave(EMBLWaveState::SetWave)
     , WaveDuration(60.0f)
-    , BossWaveDuration(30.f)
+    , BossWaveDuration(30.0f)
     , MaxSpawnObject(500)
     , SpawnInterval(1.0f)
     , MaxSpawnEnemy(1)
@@ -100,6 +100,17 @@ void AMBLGameMode::SpawnBoss()
             MBLPlayerController->ShowBossHPBar(true);
         }
     }
+
+    if (AMBLGameState* GS = GetGameState<AMBLGameState>())
+    {
+        GS->WaveDuration = GetBossWaveDuration();   
+        GS->StartWave();      
+
+        GS->CurrentWaveIndex = GS->MaxWaves;
+        GS->UpdateHUD();
+    }
+
+    if (!SpawnVolume || !Boss) return;
 
     AEnemyBase* NewEnemy = SpawnVolume->SpawnEnemy(Boss);
     if (!IsValid(NewEnemy)) return;
