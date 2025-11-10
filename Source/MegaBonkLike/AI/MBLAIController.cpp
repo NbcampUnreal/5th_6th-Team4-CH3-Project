@@ -7,6 +7,7 @@
 #include "Character/MBLNonPlayerCharacter.h"
 #include "Character/FlyingEnemy.h"
 #include "Character/MBLBossCharacter.h"
+#include "Character/MBLEliteMonster.h"
 #include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
@@ -44,43 +45,49 @@ void AMBLAIController::OnPossess(APawn* InPawn)
 			BlackboardComp->SetValueAsBool(TEXT("CanFly"), false);
 			StartBehaviorTree();
 		}
+		else if (AMBLEliteMonster* Elite = Cast<AMBLEliteMonster>(InPawn))
+		{
+			TWeakObjectPtr<AMBLEliteMonster> WeakElite = Elite;
 
-		if (AFlyingEnemy* Enemy = Cast<AFlyingEnemy>(InPawn))
+			GetWorld()->GetTimerManager().SetTimerForNextTick([WeakElite]()
+				{
+					if (WeakElite.IsValid())
+					{
+						WeakElite->SpawnWeapon();
+					}
+				});
+
+			BlackboardComp->SetValueAsBool(TEXT("CanFly"), false);
+			StartBehaviorTree();
+		}
+
+		else if (AFlyingEnemy* Enemy = Cast<AFlyingEnemy>(InPawn))
 		{
 			BlackboardComp->SetValueAsBool(TEXT("CanFly"), true);
 			BlackboardComp->SetValueAsBool(TEXT("IsFlyingMode"), true);
 			StartBehaviorTree();
 		}
-
 	}
+	GetWorld()->GetTimerManager().SetTimerForNextTick(
+		this, 
+		&AMBLAIController::SetPlayerPawnToBlackboard 
+	);
+}
 
+void AMBLAIController::SetPlayerPawnToBlackboard()
+{
 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	if (PlayerPawn && GetBlackboardComp())
 	{
 
 		GetBlackboardComp()->SetValueAsObject(TEXT("TargetCharacter"), PlayerPawn);
+
 	}
 }
 
 UBlackboardComponent* AMBLAIController::GetBlackboardComp() const
 {
 	return BlackboardComp;
-}
-
-void AMBLAIController::OnSmartLinkJump(AActor* MovingActor, const FVector& DestinationPoint)
-{
-	AMBLNonPlayerCharacter* NPC = Cast<AMBLNonPlayerCharacter>(MovingActor);
-	if (NPC)
-	{
-		StopMovement();
-		NPC->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-
-		APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-		if (PlayerPawn)
-		{
-			MoveToActor(PlayerPawn, 50.f);
-		}
-	}
 }
 
 void AMBLAIController::StartBehaviorTree()
@@ -94,4 +101,3 @@ void AMBLAIController::StartBehaviorTree()
 
 	}
 }
-

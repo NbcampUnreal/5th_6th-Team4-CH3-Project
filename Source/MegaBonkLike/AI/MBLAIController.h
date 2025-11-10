@@ -17,9 +17,6 @@ public:
 
 	UBlackboardComponent* GetBlackboardComp() const;
 
-	UFUNCTION(BlueprintCallable)
-	void OnSmartLinkJump(AActor* MovingActor, const FVector& DestinationPoint);
-
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	UBlackboardComponent* BlackboardComp;
@@ -40,4 +37,5 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void OnPossess(APawn* InPawn) override;
 
+	void SetPlayerPawnToBlackboard();
 };

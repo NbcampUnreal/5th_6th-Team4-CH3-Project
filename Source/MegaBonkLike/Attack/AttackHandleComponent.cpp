@@ -1,6 +1,6 @@
 ﻿#include "Attack/AttackHandleComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "GameFramework/Character.h"
+#include "Character/MBLPlayerCharacter.h"
 #include "AIController.h"
 #include "BrainComponent.h"
 
@@ -25,6 +25,11 @@ float UAttackHandleComponent::ExecuteAttack(AActor* Target, const FAttackData& D
 	float FinalDamage = Data.Damage * (bIsCritical ? Data.CriticalMultiplier : 1.0f);
 
 	UGameplayStatics::ApplyDamage(Target, FinalDamage, Data.Causer->GetInstigatorController(), Causer, nullptr);
+	if (AMBLPlayerCharacter* PlayerCharacter = Cast<AMBLPlayerCharacter>(Causer))
+	{
+		float StealedHp = FinalDamage * Data.LifeSteal;
+		PlayerCharacter->AddHealth(StealedHp);
+	}
 
 	if (Data.Knockback > 0.0f)
 	{
@@ -36,6 +41,9 @@ float UAttackHandleComponent::ExecuteAttack(AActor* Target, const FAttackData& D
 
 void UAttackHandleComponent::ApplyKnockback(AActor* Target, AActor* Causer, float KnockbackForce, const FVector& KnockbackDirection)
 {
+	if (Target->ActorHasTag(TEXT("Boss")) == true)
+		return;
+
 	ACharacter* TargetCharacter = Cast<ACharacter>(Target);
 	if (TargetCharacter == nullptr)
 		return;
@@ -50,11 +58,11 @@ void UAttackHandleComponent::ApplyKnockback(AActor* Target, AActor* Causer, floa
 			FTimerHandle KnockbackTimerHandle;
 			FTimerDelegate Delegate;
 			Delegate.BindLambda(
-				[this, AIController, TargetLocation]()
+				[WeakThis = TWeakObjectPtr<UAttackHandleComponent>(this), WeakAI = TWeakObjectPtr<AAIController>(AIController), TargetLocation]()
 				{
-					if (IsValid(this) == true && IsValid(AIController))
+					if (WeakThis.IsValid() == true && WeakAI.IsValid() == true)
 					{
-						this->OnEndAIKnockback(AIController, TargetLocation);
+						WeakThis->OnEndAIKnockback(WeakAI.Get(), TargetLocation);
 					}
 				});
 			UWorld* World = GetWorld();

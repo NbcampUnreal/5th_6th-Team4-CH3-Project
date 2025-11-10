@@ -13,4 +13,6 @@ class MEGABONKLIKE_API UMBLGameInstance : public UGameInstance
 public:
 	UPROPERTY(BlueprintReadWrite)
 	int32 SelectedWeaponId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MouseSensitivity = 1.0f;
 };

@@ -7,19 +7,65 @@
 #include "Components/Image.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/AssetManager.h"
+#include "IngameUI/UIItemSlotInfo.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 
 void UUIItemSlot::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
 
-	// 아이템 상세 설명창 추가 (일시 정지 메뉴용)
+	if (Item.IsValid() == false)
+		return;
+
+	if (IsValid(UIInfo) == false)
+	{
+		if (IsValid(UIInfoClass) == true)
+		{
+			UIInfo = CreateWidget<UUIItemSlotInfo>(GetWorld(), UIInfoClass);
+			UIInfo->AddToViewport(10);
+		}
+	}
+
+	if (IsValid(UIInfo) == true)
+	{
+		UIInfo->SetVisibility(ESlateVisibility::HitTestInvisible);
+		UIInfo->SetInfo(Item);
+		bInfoActive = true;
+	}
 }
 
 void UUIItemSlot::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
 {
 	Super::NativeOnMouseLeave(InMouseEvent);
 
-	// 아이템 상세 설명창 제거
+	if (IsValid(UIInfo) == true)
+	{
+		UIInfo->SetVisibility(ESlateVisibility::Hidden);
+	}
+	bInfoActive = false;
+}
+
+void UUIItemSlot::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	if (bInfoActive)
+	{
+		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+		if (IsValid(PlayerController) == false)
+			return;
+
+		FVector2D InfoPos;
+		UWidgetLayoutLibrary::GetMousePositionScaledByDPI(PlayerController, InfoPos.X, InfoPos.Y);
+
+		FVector2D ViewportSize = UWidgetLayoutLibrary::GetViewportSize(GetWorld());
+		FVector2D InfoSize = UIInfo->GetDesiredSize();
+
+		InfoPos.X = FMath::Clamp(InfoPos.X, 0.0f, ViewportSize.X - InfoSize.X);
+		InfoPos.Y = FMath::Clamp(InfoPos.Y - InfoSize.Y, 0.0f, ViewportSize.Y - InfoSize.Y);
+
+		UIInfo->SetPositionInViewport(InfoPos, false);
+	}
 }
 
 void UUIItemSlot::SetItem(TWeakObjectPtr<UItemBase> InItem)
@@ -31,6 +77,11 @@ void UUIItemSlot::SetItem(TWeakObjectPtr<UItemBase> InItem)
 	const FItemDataRow* Data = Item->GetData();
 	if (Data == nullptr)
 		return;
+
+	if (IsValid(UIInfo) == true)
+	{
+		UIInfo->SetInfo(Item);
+	}
 
 	if (IsValid(TextItemName) == true)
 	{

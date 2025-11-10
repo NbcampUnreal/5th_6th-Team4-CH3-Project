@@ -1,4 +1,4 @@
-#include "Game/MBLGameMode.h"
+ï»¿#include "Game/MBLGameMode.h"
 #include "Game/MBLGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/MBLPlayerCharacter.h"
@@ -91,10 +91,7 @@ void AMBLGameMode::SpawnManager()
 
 void AMBLGameMode::SpawnBoss()
 {
-    AEnemyBase* NewEnemy = SpawnVolume->SpawnEnemy(Boss);
-    if (!IsValid(NewEnemy)) return;
-
-    //º¸½º°¡ µîÀåÇÒ¶§ Ã¼·Â¹Ù Ç¥½Ã
+    //ë³´ìŠ¤ê°€ ë“±ìž¥í• ë•Œ ì²´ë ¥ë°” í‘œì‹œ
     if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
     {
         if (AMBLPlayerController* MBLPlayerController = Cast<AMBLPlayerController>(PlayerController))
@@ -102,6 +99,9 @@ void AMBLGameMode::SpawnBoss()
             MBLPlayerController->ShowBossHPBar(true);
         }
     }
+
+    AEnemyBase* NewEnemy = SpawnVolume->SpawnEnemy(Boss);
+    if (!IsValid(NewEnemy)) return;
 
     GetWorldTimerManager().SetTimer(
         GameOverTimerHandle,
@@ -199,7 +199,7 @@ void AMBLGameMode::DeadEnemy()
 
     CurrentEnemy--;
 
-    if (AMBLGameState* GS = GetGameState<AMBLGameState>())  //Ãß°¡
+    if (AMBLGameState* GS = GetGameState<AMBLGameState>())  //ì¶”ê°€
     {
         GS->Addkill();
     }
@@ -207,12 +207,12 @@ void AMBLGameMode::DeadEnemy()
 
 void AMBLGameMode::DeadBoss()
 {
-    if (AMBLGameState* GS = GetGameState<AMBLGameState>())  //Ãß°¡
+    if (AMBLGameState* GS = GetGameState<AMBLGameState>())  //ì¶”ê°€
     {
         GS->Addkill();
     }
 
-    //º¸½º°¡Á×¾úÀ»¶§ Ã¼·Â¹Ù »ç¶óÁö´ÂÇ¥½Ã
+    //ë³´ìŠ¤ê°€ì£½ì—ˆì„ë•Œ ì²´ë ¥ë°” ì‚¬ë¼ì§€ëŠ”í‘œì‹œ
     if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
     {
         if (AMBLPlayerController* MBLPlayerController = Cast<AMBLPlayerController>(PlayerController))

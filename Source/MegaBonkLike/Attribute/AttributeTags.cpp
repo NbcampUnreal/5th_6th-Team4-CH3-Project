@@ -17,6 +17,7 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Attribute_JumpHeight, "Attribute.JumpHeight");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Attribute_CriticalChance, "Attribute.CriticalChance");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Attribute_CriticalMultiplier, "Attribute.CriticalMultiplier");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Attribute_Knockback, "Attribute.Knockback");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Attribute_LifeSteal, "Attribute.LifeSteal");
 
 const TArray<FGameplayTag>& GetAttributeTags()
 {

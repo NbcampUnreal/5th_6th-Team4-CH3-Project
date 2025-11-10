@@ -1,11 +1,28 @@
 ﻿#include "Skill/SA_PlayerAttributeModifier.h"
 #include "Character/MBLPlayerCharacter.h"
 #include "Character/AttributeComponent.h"
+#include "Game/MBLGameState.h"
 
 void USA_PlayerAttributeModifier::Activate(TWeakObjectPtr<AActor> InInstigator)
 {
 	Super::Activate(InInstigator);
 
+	TimerDelegate.BindUObject(this, &ThisClass::HandleAllModifiers);
+	SetIntervalTimer();
+}
+
+void USA_PlayerAttributeModifier::Deactivate()
+{
+	Super::Deactivate();
+
+	for (const auto& [TriggerId, TriggeredModifierInfo] : TriggeredModifierInfos)
+	{
+		RemoveModifier(TriggerId);
+	}
+}
+
+void USA_PlayerAttributeModifier::HandleAllModifiers()
+{
 	AMBLPlayerCharacter* Player = Cast<AMBLPlayerCharacter>(Instigator);
 	if (IsValid(Player) == false)
 		return;
@@ -18,29 +35,42 @@ void USA_PlayerAttributeModifier::Activate(TWeakObjectPtr<AActor> InInstigator)
 				ApplyModifier(Index, AttributeTriggers[Index].AttributeModifier);
 				break;
 			case EAttributeTriggerType::Player_OnDamaged:
-				Player->OnDamaged.AddDynamic(this, &ThisClass::HandlePlayerDamaged);
+				if (Player->OnDamaged.IsAlreadyBound(this, &ThisClass::HandlePlayerDamaged) == false)
+				{
+					Player->OnDamaged.AddDynamic(this, &ThisClass::HandlePlayerDamaged);
+				}
 				break;
 			case EAttributeTriggerType::Player_OnKillCountOver:
 			case EAttributeTriggerType::Player_OnEvery_N_Kills:
-				// GameMode 적 킬 수 저장하도록 하고 Delegate 받아야겠다고 말하기
+				{
+					UWorld* World = GetWorld();
+					if (IsValid(World) == false)
+						break;
+
+					AMBLGameState* GameState = World->GetGameState<AMBLGameState>();
+					if (IsValid(GameState) == false)
+						break;
+
+					HandleKilled(GameState->GetKills());
+					if (GameState->OnChangedKillCount.IsAlreadyBound(this, &ThisClass::HandleKilled) == false)
+					{
+						GameState->OnChangedKillCount.AddDynamic(this, &ThisClass::HandleKilled);
+					}
+				}
 				break;
 			case EAttributeTriggerType::Player_LowerHP:
 			case EAttributeTriggerType::Player_UpperHP:
-				Player->OnHPChanged.AddDynamic(this, &ThisClass::HandleHPChanged);
+				{
+					HandleHPChanged(Player->GetCurrHP(), Player->GetMaxHP());
+					if (Player->OnHPChanged.IsAlreadyBound(this, &ThisClass::HandleHPChanged) == false)
+					{
+						Player->OnHPChanged.AddDynamic(this, &ThisClass::HandleHPChanged);
+					}
+				}
 				break;
 			default:
 				continue;
 		}
-	}
-}
-
-void USA_PlayerAttributeModifier::Deactivate()
-{
-	Super::Deactivate();
-
-	for (const auto& [TriggerId, TriggeredModifierInfo] : TriggeredModifierInfos)
-	{
-		RemoveModifier(TriggerId);
 	}
 }
 
@@ -58,12 +88,24 @@ void USA_PlayerAttributeModifier::HandlePlayerDamaged(float Damage, AActor* Dama
 	}
 }
 
-// 킬 수 전달받게 바꿔야 할 듯
 void USA_PlayerAttributeModifier::HandleKilled(int32 KillCount)
 {
 	for (int32 Index = 0; Index < AttributeTriggers.Num(); ++Index)
 	{
-		// GameMode 적 킬 수 생기면 그 때
+		if (AttributeTriggers[Index].TriggerType == EAttributeTriggerType::Player_OnKillCountOver)
+		{
+			if (KillCount >= AttributeTriggers[Index].TriggerValue)
+			{
+				ApplyModifier(Index, AttributeTriggers[Index].AttributeModifier);
+			}
+		}
+		else if (AttributeTriggers[Index].TriggerType == EAttributeTriggerType::Player_OnEvery_N_Kills)
+		{
+			int32 Multiplier = KillCount / AttributeTriggers[Index].TriggerValue;
+			FAttributeModifier Modifier = AttributeTriggers[Index].AttributeModifier;
+			Modifier.Value *= Multiplier;
+			ApplyModifier(Index, Modifier);
+		}
 	}
 }
 

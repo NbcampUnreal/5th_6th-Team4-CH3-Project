@@ -28,6 +28,8 @@ public:
 	void SelectItem(const FItemSelectOption& Option);
 	UFUNCTION()
 	void RefreshOptions();
+	UFUNCTION()
+	void SetRefreshCount(int32 Count);
 
 protected:
 	UPROPERTY(meta = (BindWidget))
@@ -37,16 +39,18 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUIItemSelectOption> UIOptionClass;
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UButton> BtnBanish;
-	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> BtnSkip;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> BtnRefresh;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> TextRefreshCount;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UUIInventory> UIInventory;
 
 	UPROPERTY()
 	int32 OptionCount = 3;
+	UPROPERTY()
+	int32 RefreshCount = 3;
 
 	UPROPERTY()
 	TWeakObjectPtr<UInventoryComponent> Inventory;

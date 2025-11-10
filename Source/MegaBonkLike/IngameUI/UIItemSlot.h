@@ -7,6 +7,7 @@
 class UTextBlock;
 class UItemBase;
 class UImage;
+class UUIItemSlotInfo;
 
 UCLASS()
 class MEGABONKLIKE_API UUIItemSlot : public UUserWidget
@@ -16,6 +17,7 @@ class MEGABONKLIKE_API UUIItemSlot : public UUserWidget
 public:
 	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	void SetItem(TWeakObjectPtr<UItemBase> InItem);
 
@@ -28,6 +30,13 @@ protected:
 	TObjectPtr<UTextBlock> TextItemLevel;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UImage> ImgIcon;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUIItemSlotInfo> UIInfoClass;
+	UPROPERTY()
+	TObjectPtr<UUIItemSlotInfo> UIInfo;
+	UPROPERTY()
+	bool bInfoActive;
 
 	UPROPERTY()
 	TWeakObjectPtr<const UItemBase> Item;

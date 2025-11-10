@@ -5,26 +5,100 @@
 #include "IngameUI/PopupTags.h"
 #include "IngameUI/PopupItemAcquire.h"
 #include "Player/MBLPlayerController.h"
+#include "Gimmick/Objects/InteractionObjects/GoldManagerSubsystem.h"
+#include "Kismet/GameplayStatics.h"
+#include "Gimmick/Objects/UI/ChestWidget.h"
+#include "Components/WidgetComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AMBLChestObject::AMBLChestObject()
+	: DenySound(nullptr)
 {
+}
+
+void AMBLChestObject::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UpdateRequiredGold();
+
+	if (UGoldManagerSubsystem* GoldManager = GetWorld()->GetSubsystem<UGoldManagerSubsystem>())
+	{
+		if (!GoldManager->OnRequiredGoldUpdated.IsAlreadyBound(this, &AMBLChestObject::UpdateRequiredGold))
+		{
+			GoldManager->OnRequiredGoldUpdated.AddDynamic(this, &AMBLChestObject::UpdateRequiredGold);
+		}
+	}
 }
 
 void AMBLChestObject::OnObjectActivated(AActor* Activator)
 {
-	if (AMBLPlayerCharacter* Player = Cast<AMBLPlayerCharacter>(Activator))
+	UWorld* World = GetWorld();
+	if (!IsValid(World)) return;
+
+	UGoldManagerSubsystem* GoldManager = World->GetSubsystem<UGoldManagerSubsystem>();
+	if (!IsValid(GoldManager)) return;
+	
+	
+	AMBLPlayerCharacter* Player = Cast<AMBLPlayerCharacter>(Activator);
+	if (!IsValid(Player)) return;
+
+	if (Player->UseGold(GoldManager->GetRequiredGold()))
 	{
-		if (UInventoryComponent* Inventory = Player->FindComponentByClass<UInventoryComponent>())
+		if (InteractionSound)
 		{
-			if (AMBLPlayerController* PlayerController = Cast<AMBLPlayerController>(Player->GetController()))
+			UGameplayStatics::PlaySound2D(this, InteractionSound);
+		}
+
+		UInventoryComponent* Inventory = Player->FindComponentByClass<UInventoryComponent>();
+		if (!IsValid(Inventory)) return;
+
+		AMBLPlayerController* PlayerController = Cast<AMBLPlayerController>(Player->GetController());
+		if (!IsValid(PlayerController)) return;
+
+		UPopupItemAcquire* PopupItemAcquire = Cast<UPopupItemAcquire>(PlayerController->MakePopup(TAG_Popup_AcquireItem));
+		if (!IsValid(PopupItemAcquire)) return;
+
+		GoldManager->NextPhase();
+		PopupItemAcquire->SetInventory(Inventory);
+		PopupItemAcquire->SetOption();
+		Super::DestroyObject();
+
+		return;
+	}
+
+	if (DenySound)
+	{
+		DenyMessage();
+		UGameplayStatics::PlaySoundAtLocation(
+			GetWorld(),
+			DenySound,
+			GetActorLocation()
+		);
+	}
+}
+
+void AMBLChestObject::UpdateRequiredGold()
+{
+	if (UUserWidget* Widget = InteractableWidget->GetWidget())
+	{
+		if (UChestWidget* ChestWidget = Cast<UChestWidget>(Widget))
+		{
+			if (UGoldManagerSubsystem* GoldManager = GetWorld()->GetSubsystem<UGoldManagerSubsystem>())
 			{
-				if (UPopupItemAcquire* PopupItemAcquire = Cast<UPopupItemAcquire>(PlayerController->MakePopup(TAG_Popup_AcquireItem)))
-				{
-					PopupItemAcquire->SetInventory(Inventory);
-					PopupItemAcquire->SetOption();
-					Super::DestroyObject();
-				}
+				ChestWidget->SetGoldText(GoldManager->GetRequiredGold());
 			}
-		}		
+		}
+	}
+}
+
+void AMBLChestObject::DenyMessage()
+{
+	if (UUserWidget* Widget = InteractableWidget->GetWidget())
+	{
+		if (UChestWidget* ChestWidget = Cast<UChestWidget>(Widget))
+		{
+			ChestWidget->ViewDenyMessage();
+		}
 	}
 }

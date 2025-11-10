@@ -40,7 +40,7 @@ FVector AMBLSpawnVolume::GetRandomEnemySpawnLocation(float CapsuleHalfHeight) co
 
 	const FVector Offset(FMath::Cos(Angle) * Radius, FMath::Sin(Angle) * Radius, 0.f);
 	FVector SpawnLocation = PlayerLocation + Offset;
-	UE_LOG(LogTemp, Error, TEXT("SpawnLocation: %s"), *SpawnLocation.ToString());//
+	
 	return GetValidNavMeshLocation(SpawnLocation, SearchRadius, CapsuleHalfHeight);
 }
 
@@ -201,7 +201,6 @@ FVector AMBLSpawnVolume::GetValidNavMeshLocation(const FVector& Location, float 
 	{
 		UE_LOG(LogTemp, Warning, TEXT("LineTrace failed. Using NavMesh Z."));
 	}
-	UE_LOG(LogTemp, Error, TEXT("FinalLocation: %s"), *FinalLocation.ToString());//
 
 	return FinalLocation;
 }

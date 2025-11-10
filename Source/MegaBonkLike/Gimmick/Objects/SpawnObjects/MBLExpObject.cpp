@@ -12,6 +12,7 @@ void AMBLExpObject::OnObjectActivated(AActor* Activator)
 	if (AMBLPlayerCharacter* Player = Cast<AMBLPlayerCharacter>(Activator))
 	{
 		Player->AcquireExp(Exp);
+		Super::OnObjectActivated(Activator);
 		Super::DestroyObject();
 	}
 }
