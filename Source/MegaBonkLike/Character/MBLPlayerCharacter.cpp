@@ -224,10 +224,22 @@ void AMBLPlayerCharacter::Input_Move(const FInputActionValue& InputValue)
 
 void AMBLPlayerCharacter::Input_Look(const FInputActionValue& InputValue)
 {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	FVector2D LookVector = InputValue.Get<FVector2D>();
 
-	AddControllerYawInput(LookVector.X);
-	AddControllerPitchInput(LookVector.Y);
+	float Sensitivity = 1.0f;
+
+	if (const UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (const UMBLGameInstance* MBLGameInstance = Cast<UMBLGameInstance>(GameInstance))
+		{
+			Sensitivity = MBLGameInstance->MouseSensitivity;
+		}
+	}
+
+	AddControllerYawInput(LookVector.X * Sensitivity);
+	AddControllerPitchInput(LookVector.Y * Sensitivity);
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
 void AMBLPlayerCharacter::Interact(const FInputActionValue& Value)
