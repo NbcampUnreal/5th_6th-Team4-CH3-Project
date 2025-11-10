@@ -4,8 +4,10 @@
 #include "Blueprint/UserWidget.h"
 #include "UIWeaponInfoPanel.generated.h"
 
+class UWidgetSwitcher;
 class UTextBlock;
 class UItemBase;
+struct FItemDataRow;
 
 UCLASS()
 class MEGABONKLIKE_API UUIWeaponInfoPanel : public UUserWidget
@@ -17,6 +19,9 @@ public:
     void SetWeaponInfo(UItemBase* WeaponItem);
 
 protected:
+    UPROPERTY(meta = (BindWidget))
+    UWidgetSwitcher* WeaponInfoSwitcher;
+
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UTextBlock> WeaponName;
 
