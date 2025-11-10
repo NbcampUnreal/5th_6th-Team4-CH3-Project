@@ -1,23 +1,14 @@
 ﻿#include "Common/PoolSubsystem.h"
 #include "Common/PoolBase.h"
 
-void UPoolSubsystem::ReturnToPool(AActor* Actor)
+void UPoolSubsystem::ReturnToPool(UObject* Object)
 {
-	if (IsValid(Actor) == false)
+	if (IsValid(Object) == false)
 		return;
 
-	if (IPoolSpawnable* PoolSpawnable = Cast<IPoolSpawnable>(Actor))
-	{
-		PoolSpawnable->Deactivate();
-	}
-
-	TObjectPtr<UPoolBase>* PoolPtr = PoolMap.Find(Actor->GetClass());
+	TObjectPtr<UPoolBase>* PoolPtr = PoolMap.Find(Object->GetClass());
 	if (PoolPtr)
 	{
-		(*PoolPtr)->ReturnActor(Actor);
-	}
-	else
-	{
-		Actor->Destroy();
+		(*PoolPtr)->Return(Object);
 	}
 }

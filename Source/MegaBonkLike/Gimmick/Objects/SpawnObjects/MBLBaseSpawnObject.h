@@ -35,6 +35,8 @@ private:
 	UStaticMeshComponent* StaticMeshComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SpawnObject|Component", meta = (AllowPrivateAccess = "true"))
 	UProjectileMovementComponent* ProjectileComp;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SpawnObject|Sound", meta = (AllowPrivateAccess = "true"))
+	USoundBase* PickupSound;
 
 	// 오브젝트 Rotation
 	FTimerHandle RotationTimerHandle;

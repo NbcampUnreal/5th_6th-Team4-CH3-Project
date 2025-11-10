@@ -1,4 +1,5 @@
 #include "MBLBaseSpawnObject.h"
+#include "Kismet/GameplayStatics.h"
 #include "Components/SceneComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -6,7 +7,13 @@
 #include "TimerManager.h"
 
 AMBLBaseSpawnObject::AMBLBaseSpawnObject()
-	: RotationSpeed(90.f)
+	: SpawnObjectType("")
+	, SceneComp(nullptr)
+	, CollisionComp(nullptr)
+	, StaticMeshComp(nullptr)
+	, ProjectileComp(nullptr)
+	, PickupSound(nullptr)
+	, RotationSpeed(90.f)
 	, UpdateRotation(0.02f)
 	, TargetActor(nullptr)
 	, BaseSpeed(1000.f)
@@ -103,7 +110,14 @@ void AMBLBaseSpawnObject::CallOverlap(UPrimitiveComponent* CollisionComponent)
 
 void AMBLBaseSpawnObject::OnObjectActivated(AActor* Activator)
 {
-	UE_LOG(LogTemp, Warning, TEXT("BaseSpawnObject OnObjectActivated() Called"));
+	if (PickupSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			GetWorld(),
+			PickupSound,
+			GetActorLocation()
+		);
+	}
 }
 
 FName AMBLBaseSpawnObject::GetObejctType() const

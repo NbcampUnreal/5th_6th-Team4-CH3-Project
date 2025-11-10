@@ -6,6 +6,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Game/MBLGameMode.h"
 #include "MegaBonkLike.h"
+#include "Player/MBLPlayerController.h" //IngameUI 추가
+#include "Kismet/GameplayStatics.h" //IngameUI 추가
 
 AMBLBossCharacter::AMBLBossCharacter()
 {
@@ -57,6 +59,15 @@ AMBLBossCharacter::AMBLBossCharacter()
 void AMBLBossCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//IngameUI
+	if (AMBLPlayerController* CT = Cast<AMBLPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)))
+	{
+		CT->UpdateBossHP(CurrHP, MaxHP);
+		OnHPChanged.AddDynamic(CT, &AMBLPlayerController::UpdateBossHP);
+	}
+	//IngameUI
+
 }
 
 
@@ -170,7 +181,7 @@ void AMBLBossCharacter::OnDamageColliderBeginOverlap(
 				DamageTimerHandle,
 				this,
 				&AMBLBossCharacter::DamageTick,
-				0.5f,
+				1.0f,
 				true,
 				0.f
 			);
@@ -187,7 +198,7 @@ void AMBLBossCharacter::OnDamageColliderEndOverlap(
 	if (OtherActor && OtherActor == DamageTarget)
 	{
 		DamageTarget = nullptr;
-		GetWorldTimerManager().ClearTimer(DamageTimerHandle);
+		//GetWorldTimerManager().ClearTimer(DamageTimerHandle);
 		//UE_LOG(LogTemp, Warning, TEXT("Player left dectection area."));
 	}
 }
@@ -198,6 +209,7 @@ void AMBLBossCharacter::DamageTick()
 	{
 		//데미지 적용
 		UGameplayStatics::ApplyDamage(DamageTarget, Attack, GetInstigatorController(), GetInstigator(), UDamageType::StaticClass());
+		//UE_LOG(LogTemp, Warning, TEXT("Monster HP : %f / %f"), CurrHP, MaxHP);
 
 		//넉백 적용
 		AMBLCharacterBase* Player = Cast<AMBLCharacterBase>(DamageTarget);

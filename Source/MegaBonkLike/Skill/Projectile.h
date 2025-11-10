@@ -11,6 +11,8 @@ class UStaticMeshComponent;
 class UNiagaraComponent;
 class UNiagaraSystem;
 class UProjectileMovementComponent;
+class UProjectileActionBase;
+struct FProjectileActionContext;
 
 UCLASS(Abstract)
 class MEGABONKLIKE_API AProjectile : public AActor, public IPoolSpawnable
@@ -30,20 +32,23 @@ public:
     void SetDirectionAndSpeed(const FVector& InDirection, float InSpeed);
     void SetAttackData(const FAttackData& InAttackData);
     void SetSize(float InSize);
-    void SetPenetrate(bool bInPenetrate);
-
-    void SetLifeTimer();
+    void SetProjectileAction(const TSubclassOf<UProjectileActionBase>& ActionClass, const FProjectileActionContext& ActionContext);
 
     void ApplyDamage(AActor* TargetActor);
 
+    void SetUpdatedComponent();
+
+    UFUNCTION()
     void ReturnToPool();
+
+private:
+    void SetLifeTimer(float LifeTime);
 
 protected:
     UFUNCTION()
     void OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 BodyIndex, bool bFromSweep, const FHitResult& Hit);
     UFUNCTION()
-    void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
-        UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+    void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -51,12 +56,18 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     TObjectPtr<UStaticMeshComponent> StaticMesh;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-    TObjectPtr<UNiagaraComponent> Trail;
+    TObjectPtr<USceneComponent> TrailTransform;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     TObjectPtr<UProjectileMovementComponent> ProjectileMovement;
+    UPROPERTY()
+    TObjectPtr<UProjectileActionBase> ProjectileAction;
 
+    UPROPERTY(EditAnywhere)
+    TSubclassOf<UNiagaraComponent> TrailTemplate;
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     TObjectPtr<UNiagaraSystem> TrailEffect;
+    UPROPERTY()
+    TObjectPtr<UNiagaraComponent> TrailComponent;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     FAttackData AttackData;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -65,10 +76,15 @@ protected:
     float Size;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     bool bPenetrate;
+
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     float OriginTrailWidth;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    float OriginTrailLifeTime;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    FLinearColor OriginTrailColor;
 
     FTimerHandle DestroyTimerHandle;
 
-    static const float LifeTime;
+    bool bReturnedToPool;
 };

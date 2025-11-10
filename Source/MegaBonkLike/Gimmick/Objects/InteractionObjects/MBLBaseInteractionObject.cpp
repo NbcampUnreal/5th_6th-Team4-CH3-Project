@@ -4,11 +4,19 @@
 #include "Components/StaticMeshComponent.h"
 #include "Gimmick/Spawn/MBLSpawnSubsystem.h"
 #include "Gimmick/Objects/SpawnObjects/MBLBaseSpawnObject.h"
+#include "Gimmick/Objects/UI/InteractionWidget.h"
 #include "Components/WidgetComponent.h"
-#include "Components/TextBlock.h"
+#include "Kismet/GameplayStatics.h"
 
 
 AMBLBaseInteractionObject::AMBLBaseInteractionObject()
+	: InteractionObjectType("")
+	, SceneComp(nullptr)
+	, DetectionComp(nullptr)
+	, StaticMeshComp(nullptr)
+	, InteractableWidget(nullptr)
+	, InteractionSound(nullptr)
+	, bUsed(false)
 {
 	PrimaryActorTick.bCanEverTick = false;
 
@@ -27,7 +35,7 @@ AMBLBaseInteractionObject::AMBLBaseInteractionObject()
 	InteractableWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractableWidget"));
 	InteractableWidget->SetupAttachment(StaticMeshComp);
 	InteractableWidget->SetWidgetSpace(EWidgetSpace::Screen);
-	InteractableWidget->SetVisibility(false);
+	InteractableWidget->SetVisibility(true);
 
 }
 
@@ -50,6 +58,13 @@ void AMBLBaseInteractionObject::BeginPlay()
 	if (InteractableWidget)
 	{
 		InteractableWidget->SetVisibility(false);
+		if (UUserWidget* Widget = InteractableWidget->GetWidget())
+		{
+			if (UInteractionWidget* InteractionWidget = Cast<UInteractionWidget>(Widget))
+			{
+				InteractionWidget->SetInteractionText(GetObejctType());
+			}
+		}
 	}
 
 }
@@ -62,8 +77,8 @@ void AMBLBaseInteractionObject::OnPlayerOverlapBegin(
 	bool bFromSweep,
 	const FHitResult& SweepResult)
 {
+	if (bUsed) return;
 	InteractableWidget->SetVisibility(true);
-	UE_LOG(LogTemp, Warning, TEXT("Player can interact this object"));
 }
 
 void AMBLBaseInteractionObject::OnPlayerOverlapEnd(
@@ -73,7 +88,6 @@ void AMBLBaseInteractionObject::OnPlayerOverlapEnd(
 	int32 OtherBodyIndex)
 {
 	InteractableWidget->SetVisibility(false);
-	UE_LOG(LogTemp, Warning, TEXT("Player lost"));
 }
 
 void AMBLBaseInteractionObject::CallOverlap(UPrimitiveComponent* CollisionComponent)
@@ -94,6 +108,12 @@ void AMBLBaseInteractionObject::CallOverlap(UPrimitiveComponent* CollisionCompon
 
 void AMBLBaseInteractionObject::OnObjectActivated(AActor* Activator)
 {
+	if (InteractionSound)
+	{
+		UGameplayStatics::PlaySound2D(this, InteractionSound);
+	}
+	bUsed = true;
+	InteractableWidget->SetVisibility(false);
 }
 
 FName AMBLBaseInteractionObject::GetObejctType() const

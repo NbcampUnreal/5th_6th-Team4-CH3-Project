@@ -34,7 +34,7 @@ struct MEGABONKLIKE_API FItemDataRow : public FTableRowBase
 	EItemType ItemType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText ItemName;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (MultiLine = "true"))
 	FText ItemDesc;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSoftObjectPtr<UTexture2D> ItemIcon;

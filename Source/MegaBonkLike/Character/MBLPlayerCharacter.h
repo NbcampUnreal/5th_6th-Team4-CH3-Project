@@ -44,6 +44,8 @@ public:
 	int32 GetLevel() const { return Level; }
 
 	void AcquireGold(float InGold);
+	bool UseGold(float Price);
+	float GetGold() const { return Gold; }
 
 protected:
 	void Input_Move(const FInputActionValue& InputValue);
