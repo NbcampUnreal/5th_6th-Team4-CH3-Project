@@ -5,6 +5,7 @@
 #include "CoinCounter.generated.h"
 
 class UTextBlock;
+class UImage;
 
 UCLASS()
 class MEGABONKLIKE_API UCoinCounter : public UUserWidget
@@ -16,5 +17,8 @@ public:
 
 protected:
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UTextBlock> CoinText;
+	TObjectPtr <UImage> CoinImage;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> CoinCountText;
 };
