@@ -70,6 +70,18 @@ void AMBLBossCharacter::BeginPlay()
 
 }
 
+float AMBLBossCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	PlayHitFlash();
+
+	if (CurrHP <= 0.f)
+	{
+		DeadHandle();
+	}
+
+	return DamageAmount;
+}
 
 void AMBLBossCharacter::DeadHandle()
 {

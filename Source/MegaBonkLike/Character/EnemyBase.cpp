@@ -25,6 +25,43 @@ void AEnemyBase::BeginPlay()
 	}
 }
 
+float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	CurrHP -= DamageAmount;
+	PlayHitFlash();
+
+	return DamageAmount;
+}
+
+void AEnemyBase::PlayHitFlash()
+{
+	int32 MaterialCount = GetMesh()->GetNumMaterials();
+
+	for (int32 i = 0; i < MaterialCount; ++i)
+	{
+		if (UMaterialInstanceDynamic* DynMat = GetMesh()->CreateAndSetMaterialInstanceDynamic(i))
+		{
+			DynMat->SetScalarParameterValue(TEXT("HitFlashAmount"), 1.0f);
+
+			TWeakObjectPtr<UMaterialInstanceDynamic> WeakMat = DynMat;
+
+			FTimerDelegate TimerDel;
+			TimerDel.BindLambda([WeakMat]()
+				{
+					if (WeakMat.IsValid())
+					{
+						WeakMat->SetScalarParameterValue(TEXT("HitFlashAmount"), 0.0f);
+					}
+				});
+
+			FTimerHandle TimerHandle;
+			GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, 0.1f, false);
+		}
+	}
+}
+
 void AEnemyBase::SetAttack(EMBLWaveState Wave)
 {
 	if (!IsValid(StatDataTable)) return;

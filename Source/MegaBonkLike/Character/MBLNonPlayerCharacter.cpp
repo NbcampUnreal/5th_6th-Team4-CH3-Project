@@ -63,6 +63,19 @@ void AMBLNonPlayerCharacter::BeginPlay()
 	//UE_LOG(LogTemp, Warning, TEXT("%.f"), GetCharacterMovement()->MaxWalkSpeed);
 }
 
+float AMBLNonPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	PlayHitFlash();
+
+	if (CurrHP <= 0.f)
+	{
+		DeadHandle();
+	}
+
+	return DamageAmount;
+}
+
 
 void AMBLNonPlayerCharacter::DeadHandle()
 {
