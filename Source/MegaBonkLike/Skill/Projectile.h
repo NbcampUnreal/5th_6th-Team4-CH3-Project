@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "Attack/AttackData.h"
 #include "Common/PoolSpawnable.h"
+#include "Skill/SkillEffect/SkillEffectSet.h"
 #include "Projectile.generated.h"
 
 class USphereComponent;
@@ -83,6 +84,11 @@ protected:
     float OriginTrailLifeTime;
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     FLinearColor OriginTrailColor;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    FSkillEffectSet MovingEffect;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    FSkillEffectSet HitEffect;
 
     FTimerHandle DestroyTimerHandle;
 

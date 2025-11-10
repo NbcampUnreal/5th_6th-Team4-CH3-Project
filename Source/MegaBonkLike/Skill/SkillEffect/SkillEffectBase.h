@@ -12,7 +12,7 @@ class MEGABONKLIKE_API USkillEffectBase : public UObject
 public:
 	void SetOwner(TWeakObjectPtr<AActor> InOwner);
 
-	virtual void Activate(const FVector& Location, const FRotator& Rotation) {}
+	virtual void Activate(const FVector& Location, const FRotator& Rotation, float InScale) {}
 	virtual void Deactivate() {}
 
 protected:

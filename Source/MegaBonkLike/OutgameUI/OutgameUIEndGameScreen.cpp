@@ -63,6 +63,18 @@ void UOutgameUIEndGameScreen::SetOutgameUIScore()
 		LevelText->SetText(FText::FromString(FString::Printf(TEXT("Level: %d"), Level))); 
 	}
 
+	if (TitleText)
+	{
+		if (GameState->GmaeClear)
+		{
+			TitleText->SetText(FText::FromString(TEXT("!! Gmae Clea !!")));
+		}
+		else
+		{
+			TitleText->SetText(FText::FromString(TEXT("Game Over...")));
+		}
+	}
+
 }
 
 void UOutgameUIEndGameScreen::SetOutgameUIInventory()

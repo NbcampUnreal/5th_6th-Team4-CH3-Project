@@ -11,6 +11,15 @@ void UWSA_UnderFootAttack::Activate(TWeakObjectPtr<AActor> InInstigator)
 
     TimerDelegate.BindUObject(this, &ThisClass::SpawnUnderFootAttackActor);
     SetIntervalTimer();
+
+    SpawnEffects.SetOwner(Instigator);
+}
+
+void UWSA_UnderFootAttack::Deactivate()
+{
+    SpawnEffects.DeactivateAll();
+
+    Super::Deactivate();
 }
 
 void UWSA_UnderFootAttack::SpawnUnderFootAttackActor()
@@ -48,6 +57,9 @@ void UWSA_UnderFootAttack::SpawnUnderFootAttackActor()
                 SpawnActor->SetSize(Size);
                 SpawnActor->SetLifeTime(LifeTime);
                 SpawnActor->SetHitTimer(LifeTime / GetValue(TAG_Attribute_AttackProjectiles));
+
+                SpawnEffects.DeactivateAll();
+                SpawnEffects.ActivateAll();
             }
         }
     }

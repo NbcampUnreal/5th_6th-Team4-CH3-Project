@@ -42,4 +42,7 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* LevelText;
+
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* TitleText;
 };

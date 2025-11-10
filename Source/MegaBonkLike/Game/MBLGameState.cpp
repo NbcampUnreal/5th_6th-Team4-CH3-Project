@@ -61,10 +61,17 @@ void AMBLGameState::UpdateTimer()
 void AMBLGameState::OnWaveEnd()
 {
 	CurrentWaveIndex++;
-
-	StartWave();
-		
-
+	if (CurrentWaveIndex == MaxWaves - 1)
+	{
+		if (AMBLGameMode* GameMode = Cast<AMBLGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
+		{
+			GameMode->SpawnBoss();          
+			CurrentWaveIndex = MaxWaves;    
+			UpdateHUD();                    
+			return;                         
+		}
+	}
+  	StartWave();
 }
 
 void AMBLGameState::Addkill()
