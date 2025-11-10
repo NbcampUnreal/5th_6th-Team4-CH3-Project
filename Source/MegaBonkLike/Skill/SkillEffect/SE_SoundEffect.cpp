@@ -10,6 +10,9 @@ void USE_SoundEffect::Activate(const FVector& Location, const FRotator& Rotation
     if (IsValid(Audio) == false)
     {
         Audio = UGameplayStatics::SpawnSoundAttached(Sound, Owner->GetRootComponent());
+        Audio->bAllowSpatialization = true;
+        Audio->bOverrideAttenuation = true;
+        Audio->AttenuationOverrides.FalloffDistance = 3000.f;
     }
 
     Audio->VolumeMultiplier = InScale;
