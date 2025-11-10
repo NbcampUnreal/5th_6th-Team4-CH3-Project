@@ -39,6 +39,8 @@ protected:
 	TObjectPtr<UStaticMeshComponent> RangeMesh;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USphereComponent> SphereComponent;
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundBase* AttackSound;
 
 private:
 

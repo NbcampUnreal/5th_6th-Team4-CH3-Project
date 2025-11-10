@@ -33,7 +33,7 @@ FVector AMBLSpawnVolume::GetRandomEnemySpawnLocation(float CapsuleHalfHeight) co
 	const FVector PlayerLocation = PlayerActor->GetActorLocation();
 
 	// 캐릭터 기준 반경 300 ~ 1000M 안의 랜덤 지점 계산
-	const float MinRadius = 300.f;
+	const float MinRadius = 500.f;
 	const float MaxRadius = 1000.f;
 	const float Radius = FMath::FRandRange(MinRadius, MaxRadius);
 	const float Angle = FMath::FRandRange(0.f, 2 * PI);
@@ -94,6 +94,9 @@ AEnemyBase* AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AEnemyBase> EnemyClass)
 
 	FRotator SpawnRotation = (Player->GetActorLocation() - SpawnLocation).Rotation();
 
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
 	return World->SpawnActor<AEnemyBase>(EnemyClass, SpawnLocation, SpawnRotation);
 }
 
@@ -113,6 +116,9 @@ void AMBLSpawnVolume::SpawnObject(TSubclassOf<AActor> ObjectClass)
 	}
 
 	FRotator SpawnRotation = FRotator(0.f, FMath::FRandRange(0.f, 360.f), 0.f);
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
 	World->SpawnActor<AActor>(ObjectClass, SpawnLocation, SpawnRotation);
 }
@@ -175,7 +181,7 @@ FVector AMBLSpawnVolume::GetValidNavMeshLocation(const FVector& Location, float 
 
 	FVector FinalLocation = ValidLocation.Location;
 
-	const float StartOffset = 5000.f;
+	const float StartOffset = 10000.f;
 	const float EndOffset = 500.f;
 	
 	FVector Start = FVector(FinalLocation.X, FinalLocation.Y, FinalLocation.Z + StartOffset);

@@ -14,6 +14,7 @@ void AMBLMoneyObject::OnObjectActivated(AActor* Activator)
 	if (AMBLPlayerCharacter* Player = Cast<AMBLPlayerCharacter>(Activator))
 	{	
 		Player->AcquireGold(MoneyValue);
+		Super::OnObjectActivated(Activator);
 		Super::DestroyObject();
 	}
 }

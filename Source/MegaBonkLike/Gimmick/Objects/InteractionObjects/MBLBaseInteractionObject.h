@@ -22,20 +22,19 @@ protected:
 	virtual void BeginPlay() override;
 
 	// 오브젝트 타입
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InteractionObject")
 	FName InteractionObjectType;
-
-private:
 	// 컴포넌트
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InteractionObject|Component", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InteractionObject|Component")
 	USceneComponent* SceneComp;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InteractionObject|Component", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InteractionObject|Component")
 	USphereComponent* DetectionComp;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InteractionObject|Component", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InteractionObject|Component")
 	UStaticMeshComponent* StaticMeshComp;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InteractionObject|Component", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InteractionObject|Component")
 	UWidgetComponent* InteractableWidget;
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InteractionObject|Sound")
+	USoundBase* InteractionSound;
+	bool bUsed;
 
 public:
 	virtual void OnPlayerOverlapBegin(
@@ -56,5 +55,6 @@ public:
 	virtual void OnObjectActivated(AActor* Activator) override;
 	virtual FName GetObejctType() const override;
 	virtual void DestroyObject() override;
+	void UpdateWidgetText();
 
 };

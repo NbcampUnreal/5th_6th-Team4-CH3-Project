@@ -53,6 +53,8 @@ void AGroundAttack::OnTimelineFinished()
 		FCollisionShape::MakeSphere(110 * MaxScale)
 	);
 
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), AttackSound, GetActorLocation(), 0.02f, 1.5f);
+
 	if (bHit)
 	{
 		for (auto& Result : Overlaps)

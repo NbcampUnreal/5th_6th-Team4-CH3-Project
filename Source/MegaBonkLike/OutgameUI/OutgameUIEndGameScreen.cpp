@@ -38,7 +38,7 @@ void UOutgameUIEndGameScreen::SetOutgameUIScore()
 	if (GameState)
 	{
 		Kills = GameState->GetKills();
-		TimeSurvived = GameState->GetRemainingTime();
+		TimeSurvived = GameState->TimeSurvived();
 	}
 
 	if (PlayerCharacter)
@@ -63,6 +63,18 @@ void UOutgameUIEndGameScreen::SetOutgameUIScore()
 		LevelText->SetText(FText::FromString(FString::Printf(TEXT("Level: %d"), Level))); 
 	}
 
+	if (TitleText)
+	{
+		if (GameState->GmaeClear)
+		{
+			TitleText->SetText(FText::FromString(TEXT("!! Gmae Clea !!")));
+		}
+		else
+		{
+			TitleText->SetText(FText::FromString(TEXT("Game Over...")));
+		}
+	}
+
 }
 
 void UOutgameUIEndGameScreen::SetOutgameUIInventory()
@@ -76,12 +88,12 @@ void UOutgameUIEndGameScreen::SetOutgameUIInventory()
 	{
 		if (IsValid(WeaponList) == true)
 		{
-			WeaponList->SetItems(Inventory->GetCachedItems(EItemType::Weapon));
+			WeaponList->SetItems(Inventory->GetCachedItems(EItemType::Weapon), Inventory->GetMaxWeaponCount());
 		}
 
 		if (IsValid(TomesList) == true)
 		{
-			TomesList->SetItems(Inventory->GetCachedItems(EItemType::Tomes));
+			TomesList->SetItems(Inventory->GetCachedItems(EItemType::Tomes), Inventory->GetMaxWeaponCount());
 		}
 
 		if (IsValid(TomesList) == true)

@@ -11,6 +11,8 @@
 
 AFlyingEnemy::AFlyingEnemy()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
 	AIControllerClass = AMBLAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
@@ -48,20 +50,42 @@ void AFlyingEnemy::BeginPlay()
 	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 
 	GetWorldTimerManager().SetTimer(
-		MoveTimerHandle,
-		this,
-		&AFlyingEnemy::MoveStep,
-		0.05f,
-		true
-	);
-
-	GetWorldTimerManager().SetTimer(
 		TrackTimerHandle,
 		this,
 		&AFlyingEnemy::UpdateTrack,
 		0.1f,
 		true
 	);
+}
+
+void AFlyingEnemy::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (bIsDead) return;
+	if (!bIsFlyingMode) return;
+
+	if (!CurrentDirection.IsNearlyZero())
+	{
+		FVector NewLocation = GetActorLocation() + CurrentDirection * GetCharacterMovement()->MaxFlySpeed * DeltaTime;
+		SetActorLocation(NewLocation, false);
+
+		FRotator NewRotation = CurrentDirection.Rotation();
+		SetActorRotation(NewRotation);
+	}
+}
+
+float AFlyingEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	PlayHitFlash();
+
+	if (CurrHP <= 0.f)
+	{
+		DeadHandle();
+	}
+
+	return DamageAmount;
 }
 
 void AFlyingEnemy::UpdateTrack()
@@ -128,17 +152,6 @@ void AFlyingEnemy::UpdateTrack()
 
 }
 
-void AFlyingEnemy::MoveStep()
-{
-	if (CurrentDirection.IsNearlyZero()) return;
-
-	FVector NewLocation = GetActorLocation() + CurrentDirection * GetCharacterMovement()->MaxFlySpeed * 0.05f;
-	SetActorLocation(NewLocation, false);
-
-	FRotator NewRotation = CurrentDirection.Rotation();
-	SetActorRotation(NewRotation);
-}
-
 void AFlyingEnemy::SetFlyingMode(bool bNewFlying)
 {
 	bIsFlyingMode = bNewFlying;
@@ -152,34 +165,7 @@ void AFlyingEnemy::SetFlyingMode(bool bNewFlying)
 	}
 	GetCharacterMovement()->SetMovementMode(bIsFlyingMode ? MOVE_Flying : MOVE_Walking);
 
-	UE_LOG(LogTemp, Warning, TEXT("SetFlyingMode called: %s"), bNewFlying ? TEXT("Flying") : TEXT("Walking"));
-
-	if (bIsFlyingMode)
-	{
-
-		GetWorldTimerManager().SetTimer(
-			MoveTimerHandle,
-			this,
-			&AFlyingEnemy::MoveStep,
-			0.05f,
-			true
-		);
-	}
-	else
-	{
-		GetWorldTimerManager().ClearTimer(MoveTimerHandle);
-	}
-
-	if (!GetWorldTimerManager().IsTimerActive(TrackTimerHandle))
-	{
-		GetWorldTimerManager().SetTimer(
-			TrackTimerHandle,
-			this,
-			&AFlyingEnemy::UpdateTrack,
-			0.1f,
-			true
-		);
-	}
+	//UE_LOG(LogTemp, Warning, TEXT("SetFlyingMode called: %s"), bNewFlying ? TEXT("Flying") : TEXT("Walking"));
 
 }
 
@@ -205,7 +191,7 @@ void AFlyingEnemy::OnDamageColliderBeginOverlap(
 				DamageTimerHandle,
 				this,
 				&AFlyingEnemy::DamageTick,
-				0.5f,
+				1.0f,
 				true,
 				0.f
 			);
@@ -218,7 +204,7 @@ void AFlyingEnemy::OnDamageColliderEndOverlap(UPrimitiveComponent* OverlappedCom
 	if (OtherActor && OtherActor == DamageTarget)
 	{
 		DamageTarget = nullptr;
-		GetWorldTimerManager().ClearTimer(DamageTimerHandle);
+		//GetWorldTimerManager().ClearTimer(DamageTimerHandle);
 		//UE_LOG(LogTemp, Warning, TEXT("Player left dectection area."));
 	}
 }
@@ -229,6 +215,7 @@ void AFlyingEnemy::DamageTick()
 	{
 		//데미지 적용
 		UGameplayStatics::ApplyDamage(DamageTarget, Attack, GetInstigatorController(), GetInstigator(), UDamageType::StaticClass());
+		//UE_LOG(LogTemp, Warning, TEXT("Monster HP : %f / %f"), CurrHP, MaxHP);
 
 		//넉백 적용
 		AMBLCharacterBase* Player = Cast<AMBLCharacterBase>(DamageTarget);

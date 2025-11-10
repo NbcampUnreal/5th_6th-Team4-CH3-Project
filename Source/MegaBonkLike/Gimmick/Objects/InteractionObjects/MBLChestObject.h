@@ -8,8 +8,18 @@ UCLASS()
 class MEGABONKLIKE_API AMBLChestObject : public AMBLBaseInteractionObject
 {
 	GENERATED_BODY()
+
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DenySound", meta = (AllowPrivateAccess = "true"))
+	USoundBase* DenySound;
+
 public:
 	AMBLChestObject();
+	virtual void BeginPlay() override;
 	virtual void OnObjectActivated(AActor* Activator) override;
-	
+
+	UFUNCTION()
+	virtual void UpdateRequiredGold();
+	void DenyMessage();
+	void PlayOpenSound();
 };

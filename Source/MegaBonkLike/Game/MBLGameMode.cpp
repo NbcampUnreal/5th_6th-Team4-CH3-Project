@@ -15,8 +15,9 @@ AMBLGameMode::AMBLGameMode()
     , Boss(nullptr)
     , DropTable(nullptr)
     , CurrentWave(EMBLWaveState::SetWave)
-    , WaveDuration(10.0f)//
-    , MaxSpawnObject(500)
+    , WaveDuration(60.0f)
+    , BossWaveDuration(30.f)
+    , MaxSpawnObject(600)
     , SpawnInterval(1.0f)
     , MaxSpawnEnemy(1)
     , CurrentEnemy(0)
@@ -37,6 +38,12 @@ void AMBLGameMode::BeginPlay()
         UE_LOG(LogTemp, Error, TEXT("SpawnVolume not found"));
         return;
     }
+
+    if (AMBLGameState* GS = GetGameState<AMBLGameState>())
+    {
+        GS->GmaeClear = false;
+    }
+
 
     SpawnManager();
     
@@ -107,7 +114,7 @@ void AMBLGameMode::SpawnBoss()
         GameOverTimerHandle,
         this,
         &AMBLGameMode::GameOver,
-        WaveDuration,
+        BossWaveDuration,
         false
     );
 }
@@ -186,6 +193,11 @@ TSubclassOf<AEnemyBase> AMBLGameMode::GetEnemyClass(EMBLWaveState Wave) const
 
 void AMBLGameMode::DeadPlayer()
 {
+    if (AMBLGameState* GS = GetGameState<AMBLGameState>())
+    {
+        GS->GmaeClear = false;  //클리어 못함
+    }
+
     GameOver();
 }
 
@@ -210,6 +222,7 @@ void AMBLGameMode::DeadBoss()
     if (AMBLGameState* GS = GetGameState<AMBLGameState>())  //추가
     {
         GS->Addkill();
+        GS->GmaeClear = true;  //클리어 함
     }
 
     //보스가죽었을때 체력바 사라지는표시
@@ -229,8 +242,18 @@ float AMBLGameMode::GetWaveDuration() const
     return WaveDuration;
 }
 
+float AMBLGameMode::GetBossWaveDuration() const
+{
+    return BossWaveDuration;
+}
+
 void AMBLGameMode::GameOver()
 {
+    if (AMBLGameState* CurrentGameState = GetGameState<AMBLGameState>())
+    {
+        CurrentGameState->BGMOff();
+    }
+
     if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
     {
         if (AMBLPlayerController* MBLPlayerController = Cast<AMBLPlayerController>(PlayerController))
@@ -270,4 +293,5 @@ void AMBLGameMode::WaveSet()
     );
 
     if (CurrentWave == EMBLWaveState::FinalWave) SpawnBoss();
+    OnWaveChanged.Broadcast(CurrentWave);
 }

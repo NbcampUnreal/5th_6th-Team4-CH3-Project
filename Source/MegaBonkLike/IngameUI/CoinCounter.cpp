@@ -3,8 +3,8 @@
 
 void UCoinCounter::UpdateCoinCount(int32 CoinCount)
 {
-	if (CoinText)
+	if (CoinCountText)
 	{
-		CoinText->SetText(FText::FromString(FString::Printf(TEXT("Coin: %d"), CoinCount)));
+		CoinCountText->SetText(FText::AsNumber(CoinCount));
 	}
 }

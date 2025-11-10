@@ -32,6 +32,7 @@ public:
 	virtual void BeginPlay() override;
 
 	void AddOrUpgradeItem(const FItemSelectOption& SelectedOption);
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void AddItem(int32 InItemId);
 	void UpgradeItem(const FItemUpgradeContext& Context);
 	void RemoveItem(int32 InItemId);
