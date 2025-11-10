@@ -10,7 +10,7 @@ class MEGABONKLIKE_API USE_SoundEffect : public USkillEffectBase
 	GENERATED_BODY()
 
 public:
-	virtual void Activate(const FVector& Location, const FRotator& Rotation) override;
+	virtual void Activate(const FVector& Location, const FRotator& Rotation, float InScale) override;
 	virtual void Deactivate() override;
 
 protected:

@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Skill/WeaponSkillAction.h"
+#include "Skill/SkillEffect/SkillEffectSet.h"
 #include "WSA_RangeAttack.generated.h"
 
 class AProjectile;
@@ -50,6 +51,9 @@ protected:
 	int32 ProjectileCount = 0;
 	UPROPERTY(BlueprintReadOnly)
 	float AttackInterval;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FSkillEffectSet ShootEffects;
 
 	TArray<TWeakObjectPtr<AActor>> AttackTargets;
 };
