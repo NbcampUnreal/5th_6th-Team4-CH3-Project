@@ -33,7 +33,7 @@ FVector AMBLSpawnVolume::GetRandomEnemySpawnLocation(float CapsuleHalfHeight) co
 	const FVector PlayerLocation = PlayerActor->GetActorLocation();
 
 	// 캐릭터 기준 반경 300 ~ 1000M 안의 랜덤 지점 계산
-	const float MinRadius = 300.f;
+	const float MinRadius = 500.f;
 	const float MaxRadius = 1000.f;
 	const float Radius = FMath::FRandRange(MinRadius, MaxRadius);
 	const float Angle = FMath::FRandRange(0.f, 2 * PI);
