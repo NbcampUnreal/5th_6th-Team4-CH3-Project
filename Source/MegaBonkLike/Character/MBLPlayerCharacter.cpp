@@ -245,9 +245,9 @@ void AMBLPlayerCharacter::Input_Look(const FInputActionValue& InputValue)
 
 	float Sensitivity = 1.0f;
 
-	if (const UGameInstance* GameInstance = GetGameInstance())
+	if (UGameInstance* GameInstance = GetGameInstance())
 	{
-		if (const UMBLGameInstance* MBLGameInstance = Cast<UMBLGameInstance>(GameInstance))
+		if (UMBLGameInstance* MBLGameInstance = Cast<UMBLGameInstance>(GameInstance))
 		{
 			Sensitivity = MBLGameInstance->MouseSensitivity;
 		}
