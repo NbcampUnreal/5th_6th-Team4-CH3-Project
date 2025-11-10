@@ -94,6 +94,9 @@ AEnemyBase* AMBLSpawnVolume::SpawnEnemy(TSubclassOf<AEnemyBase> EnemyClass)
 
 	FRotator SpawnRotation = (Player->GetActorLocation() - SpawnLocation).Rotation();
 
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
 	return World->SpawnActor<AEnemyBase>(EnemyClass, SpawnLocation, SpawnRotation);
 }
 
@@ -113,6 +116,9 @@ void AMBLSpawnVolume::SpawnObject(TSubclassOf<AActor> ObjectClass)
 	}
 
 	FRotator SpawnRotation = FRotator(0.f, FMath::FRandRange(0.f, 360.f), 0.f);
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
 	World->SpawnActor<AActor>(ObjectClass, SpawnLocation, SpawnRotation);
 }
