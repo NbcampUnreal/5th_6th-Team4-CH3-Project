@@ -40,6 +40,9 @@ public:
     void SetUpdatedComponent();
 
     UFUNCTION()
+    void ReturnTrail(UNiagaraComponent* InTrail);
+
+    UFUNCTION()
     void ReturnToPool();
 
 private:

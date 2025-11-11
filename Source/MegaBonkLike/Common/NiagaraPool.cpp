@@ -41,11 +41,6 @@ UObject* UNiagaraPool::Get(const FVector& Location, const FRotator& Rotation)
 
 	PooledComponent->SetWorldLocationAndRotation(Location, Rotation);
 
-	if (PooledComponent->OnSystemFinished.IsAlreadyBound(this, &UNiagaraPool::ReturnComponent) == false)
-	{
-		PooledComponent->OnSystemFinished.AddDynamic(this, &UNiagaraPool::ReturnComponent);
-	}
-
 	if (IPoolSpawnable* PoolSpawnable = Cast<IPoolSpawnable>(PooledComponent))
 	{
 		PoolSpawnable->Activate();
@@ -61,15 +56,8 @@ void UNiagaraPool::Return(UObject* Object)
 	if (IsValid(NiagaraComponent) == false)
 		return;
 
-	NiagaraComponent->OnSystemFinished.RemoveDynamic(this, &UNiagaraPool::ReturnComponent);
-
 	ActivateComponent(NiagaraComponent, false);
 	Pool.Add(NiagaraComponent);
-}
-
-void UNiagaraPool::ReturnComponent(UNiagaraComponent* Component)
-{
-	Return(Component);
 }
 
 UNiagaraComponent* UNiagaraPool::MakeComponent()

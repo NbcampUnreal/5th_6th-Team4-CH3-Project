@@ -133,8 +133,6 @@ void AProjectile::Activate()
         StaticMesh->SetHiddenInGame(false);
     }
 
-    GetRootComponent()->UpdateComponentToWorld();
-
     if (IsValid(TrailComponent) == false)
     {
         UPoolSubsystem* PoolSubsystem = GetWorld()->GetSubsystem<UPoolSubsystem>();
@@ -148,11 +146,11 @@ void AProjectile::Activate()
     if (IsValid(TrailComponent) == true)
     {
         TrailComponent->SetAsset(TrailEffect);
-        TrailComponent->ResetSystem();
         TrailComponent->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
         TrailComponent->SetRelativeLocation(TrailTransform->GetRelativeLocation());
         TrailComponent->SetRelativeRotation(TrailTransform->GetRelativeRotation());
-        TrailComponent->UpdateComponentToWorld();
+        TrailComponent->DeactivateImmediate();
+        TrailComponent->ResetSystem();
         TrailComponent->Activate(true);
         TrailComponent->SetVariableFloat(TEXT("User.LifeTime"), OriginTrailLifeTime);
         TrailComponent->SetVariableLinearColor(TEXT("User.LinearColor"), OriginTrailColor);
@@ -224,6 +222,19 @@ void AProjectile::SetUpdatedComponent()
     }
 }
 
+void AProjectile::ReturnTrail(UNiagaraComponent* InTrail)
+{
+    if (IsValid(InTrail) == false)
+        return;
+
+    InTrail->OnSystemFinished.RemoveDynamic(this, &AProjectile::ReturnTrail);
+    UPoolSubsystem* PoolSubsystem = GetWorld()->GetSubsystem<UPoolSubsystem>();
+    if (IsValid(PoolSubsystem) == true)
+    {
+        PoolSubsystem->ReturnToPool(InTrail);
+    }
+}
+
 void AProjectile::ReturnToPool()
 {
     if (bReturnedToPool)
@@ -232,6 +243,10 @@ void AProjectile::ReturnToPool()
     if (IsValid(TrailComponent) == true)
     {
         TrailComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+        if (TrailComponent->OnSystemFinished.IsAlreadyBound(this, &AProjectile::ReturnTrail) == false)
+        {
+            TrailComponent->OnSystemFinished.AddDynamic(this, &AProjectile::ReturnTrail);
+        }
         TrailComponent = nullptr;
     }
 
